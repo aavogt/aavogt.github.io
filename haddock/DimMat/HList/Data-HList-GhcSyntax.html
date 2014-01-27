@@ -1,0 +1,57 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Data.HList.GhcSyntax</title><link href="ocean.css" rel="stylesheet" type="text/css" title="Ocean" /><script src="haddock-util.js" type="text/javascript"></script><script type="text/javascript">//<![CDATA[
+window.onload = function () {pageLoad();setSynopsis("mini_Data-HList-GhcSyntax.html");};
+//]]>
+</script></head><body><div id="package-header"><ul class="links" id="page-menu"><li><a href="index.html">Contents</a></li><li><a href="doc-index.html">Index</a></li></ul><p class="caption">HList-0.2: Heterogeneous lists</p></div><div id="content"><div id="module-header"><table class="info"><tr><th>Safe Haskell</th><td>None</td></tr></table><p class="caption">Data.HList.GhcSyntax</p></div><div id="synopsis"><p id="control.syn" class="caption expander" onclick="toggleSection('syn')">Synopsis</p><ul id="section.syn" class="hide" onclick="toggleSection('syn')"><li class="src short"><span class="keyword">type</span> <a href="#t::-42-:">:*:</a> e l = <a href="Data-HList-HListPrelude.html#t:HCons">HCons</a> e l</li><li class="src short"><a href="#v:.-42-.">(.*.)</a> :: <a href="Data-HList-HListPrelude.html#t:HExtend">HExtend</a> e l l' =&gt; e -&gt; l -&gt; l'</li><li class="src short"><span class="keyword">type</span> <a href="#t::-61-:">:=:</a> l v = <a href="Data-HList-Record.html#t:LVPair">LVPair</a> l v</li><li class="src short"><a href="#v:.-61-.">(.=.)</a> ::  l -&gt; v -&gt; <a href="Data-HList-Record.html#t:LVPair">LVPair</a> l v</li><li class="src short"><a href="#v:.-33-.">(.!.)</a> :: <a href="Data-HList-Record.html#t:HasField">HasField</a> l r v =&gt; r -&gt; l -&gt; v</li><li class="src short"><a href="#v:.-45-.">(.-.)</a> :: <a href="Data-HList-Record.html#t:H2ProjectByLabels">H2ProjectByLabels</a> (<a href="Data-HList-HListPrelude.html#t:HCons">HCons</a> e <a href="Data-HList-HListPrelude.html#t:HNil">HNil</a>) t t1 r =&gt; <a href="Data-HList-Record.html#t:Record">Record</a> t -&gt; e -&gt; <a href="Data-HList-Record.html#t:Record">Record</a> r</li><li class="src short"><a href="#v:.-64-.">(.@.)</a> :: (<a href="Data-HList-HListPrelude.html#t:HFind">HFind</a> e l n, <a href="Data-HList-HArray.html#t:HUpdateAtHNat">HUpdateAtHNat</a> n (<a href="Data-HList-Record.html#t:LVPair">LVPair</a> e v) t r, <a href="Data-HList-Record.html#t:RecordLabels">RecordLabels</a> t l) =&gt; <a href="Data-HList-Record.html#t:Record">Record</a> t -&gt; <a href="Data-HList-Record.html#t:LVPair">LVPair</a> e v -&gt; <a href="Data-HList-Record.html#t:Record">Record</a> r</li><li class="src short"><a href="#v:.-94-.">(.^.)</a> :: (<a href="Data-HList-HListPrelude.html#t:HFind">HFind</a> l ls n, <a href="Data-HList-HArray.html#t:HUpdateAtHNat">HUpdateAtHNat</a> n (<a href="Data-HList-Record.html#t:LVPair">LVPair</a> l a) t l', <a href="Data-HList-Record.html#t:HasField">HasField</a> l t (<a href="Data-HList-FakePrelude.html#t:Proxy">Proxy</a> a), <a href="Data-HList-Record.html#t:RecordLabels">RecordLabels</a> t ls) =&gt; <a href="Data-HList-Record.html#t:LVPair">LVPair</a> l a -&gt; <a href="Data-HList-Record.html#t:Record">Record</a> t -&gt; <a href="Data-HList-Record.html#t:Record">Record</a> l'</li><li class="src short"><a href="#v:.-60-.">(.&lt;.)</a> :: (<a href="Data-HList-HListPrelude.html#t:HFind">HFind</a> e l n, <a href="Data-HList-HArray.html#t:HUpdateAtHNat">HUpdateAtHNat</a> n (<a href="Data-HList-Record.html#t:LVPair">LVPair</a> e v) t r, <a href="Data-HList-Record.html#t:HasField">HasField</a> e t v, <a href="Data-HList-Record.html#t:RecordLabels">RecordLabels</a> t l) =&gt; <a href="Data-HList-Record.html#t:LVPair">LVPair</a> e v -&gt; <a href="Data-HList-Record.html#t:Record">Record</a> t -&gt; <a href="Data-HList-Record.html#t:Record">Record</a> r</li><li class="src short"><a href="#v:.-60--43--43-.">(.&lt;++.)</a> :: <a href="Data-HList-Record.html#t:HLeftUnion">HLeftUnion</a> r r' r'' =&gt; r -&gt; r' -&gt; r''</li><li class="src short"><span class="keyword">type</span> <a href="#t::-43-:">:+:</a> e l = <a href="Data-HList-HListPrelude.html#t:HCons">HCons</a> (<a href="Data-HList-FakePrelude.html#t:Proxy">Proxy</a> e) l</li><li class="src short"><a href="#v:.-43-.">(.+.)</a> :: <a href="Data-HList-HListPrelude.html#t:HExtend">HExtend</a> (<a href="Data-HList-FakePrelude.html#t:Proxy">Proxy</a> e) l l' =&gt; e -&gt; l -&gt; l'</li></ul></div><div id="interface"><h1>Documentation</h1><div class="top"><p class="src"><span class="keyword">type</span> <a name="t::-42-:" class="def">:*:</a> e l = <a href="Data-HList-HListPrelude.html#t:HCons">HCons</a> e l</p></div><div class="top"><p class="src"><a name="v:.-42-." class="def">(.*.)</a> :: <a href="Data-HList-HListPrelude.html#t:HExtend">HExtend</a> e l l' =&gt; e -&gt; l -&gt; l'</p><div class="doc"><p>(.*.) -- Add a field to a record. Analagous to (++) for
+           lists. 
+</p><p>record .*. field1
+         .*. field2
+-
+</p></div></div><div class="top"><p class="src"><span class="keyword">type</span> <a name="t::-61-:" class="def">:=:</a> l v = <a href="Data-HList-Record.html#t:LVPair">LVPair</a> l v</p></div><div class="top"><p class="src"><a name="v:.-61-." class="def">(.=.)</a> ::  l -&gt; v -&gt; <a href="Data-HList-Record.html#t:LVPair">LVPair</a> l v</p><div class="doc"><p>(.=.) -- Create a value with the given label. Analagous to a data
+           constructor such as <code><a href="http://hackage.haskell.org/packages/archive/base/4.6.0.1/doc/html/Data-Maybe.html#v:Just">Just</a></code>, <code><a href="http://hackage.haskell.org/packages/archive/base/4.6.0.1/doc/html/Data-Either.html#v:Left">Left</a></code>, or <code><a href="http://hackage.haskell.org/packages/archive/base/4.6.0.1/doc/html/Data-Either.html#v:Right">Right</a></code>. Higher fixity
+           than record-modification operations like (.*.), (.-.), etc. to
+           support expression like the below w/o parentheses:
+</p><p>label1 .=. value1 .*. 
+  label2 .=. value2 .*. 
+  emptyRecord
+</p><ul><li>
+</li></ul></div></div><div class="top"><p class="src"><a name="v:.-33-." class="def">(.!.)</a> :: <a href="Data-HList-Record.html#t:HasField">HasField</a> l r v =&gt; r -&gt; l -&gt; v</p><div class="doc"><p>(.!.) -- Lookup a value in a record, by its label. Analagous to (!!), the
+           list indexing operation. Highest fixity, like (!!).
+</p><p>record1 .*. label1 .=. record2 .!. label1
+          .*. label2 .=. record2 .!. label2
+-
+</p></div></div><div class="top"><p class="src"><a name="v:.-45-." class="def">(.-.)</a> :: <a href="Data-HList-Record.html#t:H2ProjectByLabels">H2ProjectByLabels</a> (<a href="Data-HList-HListPrelude.html#t:HCons">HCons</a> e <a href="Data-HList-HListPrelude.html#t:HNil">HNil</a>) t t1 r =&gt; <a href="Data-HList-Record.html#t:Record">Record</a> t -&gt; e -&gt; <a href="Data-HList-Record.html#t:Record">Record</a> r</p><div class="doc"><p>(.-.) -- Remove a field from a record. At the same
+           level as other record modification options (.*.). Analagous
+           to (\) in lists.
+</p><p>record1 .-. label1
+</p><p>label1 .=. value1 .*. 
+  label2 .=. value2 .-.
+  label2 .*. 
+  emptyRecord 
+</p><p>label1 .=. value1 .-.
+  label1 .*. 
+  label2 .=. value2 .*. 
+  emptyRecord 
+</p><p>record1 .*. label1 .=. record2 .!. label1
+          .*. label2 .=. record2 .!. label2 
+          .-. label1
+-
+</p></div></div><div class="top"><p class="src"><a name="v:.-64-." class="def">(.@.)</a> :: (<a href="Data-HList-HListPrelude.html#t:HFind">HFind</a> e l n, <a href="Data-HList-HArray.html#t:HUpdateAtHNat">HUpdateAtHNat</a> n (<a href="Data-HList-Record.html#t:LVPair">LVPair</a> e v) t r, <a href="Data-HList-Record.html#t:RecordLabels">RecordLabels</a> t l) =&gt; <a href="Data-HList-Record.html#t:Record">Record</a> t -&gt; <a href="Data-HList-Record.html#t:LVPair">LVPair</a> e v -&gt; <a href="Data-HList-Record.html#t:Record">Record</a> r</p><div class="doc"><p>(.<code>.) -- Update a field with a particular value. Another record-level
+           operation, so it has the same fixity as (.*.) and (.-.). No
+           real list analogue, since there is no Prelude defined
+           update.
+
+record1 .</code>. label1 .=. value1
+</p><p>record1 .<code>. label1 .=. record2 .!. label1
+
+record1 .*. label1 .=. record2 .!. label1
+          .*. label2 .=. record2 .!. label2 
+          .</code>. label1 .=. value2
+</p></div></div><div class="top"><p class="src"><a name="v:.-94-." class="def">(.^.)</a> :: (<a href="Data-HList-HListPrelude.html#t:HFind">HFind</a> l ls n, <a href="Data-HList-HArray.html#t:HUpdateAtHNat">HUpdateAtHNat</a> n (<a href="Data-HList-Record.html#t:LVPair">LVPair</a> l a) t l', <a href="Data-HList-Record.html#t:HasField">HasField</a> l t (<a href="Data-HList-FakePrelude.html#t:Proxy">Proxy</a> a), <a href="Data-HList-Record.html#t:RecordLabels">RecordLabels</a> t ls) =&gt; <a href="Data-HList-Record.html#t:LVPair">LVPair</a> l a -&gt; <a href="Data-HList-Record.html#t:Record">Record</a> t -&gt; <a href="Data-HList-Record.html#t:Record">Record</a> l'</p><div class="doc"><p>(.^.) -- This is a variation on updating (according to GhcRecord.hs),
+           so use the same fixity as (.@.).
+</p></div></div><div class="top"><p class="src"><a name="v:.-60-." class="def">(.&lt;.)</a> :: (<a href="Data-HList-HListPrelude.html#t:HFind">HFind</a> e l n, <a href="Data-HList-HArray.html#t:HUpdateAtHNat">HUpdateAtHNat</a> n (<a href="Data-HList-Record.html#t:LVPair">LVPair</a> e v) t r, <a href="Data-HList-Record.html#t:HasField">HasField</a> e t v, <a href="Data-HList-Record.html#t:RecordLabels">RecordLabels</a> t l) =&gt; <a href="Data-HList-Record.html#t:LVPair">LVPair</a> e v -&gt; <a href="Data-HList-Record.html#t:Record">Record</a> t -&gt; <a href="Data-HList-Record.html#t:Record">Record</a> r</p><div class="doc"><p>(.&lt;.) -- Another variation on update, so give it the same fixity as (.@.).
+</p></div></div><div class="top"><p class="src"><a name="v:.-60--43--43-." class="def">(.&lt;++.)</a> :: <a href="Data-HList-Record.html#t:HLeftUnion">HLeftUnion</a> r r' r'' =&gt; r -&gt; r' -&gt; r''</p><div class="doc"><p>(.&lt;++.) -- Similar to list append, so give this slightly lower fixity than
+             (.*.), so we can write:
+</p><p>record1 .*. field1 .&lt;++. record2 .*. field2
+</p></div></div><div class="top"><p class="src"><span class="keyword">type</span> <a name="t::-43-:" class="def">:+:</a> e l = <a href="Data-HList-HListPrelude.html#t:HCons">HCons</a> (<a href="Data-HList-FakePrelude.html#t:Proxy">Proxy</a> e) l</p></div><div class="top"><p class="src"><a name="v:.-43-." class="def">(.+.)</a> :: <a href="Data-HList-HListPrelude.html#t:HExtend">HExtend</a> (<a href="Data-HList-FakePrelude.html#t:Proxy">Proxy</a> e) l l' =&gt; e -&gt; l -&gt; l'</p><div class="doc"><p>(.+.) -- Type-indexed rows append. Very similar to .*., so 
+           keep the same fixity.
+</p></div></div></div></div><div id="footer"><p>Produced by <a href="http://www.haskell.org/haddock/">Haddock</a> version 2.13.2</p></div></body></html>
