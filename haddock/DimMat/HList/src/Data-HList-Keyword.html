@@ -75,509 +75,509 @@
 <a name="line-66"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>HList</span><span class='hs-varop'>.</span><span class='hs-conid'>HListPrelude</span>
 <a name="line-67"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>HList</span><span class='hs-varop'>.</span><span class='hs-conid'>HList</span>
 <a name="line-68"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>HList</span><span class='hs-varop'>.</span><span class='hs-conid'>Record</span>
-<a name="line-69"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>HList</span><span class='hs-varop'>.</span><span class='hs-conid'>RecordPuns</span>
-<a name="line-70"></a>
-<a name="line-71"></a><span class='hs-comment'>{- $setup
-<a name="line-72"></a>
-<a name="line-73"></a> &gt;&gt;&gt; :set -XDataKinds -XFlexibleInstances -XMultiParamTypeClasses
-<a name="line-74"></a> &gt;&gt;&gt; :set -XScopedTypeVariables -XOverlappingInstances -XTypeFamilies
-<a name="line-75"></a>
-<a name="line-76"></a>We will be using an example inspired by a graphics toolkit -- the area
-<a name="line-77"></a>which really benefits from keyword arguments. We first define our
-<a name="line-78"></a>labels and useful datatypes
-<a name="line-79"></a>
-<a name="line-80"></a> &gt;&gt;&gt; data Color = Color
-<a name="line-81"></a> &gt;&gt;&gt; data Size  = Size
-<a name="line-82"></a> &gt;&gt;&gt; data Origin  = Origin
-<a name="line-83"></a> &gt;&gt;&gt; data RaisedBorder = RaisedBorder
+<a name="line-69"></a>
+<a name="line-70"></a><span class='hs-comment'>{- $setup
+<a name="line-71"></a>
+<a name="line-72"></a> &gt;&gt;&gt; :set -XDataKinds -XFlexibleInstances -XMultiParamTypeClasses
+<a name="line-73"></a> &gt;&gt;&gt; :set -XScopedTypeVariables -XOverlappingInstances -XTypeFamilies
+<a name="line-74"></a>
+<a name="line-75"></a>We will be using an example inspired by a graphics toolkit -- the area
+<a name="line-76"></a>which really benefits from keyword arguments. We first define our
+<a name="line-77"></a>labels and useful datatypes
+<a name="line-78"></a>
+<a name="line-79"></a> &gt;&gt;&gt; data Color = Color
+<a name="line-80"></a> &gt;&gt;&gt; data Size  = Size
+<a name="line-81"></a> &gt;&gt;&gt; data Origin  = Origin
+<a name="line-82"></a> &gt;&gt;&gt; data RaisedBorder = RaisedBorder
+<a name="line-83"></a>
 <a name="line-84"></a>
-<a name="line-85"></a>
-<a name="line-86"></a>The number of arguments each keyword must be specified by an 'IsKeyFN'
-<a name="line-87"></a>instance.
-<a name="line-88"></a>
-<a name="line-89"></a> &gt;&gt;&gt; instance IsKeyFN (Color-&gt;a-&gt;b)  True
-<a name="line-90"></a> &gt;&gt;&gt; instance IsKeyFN (Size-&gt;a-&gt;b)   True
-<a name="line-91"></a> &gt;&gt;&gt; instance (a ~ (Int,Int)) =&gt; IsKeyFN (Origin-&gt;a-&gt;b) True
-<a name="line-92"></a> &gt;&gt;&gt; instance IsKeyFN (RaisedBorder-&gt;a-&gt;b) True
-<a name="line-93"></a>
-<a name="line-94"></a>Note that if a keyword is always followed by a certain type, that
-<a name="line-95"></a>can be specified above using an instance like the one for Origin.
-<a name="line-96"></a>
-<a name="line-97"></a> &gt;&gt;&gt; data CommonColor = Red | Green | Blue deriving Show
-<a name="line-98"></a> &gt;&gt;&gt; data RGBColor = RGBColor Int Int Int deriving Show
-<a name="line-99"></a>
-<a name="line-100"></a>and two functions:
-<a name="line-101"></a>
-<a name="line-102"></a> &gt;&gt;&gt; :{
-<a name="line-103"></a> let make_square Size n Origin (x0,y0) Color (color::CommonColor) =
-<a name="line-104"></a>        unwords ["Square:", show (n :: Int), "at", show (x0,y0), show color] ++ "\n"
-<a name="line-105"></a> :}
-<a name="line-106"></a>
-<a name="line-107"></a> &gt;&gt;&gt; :{
-<a name="line-108"></a> let make_rect Size (nx,ny) Origin (x0,y0) Color (color::RGBColor)
-<a name="line-109"></a>         RaisedBorder border =
-<a name="line-110"></a>        unwords ["Rectangle:", show (nx,ny), "at", show (x0,y0),
-<a name="line-111"></a>             show color, if border then "raised border" else ""] ++ "\n"
-<a name="line-112"></a> :}
-<a name="line-113"></a>
-<a name="line-114"></a>-}</span>
-<a name="line-115"></a>
-<a name="line-116"></a><span class='hs-comment'>{- $ex2
-<a name="line-117"></a>
-<a name="line-118"></a>We are not interested in really drawing squares and rectangles
-<a name="line-119"></a>here. Therefore, make_square and make_rect return a String, which we
-<a name="line-120"></a>can regard as a ``command'' to be passed to a low-level graphics
-<a name="line-121"></a>library. The functions make_square and make_rect are genuine functions
-<a name="line-122"></a>and can be used as such. They are not keyword argument functions, yet,
-<a name="line-123"></a>but they set the stage. These functions can be considered an
-<a name="line-124"></a>`interface' for the keyword argument functions. We should note that
-<a name="line-125"></a>the functions are polymorphic: for example, `Size' can be any
-<a name="line-126"></a>showable. We must also emphasize the re-use of the labels: The Color
-<a name="line-127"></a>of a square is the value of the enumerated type CommonColor. OTH, the
-<a name="line-128"></a>color of the rectangle is given as an RGB triple. The sizes of the
-<a name="line-129"></a>square and of the rectangle are specified differently too, the same
-<a name="line-130"></a>label notwithstanding.
-<a name="line-131"></a>
-<a name="line-132"></a>Once the user wrote the functions such as make_square and make_rect,
-<a name="line-133"></a>he can _automatically_ convert them to their keyword
-<a name="line-134"></a>alternatives. This transformation is done by a function 'kw'. The user
-<a name="line-135"></a>should pass the positional-argument function (`labeled' as above),
-<a name="line-136"></a>and an HList of default values for some of the labels. The latter may
-<a name="line-137"></a>be HNil if all keyword arguments are required.
-<a name="line-138"></a>
-<a name="line-139"></a>The first example (no defaults)
-<a name="line-140"></a>
-<a name="line-141"></a> &gt;&gt;&gt; kw (make_square .*. HNil) Size (1::Int) Origin (0,10) Color Red   :: String
-<a name="line-142"></a> "Square: 1 at (0,10) Red\n"
-<a name="line-143"></a>
-<a name="line-144"></a>we can permute the arguments at wish
-<a name="line-145"></a>
-<a name="line-146"></a> &gt;&gt;&gt; kw (make_square .*. HNil) Color Red Size (1::Int) Origin (0,10)   :: String
-<a name="line-147"></a> "Square: 1 at (0,10) Red\n"
-<a name="line-148"></a>
-<a name="line-149"></a>we can also assign a name to a keyword function, or partially apply it:
-<a name="line-150"></a>
-<a name="line-151"></a> &gt;&gt;&gt; :{
-<a name="line-152"></a> case kw (make_square .*. HNil) Color Red of
-<a name="line-153"></a>    f -&gt; "here: " ++ f Origin (0,10) Size (1::Int)
-<a name="line-154"></a>:}
-<a name="line-155"></a>"here: Square: 1 at (0,10) Red\n"
-<a name="line-156"></a>
-<a name="line-157"></a>Note that it is necessary to use a monomorphic pattern binding here (lambda or
-<a name="line-158"></a>case). One way to get around this is to pass @f@ instead of @kw f@ around:
-<a name="line-159"></a>
-<a name="line-160"></a>&gt;&gt;&gt; :{
-<a name="line-161"></a> let f = hEnd $ hBuild make_square Color Red
-<a name="line-162"></a> in "here: " ++ kw f Origin (0,10) Size (1::Int)
-<a name="line-163"></a>:}
-<a name="line-164"></a>"here: Square: 1 at (0,10) Red\n"
-<a name="line-165"></a>
-<a name="line-166"></a>The following is a more interesting example, with the
-<a name="line-167"></a>defaults:
-<a name="line-168"></a>
-<a name="line-169"></a> &gt;&gt;&gt; :{
-<a name="line-170"></a>let addDef f = f .*. Origin .*. (0,10) .*.
-<a name="line-171"></a>             RaisedBorder .*. True .*.
-<a name="line-172"></a>             HNil
-<a name="line-173"></a>    in kw (addDef make_square) Size (1::Int) Color Red ++
-<a name="line-174"></a>       kw (addDef make_rect)   Color (RGBColor 0 10 255)
-<a name="line-175"></a>                               Size (1.0::Float, 2.0::Float)
-<a name="line-176"></a>:}
-<a name="line-177"></a>"Square: 1 at (0,10) Red\nRectangle: (1.0,2.0) at (0,10) RGBColor 0 10 255 raised border\n"
-<a name="line-178"></a>
-<a name="line-179"></a>The argument RaisedBorder is not given, and so the default value is
-<a name="line-180"></a>used. Of course, we can override the default:
-<a name="line-181"></a>
-<a name="line-182"></a> &gt;&gt;&gt; :{
-<a name="line-183"></a>let addDef f =  f .*. Origin .*. (0,10) .*.
-<a name="line-184"></a>                    RaisedBorder .*. True .*.
-<a name="line-185"></a>                    HNil
-<a name="line-186"></a> in case kw (addDef make_square) Color of
-<a name="line-187"></a>     sq -&gt; case kw (addDef make_rect)  of
-<a name="line-188"></a>      re -&gt;
-<a name="line-189"></a>         sq Red Size (1::Int) ++
-<a name="line-190"></a>         re Color (RGBColor 0 10 255)
-<a name="line-191"></a>             RaisedBorder False
-<a name="line-192"></a>             Size (1.0::Float, 2.0::Float)
-<a name="line-193"></a>:}
-<a name="line-194"></a>"Square: 1 at (0,10) Red\nRectangle: (1.0,2.0) at (0,10) RGBColor 0 10 255 \n"
-<a name="line-195"></a>
-<a name="line-196"></a>We have reshuffled a few arguments, just for fun. As you can see, the
-<a name="line-197"></a>function `kw make_rect defaults' is polyvariadic indeed.  We chose to
-<a name="line-198"></a>partially apply 'Color' to the function `kw make_square defaults' --
-<a name="line-199"></a>so that the function `sq' is positional in its first argument, and
-<a name="line-200"></a>keyword in the rest.
-<a name="line-201"></a>
-<a name="line-202"></a>If we omit a required argument, we get a type error:
-<a name="line-203"></a>
-<a name="line-204"></a>&gt; ] testse1 = let f x = kw make_square HNil Color Red x
-<a name="line-205"></a>&gt; ] 	    in "here: " ++ f Origin (0,10)
-<a name="line-206"></a>&gt;
-<a name="line-207"></a>&gt;   Couldn't match `ErrReqdArgNotFound Size' against `[Char]'
-<a name="line-208"></a>&gt;       Expected type: ErrReqdArgNotFound Size
-<a name="line-209"></a>&gt;       Inferred type: [Char] ...
-<a name="line-210"></a>
-<a name="line-211"></a>The error message seems reasonably clear. Likewise we get an error
-<a name="line-212"></a>message if we pass to a keyword function an argument it does not expect:
-<a name="line-213"></a>
-<a name="line-214"></a>&gt; ] testse2 = let f x = kw make_square HNil Color Red x
-<a name="line-215"></a>&gt; ] 	    in "here: " ++ f Origin (0,10) Size (1::Int)
-<a name="line-216"></a>&gt; ]	                   RaisedBorder False
-<a name="line-217"></a>&gt;
-<a name="line-218"></a>&gt;   No instances for (Fail (ErrUnexpectedKW RaisedBorder),
-<a name="line-219"></a>&gt; 		    KWApply [Char] (HCons RaisedBorder (:*: Bool HNil)) [Char])
-<a name="line-220"></a>&gt;       arising from use of `f' at ...
-<a name="line-221"></a>&gt;     In the second argument of `(++)', namely
-<a name="line-222"></a>&gt;   `f Origin (0,10) Size (1 :: Int) RaisedBorder False'
+<a name="line-85"></a>The number of arguments each keyword must be specified by an 'IsKeyFN'
+<a name="line-86"></a>instance.
+<a name="line-87"></a>
+<a name="line-88"></a> &gt;&gt;&gt; instance IsKeyFN (Color-&gt;a-&gt;b)  True
+<a name="line-89"></a> &gt;&gt;&gt; instance IsKeyFN (Size-&gt;a-&gt;b)   True
+<a name="line-90"></a> &gt;&gt;&gt; instance (a ~ (Int,Int)) =&gt; IsKeyFN (Origin-&gt;a-&gt;b) True
+<a name="line-91"></a> &gt;&gt;&gt; instance IsKeyFN (RaisedBorder-&gt;a-&gt;b) True
+<a name="line-92"></a>
+<a name="line-93"></a>Note that if a keyword is always followed by a certain type, that
+<a name="line-94"></a>can be specified above using an instance like the one for Origin.
+<a name="line-95"></a>
+<a name="line-96"></a> &gt;&gt;&gt; data CommonColor = Red | Green | Blue deriving Show
+<a name="line-97"></a> &gt;&gt;&gt; data RGBColor = RGBColor Int Int Int deriving Show
+<a name="line-98"></a>
+<a name="line-99"></a>and two functions:
+<a name="line-100"></a>
+<a name="line-101"></a> &gt;&gt;&gt; :{
+<a name="line-102"></a> let make_square Size n Origin (x0,y0) Color (color::CommonColor) =
+<a name="line-103"></a>        unwords ["Square:", show (n :: Int), "at", show (x0,y0), show color] ++ "\n"
+<a name="line-104"></a> :}
+<a name="line-105"></a>
+<a name="line-106"></a> &gt;&gt;&gt; :{
+<a name="line-107"></a> let make_rect Size (nx,ny) Origin (x0,y0) Color (color::RGBColor)
+<a name="line-108"></a>         RaisedBorder border =
+<a name="line-109"></a>        unwords ["Rectangle:", show (nx,ny), "at", show (x0,y0),
+<a name="line-110"></a>             show color, if border then "raised border" else ""] ++ "\n"
+<a name="line-111"></a> :}
+<a name="line-112"></a>
+<a name="line-113"></a>-}</span>
+<a name="line-114"></a>
+<a name="line-115"></a><span class='hs-comment'>{- $ex2
+<a name="line-116"></a>
+<a name="line-117"></a>We are not interested in really drawing squares and rectangles
+<a name="line-118"></a>here. Therefore, make_square and make_rect return a String, which we
+<a name="line-119"></a>can regard as a ``command'' to be passed to a low-level graphics
+<a name="line-120"></a>library. The functions make_square and make_rect are genuine functions
+<a name="line-121"></a>and can be used as such. They are not keyword argument functions, yet,
+<a name="line-122"></a>but they set the stage. These functions can be considered an
+<a name="line-123"></a>`interface' for the keyword argument functions. We should note that
+<a name="line-124"></a>the functions are polymorphic: for example, `Size' can be any
+<a name="line-125"></a>showable. We must also emphasize the re-use of the labels: The Color
+<a name="line-126"></a>of a square is the value of the enumerated type CommonColor. OTH, the
+<a name="line-127"></a>color of the rectangle is given as an RGB triple. The sizes of the
+<a name="line-128"></a>square and of the rectangle are specified differently too, the same
+<a name="line-129"></a>label notwithstanding.
+<a name="line-130"></a>
+<a name="line-131"></a>Once the user wrote the functions such as make_square and make_rect,
+<a name="line-132"></a>he can _automatically_ convert them to their keyword
+<a name="line-133"></a>alternatives. This transformation is done by a function 'kw'. The user
+<a name="line-134"></a>should pass the positional-argument function (`labeled' as above),
+<a name="line-135"></a>and an HList of default values for some of the labels. The latter may
+<a name="line-136"></a>be HNil if all keyword arguments are required.
+<a name="line-137"></a>
+<a name="line-138"></a>The first example (no defaults)
+<a name="line-139"></a>
+<a name="line-140"></a> &gt;&gt;&gt; kw (make_square .*. HNil) Size (1::Int) Origin (0,10) Color Red   :: String
+<a name="line-141"></a> "Square: 1 at (0,10) Red\n"
+<a name="line-142"></a>
+<a name="line-143"></a>we can permute the arguments at wish
+<a name="line-144"></a>
+<a name="line-145"></a> &gt;&gt;&gt; kw (make_square .*. HNil) Color Red Size (1::Int) Origin (0,10)   :: String
+<a name="line-146"></a> "Square: 1 at (0,10) Red\n"
+<a name="line-147"></a>
+<a name="line-148"></a>we can also assign a name to a keyword function, or partially apply it:
+<a name="line-149"></a>
+<a name="line-150"></a> &gt;&gt;&gt; :{
+<a name="line-151"></a> case kw (make_square .*. HNil) Color Red of
+<a name="line-152"></a>    f -&gt; "here: " ++ f Origin (0,10) Size (1::Int)
+<a name="line-153"></a>:}
+<a name="line-154"></a>"here: Square: 1 at (0,10) Red\n"
+<a name="line-155"></a>
+<a name="line-156"></a>Note that it is necessary to use a monomorphic pattern binding here (lambda or
+<a name="line-157"></a>case). One way to get around this is to pass @f@ instead of @kw f@ around:
+<a name="line-158"></a>
+<a name="line-159"></a>&gt;&gt;&gt; :{
+<a name="line-160"></a> let f = hEnd $ hBuild make_square Color Red
+<a name="line-161"></a> in "here: " ++ kw f Origin (0,10) Size (1::Int)
+<a name="line-162"></a>:}
+<a name="line-163"></a>"here: Square: 1 at (0,10) Red\n"
+<a name="line-164"></a>
+<a name="line-165"></a>The following is a more interesting example, with the
+<a name="line-166"></a>defaults:
+<a name="line-167"></a>
+<a name="line-168"></a> &gt;&gt;&gt; :{
+<a name="line-169"></a>let addDef f = f .*. Origin .*. (0,10) .*.
+<a name="line-170"></a>             RaisedBorder .*. True .*.
+<a name="line-171"></a>             HNil
+<a name="line-172"></a>    in kw (addDef make_square) Size (1::Int) Color Red ++
+<a name="line-173"></a>       kw (addDef make_rect)   Color (RGBColor 0 10 255)
+<a name="line-174"></a>                               Size (1.0::Float, 2.0::Float)
+<a name="line-175"></a>:}
+<a name="line-176"></a>"Square: 1 at (0,10) Red\nRectangle: (1.0,2.0) at (0,10) RGBColor 0 10 255 raised border\n"
+<a name="line-177"></a>
+<a name="line-178"></a>The argument RaisedBorder is not given, and so the default value is
+<a name="line-179"></a>used. Of course, we can override the default:
+<a name="line-180"></a>
+<a name="line-181"></a> &gt;&gt;&gt; :{
+<a name="line-182"></a>let addDef f =  f .*. Origin .*. (0,10) .*.
+<a name="line-183"></a>                    RaisedBorder .*. True .*.
+<a name="line-184"></a>                    HNil
+<a name="line-185"></a> in case kw (addDef make_square) Color of
+<a name="line-186"></a>     sq -&gt; case kw (addDef make_rect)  of
+<a name="line-187"></a>      re -&gt;
+<a name="line-188"></a>         sq Red Size (1::Int) ++
+<a name="line-189"></a>         re Color (RGBColor 0 10 255)
+<a name="line-190"></a>             RaisedBorder False
+<a name="line-191"></a>             Size (1.0::Float, 2.0::Float)
+<a name="line-192"></a>:}
+<a name="line-193"></a>"Square: 1 at (0,10) Red\nRectangle: (1.0,2.0) at (0,10) RGBColor 0 10 255 \n"
+<a name="line-194"></a>
+<a name="line-195"></a>We have reshuffled a few arguments, just for fun. As you can see, the
+<a name="line-196"></a>function `kw make_rect defaults' is polyvariadic indeed.  We chose to
+<a name="line-197"></a>partially apply 'Color' to the function `kw make_square defaults' --
+<a name="line-198"></a>so that the function `sq' is positional in its first argument, and
+<a name="line-199"></a>keyword in the rest.
+<a name="line-200"></a>
+<a name="line-201"></a>If we omit a required argument, we get a type error:
+<a name="line-202"></a>
+<a name="line-203"></a>&gt; ] testse1 = let f x = kw make_square HNil Color Red x
+<a name="line-204"></a>&gt; ] 	    in "here: " ++ f Origin (0,10)
+<a name="line-205"></a>&gt;
+<a name="line-206"></a>&gt;   Couldn't match `ErrReqdArgNotFound Size' against `[Char]'
+<a name="line-207"></a>&gt;       Expected type: ErrReqdArgNotFound Size
+<a name="line-208"></a>&gt;       Inferred type: [Char] ...
+<a name="line-209"></a>
+<a name="line-210"></a>The error message seems reasonably clear. Likewise we get an error
+<a name="line-211"></a>message if we pass to a keyword function an argument it does not expect:
+<a name="line-212"></a>
+<a name="line-213"></a>&gt; ] testse2 = let f x = kw make_square HNil Color Red x
+<a name="line-214"></a>&gt; ] 	    in "here: " ++ f Origin (0,10) Size (1::Int)
+<a name="line-215"></a>&gt; ]	                   RaisedBorder False
+<a name="line-216"></a>&gt;
+<a name="line-217"></a>&gt;   No instances for (Fail (ErrUnexpectedKW RaisedBorder),
+<a name="line-218"></a>&gt; 		    KWApply [Char] (HCons RaisedBorder (:*: Bool HNil)) [Char])
+<a name="line-219"></a>&gt;       arising from use of `f' at ...
+<a name="line-220"></a>&gt;     In the second argument of `(++)', namely
+<a name="line-221"></a>&gt;   `f Origin (0,10) Size (1 :: Int) RaisedBorder False'
+<a name="line-222"></a>
 <a name="line-223"></a>
-<a name="line-224"></a>
-<a name="line-225"></a>The function 'kw' receives the appropriately labeled function (such
-<a name="line-226"></a>as make_square) and the HList with default values. The function 'kw'
-<a name="line-227"></a>is polymorphic; the overloading is resolved based on the type of the
-<a name="line-228"></a>user function *and* on the type of its continuation. The continuation
-<a name="line-229"></a>indicates if a keyword argument is forthcoming, or not. In the latter
-<a name="line-230"></a>case, 'kw' checks to see if the supplied defaults can provide the
-<a name="line-231"></a>values of the still missing arguments. We see therefore that a
-<a name="line-232"></a>function type is more than it may appear -- the type of a function is
-<a name="line-233"></a>truly a heterogeneous, type level collection! The function 'kw'
-<a name="line-234"></a>traverses that collection, thus performing a limited form of
-<a name="line-235"></a>reflection on Haskell functions.
-<a name="line-236"></a>
-<a name="line-237"></a>-}</span>
+<a name="line-224"></a>The function 'kw' receives the appropriately labeled function (such
+<a name="line-225"></a>as make_square) and the HList with default values. The function 'kw'
+<a name="line-226"></a>is polymorphic; the overloading is resolved based on the type of the
+<a name="line-227"></a>user function *and* on the type of its continuation. The continuation
+<a name="line-228"></a>indicates if a keyword argument is forthcoming, or not. In the latter
+<a name="line-229"></a>case, 'kw' checks to see if the supplied defaults can provide the
+<a name="line-230"></a>values of the still missing arguments. We see therefore that a
+<a name="line-231"></a>function type is more than it may appear -- the type of a function is
+<a name="line-232"></a>truly a heterogeneous, type level collection! The function 'kw'
+<a name="line-233"></a>traverses that collection, thus performing a limited form of
+<a name="line-234"></a>reflection on Haskell functions.
+<a name="line-235"></a>
+<a name="line-236"></a>-}</span>
+<a name="line-237"></a>
 <a name="line-238"></a>
-<a name="line-239"></a>
-<a name="line-240"></a><span class='hs-comment'>{- $imploutline
-<a name="line-241"></a>
-<a name="line-242"></a>One of the key tools of the implementation is 'kwapply', which applies
-<a name="line-243"></a>a function to a polymorphic collection of that function's arguments.
-<a name="line-244"></a>The order of the arguments in the collection is irrelevant. The
-<a name="line-245"></a>contraption kwapply can handle polymorphic functions with arbitrary
-<a name="line-246"></a>number of labeled arguments.
-<a name="line-247"></a>
-<a name="line-248"></a>For example, if we define
-<a name="line-249"></a>
-<a name="line-250"></a>&gt; f1 Size n = show n
-<a name="line-251"></a>&gt; f2 Size n Color m = unwords ["size:", show n, "color:", show m]
-<a name="line-252"></a>&gt; f3 Origin x Color m Size n =
-<a name="line-253"></a>&gt;     unwords ["origin:", show x, "size:", show n, "color:",show m]
-<a name="line-254"></a>
-<a name="line-255"></a>then we can run
-<a name="line-256"></a>
-<a name="line-257"></a>&gt; katest1  = kwapply f1 (Size .*. () .*. HNil)
-<a name="line-258"></a>&gt; katest11 = kwapply f1 (Size .*. "Large" .*. HNil)
-<a name="line-259"></a>&gt;
-<a name="line-260"></a>&gt; katest2  = kwapply f2 (Size .*. (1::Int) .*. Color .*. Red .*. HNil)
-<a name="line-261"></a>&gt; katest21 = kwapply f2 (Color .*. Red .*. Size .*. (1::Int) .*.  HNil)
-<a name="line-262"></a>&gt;
-<a name="line-263"></a>&gt; katest3  = kwapply f3 (Size .*. (1::Int) .*. Origin .*. (2.0::Float) .*.
-<a name="line-264"></a>&gt; 		         Color .*. Red .*. HNil)
-<a name="line-265"></a>
-<a name="line-266"></a>-}</span>
+<a name="line-239"></a><span class='hs-comment'>{- $imploutline
+<a name="line-240"></a>
+<a name="line-241"></a>One of the key tools of the implementation is 'kwapply', which applies
+<a name="line-242"></a>a function to a polymorphic collection of that function's arguments.
+<a name="line-243"></a>The order of the arguments in the collection is irrelevant. The
+<a name="line-244"></a>contraption kwapply can handle polymorphic functions with arbitrary
+<a name="line-245"></a>number of labeled arguments.
+<a name="line-246"></a>
+<a name="line-247"></a>For example, if we define
+<a name="line-248"></a>
+<a name="line-249"></a>&gt; f1 Size n = show n
+<a name="line-250"></a>&gt; f2 Size n Color m = unwords ["size:", show n, "color:", show m]
+<a name="line-251"></a>&gt; f3 Origin x Color m Size n =
+<a name="line-252"></a>&gt;     unwords ["origin:", show x, "size:", show n, "color:",show m]
+<a name="line-253"></a>
+<a name="line-254"></a>then we can run
+<a name="line-255"></a>
+<a name="line-256"></a>&gt; katest1  = kwapply f1 (Size .*. () .*. HNil)
+<a name="line-257"></a>&gt; katest11 = kwapply f1 (Size .*. "Large" .*. HNil)
+<a name="line-258"></a>&gt;
+<a name="line-259"></a>&gt; katest2  = kwapply f2 (Size .*. (1::Int) .*. Color .*. Red .*. HNil)
+<a name="line-260"></a>&gt; katest21 = kwapply f2 (Color .*. Red .*. Size .*. (1::Int) .*.  HNil)
+<a name="line-261"></a>&gt;
+<a name="line-262"></a>&gt; katest3  = kwapply f3 (Size .*. (1::Int) .*. Origin .*. (2.0::Float) .*.
+<a name="line-263"></a>&gt; 		         Color .*. Red .*. HNil)
+<a name="line-264"></a>
+<a name="line-265"></a>-}</span>
+<a name="line-266"></a>
 <a name="line-267"></a>
-<a name="line-268"></a>
-<a name="line-269"></a><span class='hs-comment'>-- | Another key contraption is</span>
-<a name="line-270"></a>
-<a name="line-271"></a><a name="reflect_fk"></a><span class='hs-definition'>reflect_fk</span><span class='hs-keyglyph'>::</span> <span class='hs-layout'>(</span><span class='hs-conid'>ReflectFK</span> <span class='hs-varid'>fn</span> <span class='hs-varid'>kws</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-varid'>fn</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Arg</span> <span class='hs-varid'>kws</span> <span class='hs-chr'>'</span><span class='hs-conid'>[]</span>
-<a name="line-272"></a><span class='hs-definition'>reflect_fk</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>Arg</span> <span class='hs-conid'>HNil</span>
-<a name="line-273"></a>
-<a name="line-274"></a><span class='hs-comment'>{- ^
-<a name="line-275"></a>
-<a name="line-276"></a>that reflects on a user-supplied function. It converts the *type* of a
-<a name="line-277"></a>user function to a collection of keywords required by that
-<a name="line-278"></a>function. This and the previous contraptions may be used to define an
-<a name="line-279"></a>`extended' version of some user function that takes more arguments --
-<a name="line-280"></a>without the need to enumerate all arguments of the original
-<a name="line-281"></a>function. We thus infringe on the area of object and module systems.
-<a name="line-282"></a>
-<a name="line-283"></a>The rest of the implementation is just to convert `kw fn defaults'
-<a name="line-284"></a>into the application of kwapply.
-<a name="line-285"></a>
-<a name="line-286"></a>-}</span>
+<a name="line-268"></a><span class='hs-comment'>-- | Another key contraption is</span>
+<a name="line-269"></a>
+<a name="line-270"></a><a name="reflect_fk"></a><span class='hs-definition'>reflect_fk</span><span class='hs-keyglyph'>::</span> <span class='hs-layout'>(</span><span class='hs-conid'>ReflectFK</span> <span class='hs-varid'>fn</span> <span class='hs-varid'>kws</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-varid'>fn</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Arg</span> <span class='hs-varid'>kws</span> <span class='hs-chr'>'</span><span class='hs-conid'>[]</span>
+<a name="line-271"></a><span class='hs-definition'>reflect_fk</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>Arg</span> <span class='hs-conid'>HNil</span>
+<a name="line-272"></a>
+<a name="line-273"></a><span class='hs-comment'>{- ^
+<a name="line-274"></a>
+<a name="line-275"></a>that reflects on a user-supplied function. It converts the *type* of a
+<a name="line-276"></a>user function to a collection of keywords required by that
+<a name="line-277"></a>function. This and the previous contraptions may be used to define an
+<a name="line-278"></a>`extended' version of some user function that takes more arguments --
+<a name="line-279"></a>without the need to enumerate all arguments of the original
+<a name="line-280"></a>function. We thus infringe on the area of object and module systems.
+<a name="line-281"></a>
+<a name="line-282"></a>The rest of the implementation is just to convert `kw fn defaults'
+<a name="line-283"></a>into the application of kwapply.
+<a name="line-284"></a>
+<a name="line-285"></a>-}</span>
+<a name="line-286"></a>
 <a name="line-287"></a>
-<a name="line-288"></a>
-<a name="line-289"></a><span class='hs-comment'>-- * The rest of the implementation</span>
-<a name="line-290"></a><span class='hs-comment'>{- $impl
-<a name="line-291"></a>
-<a name="line-292"></a>We should note that all implementation is written in the
-<a name="line-293"></a>continuation-passing style (CPS) -- at the term level and especially
-<a name="line-294"></a>at the _typeclass level_. One of the reasons is to avoid relying on
-<a name="line-295"></a>overlapping instances: we compare types with a predicate `TypeEq x y
-<a name="line-296"></a>hbool', obtain the type-level boolean, and dispatch to two
-<a name="line-297"></a>non-overlapping instances of an auxiliary, continuation class. One
-<a name="line-298"></a>instance handles HTrue, and the other the HFalse alternative. Please
-<a name="line-299"></a>see the HList paper for more discussion of this technique.
-<a name="line-300"></a>
-<a name="line-301"></a>The other, equally important reason for the thorough CPS of the
-<a name="line-302"></a>typeclasses is to control the order of evaluation of constraints and
-<a name="line-303"></a>their functional dependencies. The sole reason is to produce
-<a name="line-304"></a>informative error messages. The order of constraints is irrelevant
-<a name="line-305"></a>when all the constraints are satisfied. However, if the user omitted a
-<a name="line-306"></a>required keyword, many of the constraints below will fail. If a
-<a name="line-307"></a>'wrong' constraint fails first, we get a totally off-the-wall error
-<a name="line-308"></a>message that gives us no clue whatsoever about the problem. By tightly
-<a name="line-309"></a>constraining the order via CPS, we are able to force the typechecker
-<a name="line-310"></a>to give informative error messages.
-<a name="line-311"></a>
-<a name="line-312"></a>-}</span>
+<a name="line-288"></a><span class='hs-comment'>-- * The rest of the implementation</span>
+<a name="line-289"></a><span class='hs-comment'>{- $impl
+<a name="line-290"></a>
+<a name="line-291"></a>We should note that all implementation is written in the
+<a name="line-292"></a>continuation-passing style (CPS) -- at the term level and especially
+<a name="line-293"></a>at the _typeclass level_. One of the reasons is to avoid relying on
+<a name="line-294"></a>overlapping instances: we compare types with a predicate `TypeEq x y
+<a name="line-295"></a>hbool', obtain the type-level boolean, and dispatch to two
+<a name="line-296"></a>non-overlapping instances of an auxiliary, continuation class. One
+<a name="line-297"></a>instance handles HTrue, and the other the HFalse alternative. Please
+<a name="line-298"></a>see the HList paper for more discussion of this technique.
+<a name="line-299"></a>
+<a name="line-300"></a>The other, equally important reason for the thorough CPS of the
+<a name="line-301"></a>typeclasses is to control the order of evaluation of constraints and
+<a name="line-302"></a>their functional dependencies. The sole reason is to produce
+<a name="line-303"></a>informative error messages. The order of constraints is irrelevant
+<a name="line-304"></a>when all the constraints are satisfied. However, if the user omitted a
+<a name="line-305"></a>required keyword, many of the constraints below will fail. If a
+<a name="line-306"></a>'wrong' constraint fails first, we get a totally off-the-wall error
+<a name="line-307"></a>message that gives us no clue whatsoever about the problem. By tightly
+<a name="line-308"></a>constraining the order via CPS, we are able to force the typechecker
+<a name="line-309"></a>to give informative error messages.
+<a name="line-310"></a>
+<a name="line-311"></a>-}</span>
+<a name="line-312"></a>
 <a name="line-313"></a>
 <a name="line-314"></a>
-<a name="line-315"></a>
-<a name="line-316"></a><span class='hs-comment'>-- * Errors</span>
-<a name="line-317"></a>
-<a name="line-318"></a><a name="IsKeyFN"></a><span class='hs-keyword'>data</span> <span class='hs-conid'>ErrReqdArgNotFound</span> <span class='hs-varid'>x</span>
-<a name="line-319"></a><a name="IsKeyFN"></a><span class='hs-keyword'>data</span> <span class='hs-conid'>ErrUnexpectedKW</span> <span class='hs-varid'>x</span>
-<a name="line-320"></a>
-<a name="line-321"></a><span class='hs-comment'>-- | All our keywords must be registered</span>
+<a name="line-315"></a><span class='hs-comment'>-- * Errors</span>
+<a name="line-316"></a>
+<a name="line-317"></a><a name="IsKeyFN"></a><span class='hs-keyword'>data</span> <span class='hs-conid'>ErrReqdArgNotFound</span> <span class='hs-varid'>x</span>
+<a name="line-318"></a><a name="IsKeyFN"></a><span class='hs-keyword'>data</span> <span class='hs-conid'>ErrUnexpectedKW</span> <span class='hs-varid'>x</span>
+<a name="line-319"></a>
+<a name="line-320"></a><span class='hs-comment'>-- | All our keywords must be registered</span>
+<a name="line-321"></a>
 <a name="line-322"></a>
-<a name="line-323"></a>
-<a name="line-324"></a><a name="IsKeyFN"></a><span class='hs-keyword'>class</span> <span class='hs-conid'>IsKeyFN</span>   <span class='hs-varid'>t</span> <span class='hs-layout'>(</span><span class='hs-varid'>flag</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Bool</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>|</span> <span class='hs-varid'>t</span><span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>flag</span>
-<a name="line-325"></a><a name="instance%20IsKeyFN%20t%20flag%20instance%20IsKeyFN%20(Label%20(s%20::%20Symbol)%20-%3e%20a%20-%3e%20b)%20True%20%7b-%20%5e%20labels%20that%20impose%20no%20restriction%20on%20the%20type%20of%20the%20(single)%20argument%20which%20follows%20%3e%3e%3e%20let%20testF%20(_%20::%20Label%20%22a%22)%20(a%20::%20Int)%20()%20=%20a+1%20%3e%3e%3e%20kw%20(hBuild%20testF)%20(Label%20::%20Label%20%22a%22)%205%20()%206%20-%7d%20%7b-%20%7c%20The%20purpose%20of%20this%20instance%20is%20to%20be%20able%20to%20use%20the%20same%20Symbol%20(type-level%20string)%20at%20different%20types.%20If%20they%20are%20supposed%20to%20be%20the%20same,%20then%20use%20'Label'%20instead%20of%20'K'%20%3e%3e%3e%20let%20kA%20=%20K%20::%20forall%20t.%20K%20%22a%22%20t%20%3e%3e%3e%20let%20testF%20(K%20::%20K%20%22a%22%20Int)%20a1%20(K%20::%20K%20%22a%22%20Integer)%20a2%20()%20=%20a1-fromIntegral%20a2%20therefore%20the%20following%20options%20works:%20%3e%3e%3e%20kw%20(hBuild%20testF)%20kA%20(5%20::%20Int)%20kA%20(3%20::%20Integer)%20()%202%20%3e%3e%3e%20kw%20(hBuild%20testF)%20(K%20::%20K%20%22a%22%20Integer)%203%20(K%20::%20K%20%22a%22%20Int)%205%20()%202%20But%20you%20cannot%20leave%20off%20all%20@Int@%20or%20@Integer@%20annotations.%20-%7d%20instance%20(r%20~%20(c%20-%3e%20b))%20=%3e%20IsKeyFN%20(%20(K%20s%20c)%20-%3e%20r)%20True%20data%20K%20s%20(c%20::%20*)%20=%20K%20--%20*%20The%20implementation%20of%20KWApply%20class%20KWApply%20f%20arg_values%20r"></a><span class='hs-comment'>-- | overlapping/fallback case</span>
-<a name="line-326"></a><a name="instance%20IsKeyFN%20t%20flag%20instance%20IsKeyFN%20(Label%20(s%20::%20Symbol)%20-%3e%20a%20-%3e%20b)%20True%20%7b-%20%5e%20labels%20that%20impose%20no%20restriction%20on%20the%20type%20of%20the%20(single)%20argument%20which%20follows%20%3e%3e%3e%20let%20testF%20(_%20::%20Label%20%22a%22)%20(a%20::%20Int)%20()%20=%20a+1%20%3e%3e%3e%20kw%20(hBuild%20testF)%20(Label%20::%20Label%20%22a%22)%205%20()%206%20-%7d%20%7b-%20%7c%20The%20purpose%20of%20this%20instance%20is%20to%20be%20able%20to%20use%20the%20same%20Symbol%20(type-level%20string)%20at%20different%20types.%20If%20they%20are%20supposed%20to%20be%20the%20same,%20then%20use%20'Label'%20instead%20of%20'K'%20%3e%3e%3e%20let%20kA%20=%20K%20::%20forall%20t.%20K%20%22a%22%20t%20%3e%3e%3e%20let%20testF%20(K%20::%20K%20%22a%22%20Int)%20a1%20(K%20::%20K%20%22a%22%20Integer)%20a2%20()%20=%20a1-fromIntegral%20a2%20therefore%20the%20following%20options%20works:%20%3e%3e%3e%20kw%20(hBuild%20testF)%20kA%20(5%20::%20Int)%20kA%20(3%20::%20Integer)%20()%202%20%3e%3e%3e%20kw%20(hBuild%20testF)%20(K%20::%20K%20%22a%22%20Integer)%203%20(K%20::%20K%20%22a%22%20Int)%205%20()%202%20But%20you%20cannot%20leave%20off%20all%20@Int@%20or%20@Integer@%20annotations.%20-%7d%20instance%20(r%20~%20(c%20-%3e%20b))%20=%3e%20IsKeyFN%20(%20(K%20s%20c)%20-%3e%20r)%20True%20data%20K%20s%20(c%20::%20*)%20=%20K%20--%20*%20The%20implementation%20of%20KWApply%20class%20KWApply%20f%20arg_values%20r"></a><span class='hs-keyword'>instance</span> <span class='hs-layout'>(</span><span class='hs-conid'>False</span> <span class='hs-keyglyph'>~</span> <span class='hs-varid'>flag</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>IsKeyFN</span> <span class='hs-varid'>t</span> <span class='hs-varid'>flag</span>
-<a name="line-327"></a><a name="instance%20IsKeyFN%20(%20(K%20s%20c)%20-%3e%20r)%20True%20data%20K%20s%20(c%20::%20*)%20=%20K%20--%20*%20The%20implementation%20of%20KWApply%20class%20KWApply%20f%20arg_values%20r"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>IsKeyFN</span> <span class='hs-layout'>(</span><span class='hs-conid'>Label</span> <span class='hs-layout'>(</span><span class='hs-varid'>s</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Symbol</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>b</span><span class='hs-layout'>)</span> <span class='hs-conid'>True</span>
-<a name="line-328"></a><span class='hs-comment'>{- ^ labels that impose no restriction on the type of the (single) argument
-<a name="line-329"></a> which follows
-<a name="line-330"></a>
-<a name="line-331"></a> &gt;&gt;&gt; let testF (_ :: Label "a") (a :: Int) () = a+1
-<a name="line-332"></a> &gt;&gt;&gt; kw (hBuild testF) (Label :: Label "a") 5 ()
-<a name="line-333"></a> 6
-<a name="line-334"></a>
-<a name="line-335"></a>-}</span>
-<a name="line-336"></a>
-<a name="line-337"></a><a name="instance%20IsKeyFN%20(%20(K%20s%20c)%20-%3e%20r)%20True%20data%20K%20s%20(c%20::%20*)%20=%20K%20--%20*%20The%20implementation%20of%20KWApply%20class%20KWApply%20f%20arg_values%20r"></a><span class='hs-comment'>{- | The purpose of this instance is to be able to use the same Symbol
-<a name="line-338"></a> (type-level string) at different types. If they are supposed to be the same,
-<a name="line-339"></a> then use 'Label' instead of 'K'
-<a name="line-340"></a>
-<a name="line-341"></a> &gt;&gt;&gt; let kA = K :: forall t. K "a" t
-<a name="line-342"></a> &gt;&gt;&gt; let testF (K :: K "a" Int) a1 (K :: K "a" Integer) a2 () = a1-fromIntegral a2
-<a name="line-343"></a>
-<a name="line-344"></a> therefore the following options works:
-<a name="line-345"></a>
-<a name="line-346"></a> &gt;&gt;&gt; kw (hBuild testF) kA (5 :: Int) kA (3 :: Integer) ()
-<a name="line-347"></a> 2
-<a name="line-348"></a>
-<a name="line-349"></a> &gt;&gt;&gt; kw (hBuild testF) (K :: K "a" Integer) 3 (K :: K "a" Int) 5 ()
-<a name="line-350"></a> 2
-<a name="line-351"></a>
-<a name="line-352"></a> But you cannot leave off all @Int@ or @Integer@ annotations.
-<a name="line-353"></a>
-<a name="line-354"></a>-}</span>
-<a name="line-355"></a><a name="instance%20IsKeyFN%20(%20(K%20s%20c)%20-%3e%20r)%20True%20data%20K%20s%20(c%20::%20*)%20=%20K%20--%20*%20The%20implementation%20of%20KWApply%20class%20KWApply%20f%20arg_values%20r"></a><span class='hs-keyword'>instance</span> <span class='hs-layout'>(</span><span class='hs-varid'>r</span> <span class='hs-keyglyph'>~</span> <span class='hs-layout'>(</span><span class='hs-varid'>c</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>b</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>IsKeyFN</span> <span class='hs-layout'>(</span> <span class='hs-layout'>(</span><span class='hs-conid'>K</span> <span class='hs-varid'>s</span> <span class='hs-varid'>c</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>r</span><span class='hs-layout'>)</span> <span class='hs-conid'>True</span>
-<a name="line-356"></a>
-<a name="line-357"></a><a name="K"></a><span class='hs-keyword'>data</span> <span class='hs-conid'>K</span> <span class='hs-varid'>s</span> <span class='hs-layout'>(</span><span class='hs-varid'>c</span> <span class='hs-keyglyph'>::</span> <span class='hs-varop'>*</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>K</span>
+<a name="line-323"></a><a name="IsKeyFN"></a><span class='hs-keyword'>class</span> <span class='hs-conid'>IsKeyFN</span>   <span class='hs-varid'>t</span> <span class='hs-layout'>(</span><span class='hs-varid'>flag</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Bool</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>|</span> <span class='hs-varid'>t</span><span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>flag</span>
+<a name="line-324"></a><a name="instance%20IsKeyFN%20t%20flag%20instance%20IsKeyFN%20(Label%20(s%20::%20Symbol)%20-%3e%20a%20-%3e%20b)%20True%20%7b-%20%5e%20labels%20that%20impose%20no%20restriction%20on%20the%20type%20of%20the%20(single)%20argument%20which%20follows%20%3e%3e%3e%20let%20testF%20(_%20::%20Label%20%22a%22)%20(a%20::%20Int)%20()%20=%20a+1%20%3e%3e%3e%20kw%20(hBuild%20testF)%20(Label%20::%20Label%20%22a%22)%205%20()%206%20-%7d%20%7b-%20%7c%20The%20purpose%20of%20this%20instance%20is%20to%20be%20able%20to%20use%20the%20same%20Symbol%20(type-level%20string)%20at%20different%20types.%20If%20they%20are%20supposed%20to%20be%20the%20same,%20then%20use%20'Label'%20instead%20of%20'K'%20%3e%3e%3e%20let%20kA%20=%20K%20::%20forall%20t.%20K%20%22a%22%20t%20%3e%3e%3e%20let%20testF%20(K%20::%20K%20%22a%22%20Int)%20a1%20(K%20::%20K%20%22a%22%20Integer)%20a2%20()%20=%20a1-fromIntegral%20a2%20therefore%20the%20following%20options%20works:%20%3e%3e%3e%20kw%20(hBuild%20testF)%20kA%20(5%20::%20Int)%20kA%20(3%20::%20Integer)%20()%202%20%3e%3e%3e%20kw%20(hBuild%20testF)%20(K%20::%20K%20%22a%22%20Integer)%203%20(K%20::%20K%20%22a%22%20Int)%205%20()%202%20But%20you%20cannot%20leave%20off%20all%20@Int@%20or%20@Integer@%20annotations.%20-%7d%20instance%20(r%20~%20(c%20-%3e%20b))%20=%3e%20IsKeyFN%20(%20(K%20s%20c)%20-%3e%20r)%20True%20data%20K%20s%20(c%20::%20*)%20=%20K%20--%20*%20The%20implementation%20of%20KWApply%20class%20KWApply%20f%20arg_values%20r"></a><span class='hs-comment'>-- | overlapping/fallback case</span>
+<a name="line-325"></a><a name="instance%20IsKeyFN%20t%20flag%20instance%20IsKeyFN%20(Label%20(s%20::%20Symbol)%20-%3e%20a%20-%3e%20b)%20True%20%7b-%20%5e%20labels%20that%20impose%20no%20restriction%20on%20the%20type%20of%20the%20(single)%20argument%20which%20follows%20%3e%3e%3e%20let%20testF%20(_%20::%20Label%20%22a%22)%20(a%20::%20Int)%20()%20=%20a+1%20%3e%3e%3e%20kw%20(hBuild%20testF)%20(Label%20::%20Label%20%22a%22)%205%20()%206%20-%7d%20%7b-%20%7c%20The%20purpose%20of%20this%20instance%20is%20to%20be%20able%20to%20use%20the%20same%20Symbol%20(type-level%20string)%20at%20different%20types.%20If%20they%20are%20supposed%20to%20be%20the%20same,%20then%20use%20'Label'%20instead%20of%20'K'%20%3e%3e%3e%20let%20kA%20=%20K%20::%20forall%20t.%20K%20%22a%22%20t%20%3e%3e%3e%20let%20testF%20(K%20::%20K%20%22a%22%20Int)%20a1%20(K%20::%20K%20%22a%22%20Integer)%20a2%20()%20=%20a1-fromIntegral%20a2%20therefore%20the%20following%20options%20works:%20%3e%3e%3e%20kw%20(hBuild%20testF)%20kA%20(5%20::%20Int)%20kA%20(3%20::%20Integer)%20()%202%20%3e%3e%3e%20kw%20(hBuild%20testF)%20(K%20::%20K%20%22a%22%20Integer)%203%20(K%20::%20K%20%22a%22%20Int)%205%20()%202%20But%20you%20cannot%20leave%20off%20all%20@Int@%20or%20@Integer@%20annotations.%20-%7d%20instance%20(r%20~%20(c%20-%3e%20b))%20=%3e%20IsKeyFN%20(%20(K%20s%20c)%20-%3e%20r)%20True%20data%20K%20s%20(c%20::%20*)%20=%20K%20--%20*%20The%20implementation%20of%20KWApply%20class%20KWApply%20f%20arg_values%20r"></a><span class='hs-keyword'>instance</span> <span class='hs-layout'>(</span><span class='hs-conid'>False</span> <span class='hs-keyglyph'>~</span> <span class='hs-varid'>flag</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>IsKeyFN</span> <span class='hs-varid'>t</span> <span class='hs-varid'>flag</span>
+<a name="line-326"></a><a name="instance%20IsKeyFN%20(%20(K%20s%20c)%20-%3e%20r)%20True%20data%20K%20s%20(c%20::%20*)%20=%20K%20--%20*%20The%20implementation%20of%20KWApply%20class%20KWApply%20f%20arg_values%20r"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>IsKeyFN</span> <span class='hs-layout'>(</span><span class='hs-conid'>Label</span> <span class='hs-layout'>(</span><span class='hs-varid'>s</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Symbol</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>b</span><span class='hs-layout'>)</span> <span class='hs-conid'>True</span>
+<a name="line-327"></a><span class='hs-comment'>{- ^ labels that impose no restriction on the type of the (single) argument
+<a name="line-328"></a> which follows
+<a name="line-329"></a>
+<a name="line-330"></a> &gt;&gt;&gt; let testF (_ :: Label "a") (a :: Int) () = a+1
+<a name="line-331"></a> &gt;&gt;&gt; kw (hBuild testF) (Label :: Label "a") 5 ()
+<a name="line-332"></a> 6
+<a name="line-333"></a>
+<a name="line-334"></a>-}</span>
+<a name="line-335"></a>
+<a name="line-336"></a><a name="instance%20IsKeyFN%20(%20(K%20s%20c)%20-%3e%20r)%20True%20data%20K%20s%20(c%20::%20*)%20=%20K%20--%20*%20The%20implementation%20of%20KWApply%20class%20KWApply%20f%20arg_values%20r"></a><span class='hs-comment'>{- | The purpose of this instance is to be able to use the same Symbol
+<a name="line-337"></a> (type-level string) at different types. If they are supposed to be the same,
+<a name="line-338"></a> then use 'Label' instead of 'K'
+<a name="line-339"></a>
+<a name="line-340"></a> &gt;&gt;&gt; let kA = K :: forall t. K "a" t
+<a name="line-341"></a> &gt;&gt;&gt; let testF (K :: K "a" Int) a1 (K :: K "a" Integer) a2 () = a1-fromIntegral a2
+<a name="line-342"></a>
+<a name="line-343"></a> therefore the following options works:
+<a name="line-344"></a>
+<a name="line-345"></a> &gt;&gt;&gt; kw (hBuild testF) kA (5 :: Int) kA (3 :: Integer) ()
+<a name="line-346"></a> 2
+<a name="line-347"></a>
+<a name="line-348"></a> &gt;&gt;&gt; kw (hBuild testF) (K :: K "a" Integer) 3 (K :: K "a" Int) 5 ()
+<a name="line-349"></a> 2
+<a name="line-350"></a>
+<a name="line-351"></a> But you cannot leave off all @Int@ or @Integer@ annotations.
+<a name="line-352"></a>
+<a name="line-353"></a>-}</span>
+<a name="line-354"></a><a name="instance%20IsKeyFN%20(%20(K%20s%20c)%20-%3e%20r)%20True%20data%20K%20s%20(c%20::%20*)%20=%20K%20--%20*%20The%20implementation%20of%20KWApply%20class%20KWApply%20f%20arg_values%20r"></a><span class='hs-keyword'>instance</span> <span class='hs-layout'>(</span><span class='hs-varid'>r</span> <span class='hs-keyglyph'>~</span> <span class='hs-layout'>(</span><span class='hs-varid'>c</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>b</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>IsKeyFN</span> <span class='hs-layout'>(</span> <span class='hs-layout'>(</span><span class='hs-conid'>K</span> <span class='hs-varid'>s</span> <span class='hs-varid'>c</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>r</span><span class='hs-layout'>)</span> <span class='hs-conid'>True</span>
+<a name="line-355"></a>
+<a name="line-356"></a><a name="K"></a><span class='hs-keyword'>data</span> <span class='hs-conid'>K</span> <span class='hs-varid'>s</span> <span class='hs-layout'>(</span><span class='hs-varid'>c</span> <span class='hs-keyglyph'>::</span> <span class='hs-varop'>*</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>K</span>
+<a name="line-357"></a>
 <a name="line-358"></a>
-<a name="line-359"></a>
-<a name="line-360"></a><span class='hs-comment'>-- * The implementation of KWApply</span>
-<a name="line-361"></a>
-<a name="line-362"></a><a name="KWApply"></a><span class='hs-keyword'>class</span> <span class='hs-conid'>KWApply</span> <span class='hs-varid'>f</span> <span class='hs-varid'>arg_values</span> <span class='hs-varid'>r</span> <span class='hs-keyword'>where</span>
-<a name="line-363"></a>    <span class='hs-varid'>kwapply</span><span class='hs-keyglyph'>::</span> <span class='hs-varid'>f</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>HList</span> <span class='hs-varid'>arg_values</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>r</span>
-<a name="line-364"></a>
-<a name="line-365"></a><a name="instance%20KWApply%20r%20'%5b%5d%20r'"></a><span class='hs-keyword'>instance</span> <span class='hs-layout'>(</span><span class='hs-varid'>r</span> <span class='hs-keyglyph'>~</span> <span class='hs-varid'>r'</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>KWApply</span> <span class='hs-varid'>r</span> <span class='hs-chr'>'</span><span class='hs-conid'>[]</span> <span class='hs-varid'>r'</span> <span class='hs-keyword'>where</span>
-<a name="line-366"></a>    <span class='hs-varid'>kwapply</span> <span class='hs-varid'>f</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>f</span>
-<a name="line-367"></a>
-<a name="line-368"></a><a name="instance%20KWApply%20(kw%20-%3ea-%3ef')%20(kw'%20':%20a'%20':%20tail)%20r"></a><span class='hs-keyword'>instance</span> <span class='hs-layout'>(</span><span class='hs-conid'>HEq</span> <span class='hs-varid'>kw</span> <span class='hs-varid'>kw'</span> <span class='hs-varid'>flag</span><span class='hs-layout'>,</span>
-<a name="line-369"></a>	  <span class='hs-conid'>KWApply'</span> <span class='hs-varid'>flag</span> <span class='hs-layout'>(</span><span class='hs-varid'>kw</span> <span class='hs-keyglyph'>-&gt;</span><span class='hs-varid'>a</span><span class='hs-keyglyph'>-&gt;</span><span class='hs-varid'>f'</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>kw'</span> <span class='hs-chr'>'</span><span class='hs-conop'>:</span> <span class='hs-varid'>a'</span> <span class='hs-chr'>'</span><span class='hs-conop'>:</span> <span class='hs-varid'>tail</span><span class='hs-layout'>)</span> <span class='hs-varid'>r</span><span class='hs-layout'>)</span>
-<a name="line-370"></a>    <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>KWApply</span> <span class='hs-layout'>(</span><span class='hs-varid'>kw</span> <span class='hs-keyglyph'>-&gt;</span><span class='hs-varid'>a</span><span class='hs-keyglyph'>-&gt;</span><span class='hs-varid'>f'</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>kw'</span> <span class='hs-chr'>'</span><span class='hs-conop'>:</span> <span class='hs-varid'>a'</span> <span class='hs-chr'>'</span><span class='hs-conop'>:</span> <span class='hs-varid'>tail</span><span class='hs-layout'>)</span> <span class='hs-varid'>r</span> <span class='hs-keyword'>where</span>
-<a name="line-371"></a>    <span class='hs-varid'>kwapply</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>kwapply'</span> <span class='hs-layout'>(</span><span class='hs-varid'>proxy</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Proxy</span> <span class='hs-varid'>flag</span><span class='hs-layout'>)</span>
-<a name="line-372"></a>
-<a name="line-373"></a><a name="KWApply'"></a><span class='hs-keyword'>class</span> <span class='hs-conid'>KWApply'</span> <span class='hs-varid'>flag</span> <span class='hs-varid'>f</span> <span class='hs-varid'>arg_values</span> <span class='hs-varid'>r</span>  <span class='hs-keyword'>where</span>
-<a name="line-374"></a>    <span class='hs-varid'>kwapply'</span><span class='hs-keyglyph'>::</span> <span class='hs-conid'>Proxy</span> <span class='hs-varid'>flag</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>f</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>HList</span> <span class='hs-varid'>arg_values</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>r</span>
-<a name="line-375"></a>
-<a name="line-376"></a><a name="instance%20KWApply'%20True%20(kw-%3ev-%3ef')%20(kw%20':%20v'%20':%20tail)%20r"></a><span class='hs-keyword'>instance</span>  <span class='hs-layout'>(</span><span class='hs-varid'>v'</span> <span class='hs-keyglyph'>~</span> <span class='hs-varid'>v</span><span class='hs-layout'>,</span> <span class='hs-conid'>KWApply</span> <span class='hs-varid'>f'</span> <span class='hs-varid'>tail</span> <span class='hs-varid'>r</span><span class='hs-layout'>)</span>
-<a name="line-377"></a>    <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>KWApply'</span> <span class='hs-conid'>True</span> <span class='hs-layout'>(</span><span class='hs-varid'>kw</span><span class='hs-keyglyph'>-&gt;</span><span class='hs-varid'>v</span><span class='hs-keyglyph'>-&gt;</span><span class='hs-varid'>f'</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>kw</span> <span class='hs-chr'>'</span><span class='hs-conop'>:</span> <span class='hs-varid'>v'</span> <span class='hs-chr'>'</span><span class='hs-conop'>:</span> <span class='hs-varid'>tail</span><span class='hs-layout'>)</span> <span class='hs-varid'>r</span> <span class='hs-keyword'>where</span>
-<a name="line-378"></a>    <span class='hs-varid'>kwapply'</span> <span class='hs-keyword'>_</span> <span class='hs-varid'>f</span> <span class='hs-layout'>(</span><span class='hs-conid'>HCons</span> <span class='hs-varid'>kw_</span> <span class='hs-layout'>(</span><span class='hs-conid'>HCons</span> <span class='hs-varid'>v'</span> <span class='hs-varid'>tl</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span>
-<a name="line-379"></a>                   <span class='hs-varid'>kwapply</span> <span class='hs-layout'>(</span><span class='hs-varid'>f</span> <span class='hs-varid'>kw_</span> <span class='hs-varid'>v'</span><span class='hs-layout'>)</span> <span class='hs-varid'>tl</span>
-<a name="line-380"></a>    <span class='hs-varid'>kwapply'</span> <span class='hs-keyword'>_</span> <span class='hs-keyword'>_</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>error</span> <span class='hs-str'>"Data.HList.Keyword.kwapply': impossible 1"</span>
-<a name="line-381"></a>
-<a name="line-382"></a><a name="instance%20KWApply'%20False%20f%20(kw%20':%20v%20':%20tail)%20r"></a><span class='hs-comment'>-- | Rotate the arg list ...</span>
-<a name="line-383"></a><a name="instance%20KWApply'%20False%20f%20(kw%20':%20v%20':%20tail)%20r"></a><span class='hs-keyword'>instance</span>  <span class='hs-layout'>(</span><span class='hs-conid'>HAppendList</span> <span class='hs-varid'>tail</span> <span class='hs-chr'>'</span><span class='hs-keyglyph'>[</span><span class='hs-varid'>kw</span> <span class='hs-layout'>,</span> <span class='hs-varid'>v</span><span class='hs-keyglyph'>]</span> <span class='hs-keyglyph'>~</span> <span class='hs-varid'>l'</span><span class='hs-layout'>,</span>
-<a name="line-384"></a>	   <span class='hs-conid'>KWApply</span> <span class='hs-varid'>f</span> <span class='hs-varid'>l'</span> <span class='hs-varid'>r</span><span class='hs-layout'>)</span>
-<a name="line-385"></a>    <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>KWApply'</span> <span class='hs-conid'>False</span> <span class='hs-varid'>f</span> <span class='hs-layout'>(</span><span class='hs-varid'>kw</span> <span class='hs-chr'>'</span><span class='hs-conop'>:</span> <span class='hs-varid'>v</span> <span class='hs-chr'>'</span><span class='hs-conop'>:</span> <span class='hs-varid'>tail</span><span class='hs-layout'>)</span> <span class='hs-varid'>r</span> <span class='hs-keyword'>where</span>
-<a name="line-386"></a>    <span class='hs-varid'>kwapply'</span> <span class='hs-keyword'>_</span> <span class='hs-varid'>f</span> <span class='hs-layout'>(</span><span class='hs-conid'>HCons</span> <span class='hs-varid'>kw_</span> <span class='hs-layout'>(</span><span class='hs-conid'>HCons</span> <span class='hs-varid'>v</span> <span class='hs-varid'>tl</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span>
-<a name="line-387"></a>	<span class='hs-varid'>kwapply</span> <span class='hs-varid'>f</span> <span class='hs-layout'>(</span><span class='hs-varid'>hAppend</span> <span class='hs-varid'>tl</span> <span class='hs-layout'>(</span><span class='hs-varid'>kw_</span> <span class='hs-varop'>.*.</span> <span class='hs-varid'>v</span> <span class='hs-varop'>.*.</span> <span class='hs-conid'>HNil</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span>
-<a name="line-388"></a>    <span class='hs-varid'>kwapply'</span> <span class='hs-keyword'>_</span> <span class='hs-keyword'>_</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>error</span> <span class='hs-str'>"Data.HList.Keyword.kwapply': impossible 2"</span>
-<a name="line-389"></a>
-<a name="line-390"></a><span class='hs-comment'>{- |
-<a name="line-391"></a>
-<a name="line-392"></a>The datatype Arg below is to maintain the state of keyword
-<a name="line-393"></a>accumulation: which keywords we need, and which keyword and values we
-<a name="line-394"></a>have already got.
-<a name="line-395"></a>arg_types is the phantom HList of keywords that are yet to be satisfied.
-<a name="line-396"></a>arg_values is the @HList (kw .*. kw_value .*. etc)@
-<a name="line-397"></a>of already found keywords and their values.
-<a name="line-398"></a>-}</span>
-<a name="line-399"></a>
-<a name="line-400"></a><a name="Arg"></a><span class='hs-keyword'>newtype</span> <span class='hs-conid'>Arg</span> <span class='hs-varid'>arg_types</span> <span class='hs-varid'>arg_values</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>Arg</span> <span class='hs-layout'>(</span><span class='hs-conid'>HList</span> <span class='hs-varid'>arg_values</span><span class='hs-layout'>)</span>
-<a name="line-401"></a><span class='hs-keyword'>deriving</span> <span class='hs-keyword'>instance</span> <span class='hs-conid'>Show</span> <span class='hs-layout'>(</span><span class='hs-conid'>HList</span> <span class='hs-varid'>vals</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>Show</span> <span class='hs-layout'>(</span><span class='hs-conid'>Arg</span> <span class='hs-varid'>tys</span> <span class='hs-varid'>vals</span><span class='hs-layout'>)</span>
-<a name="line-402"></a>
-<a name="line-403"></a><span class='hs-comment'>{- | Reflection on a function:
-<a name="line-404"></a>Given a function, return the type list of its keywords
-<a name="line-405"></a>
-<a name="line-406"></a>&gt;&gt;&gt; :t reflect_fk (undefined::Size-&gt;Int-&gt;Color-&gt;CommonColor-&gt;String)
-<a name="line-407"></a>reflect_fk (undefined::Size-&gt;Int-&gt;Color-&gt;CommonColor-&gt;String)
-<a name="line-408"></a>  :: Arg [*] ((':) * Size ((':) * Color ('[] *))) ('[] *)
-<a name="line-409"></a>
-<a name="line-410"></a>&gt;&gt;&gt; :t reflect_fk (undefined::Size-&gt;Int-&gt;()-&gt;Int)
-<a name="line-411"></a>reflect_fk (undefined::Size-&gt;Int-&gt;()-&gt;Int)
-<a name="line-412"></a>  :: Arg [*] ((':) * Size ('[] *)) ('[] *)
+<a name="line-359"></a><span class='hs-comment'>-- * The implementation of KWApply</span>
+<a name="line-360"></a>
+<a name="line-361"></a><a name="KWApply"></a><span class='hs-keyword'>class</span> <span class='hs-conid'>KWApply</span> <span class='hs-varid'>f</span> <span class='hs-varid'>arg_values</span> <span class='hs-varid'>r</span> <span class='hs-keyword'>where</span>
+<a name="line-362"></a>    <span class='hs-varid'>kwapply</span><span class='hs-keyglyph'>::</span> <span class='hs-varid'>f</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>HList</span> <span class='hs-varid'>arg_values</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>r</span>
+<a name="line-363"></a>
+<a name="line-364"></a><a name="instance%20KWApply%20r%20'%5b%5d%20r'"></a><span class='hs-keyword'>instance</span> <span class='hs-layout'>(</span><span class='hs-varid'>r</span> <span class='hs-keyglyph'>~</span> <span class='hs-varid'>r'</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>KWApply</span> <span class='hs-varid'>r</span> <span class='hs-chr'>'</span><span class='hs-conid'>[]</span> <span class='hs-varid'>r'</span> <span class='hs-keyword'>where</span>
+<a name="line-365"></a>    <span class='hs-varid'>kwapply</span> <span class='hs-varid'>f</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>f</span>
+<a name="line-366"></a>
+<a name="line-367"></a><a name="instance%20KWApply%20(kw%20-%3ea-%3ef')%20(kw'%20':%20a'%20':%20tail)%20r"></a><span class='hs-keyword'>instance</span> <span class='hs-layout'>(</span><span class='hs-conid'>HEq</span> <span class='hs-varid'>kw</span> <span class='hs-varid'>kw'</span> <span class='hs-varid'>flag</span><span class='hs-layout'>,</span>
+<a name="line-368"></a>	  <span class='hs-conid'>KWApply'</span> <span class='hs-varid'>flag</span> <span class='hs-layout'>(</span><span class='hs-varid'>kw</span> <span class='hs-keyglyph'>-&gt;</span><span class='hs-varid'>a</span><span class='hs-keyglyph'>-&gt;</span><span class='hs-varid'>f'</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>kw'</span> <span class='hs-chr'>'</span><span class='hs-conop'>:</span> <span class='hs-varid'>a'</span> <span class='hs-chr'>'</span><span class='hs-conop'>:</span> <span class='hs-varid'>tail</span><span class='hs-layout'>)</span> <span class='hs-varid'>r</span><span class='hs-layout'>)</span>
+<a name="line-369"></a>    <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>KWApply</span> <span class='hs-layout'>(</span><span class='hs-varid'>kw</span> <span class='hs-keyglyph'>-&gt;</span><span class='hs-varid'>a</span><span class='hs-keyglyph'>-&gt;</span><span class='hs-varid'>f'</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>kw'</span> <span class='hs-chr'>'</span><span class='hs-conop'>:</span> <span class='hs-varid'>a'</span> <span class='hs-chr'>'</span><span class='hs-conop'>:</span> <span class='hs-varid'>tail</span><span class='hs-layout'>)</span> <span class='hs-varid'>r</span> <span class='hs-keyword'>where</span>
+<a name="line-370"></a>    <span class='hs-varid'>kwapply</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>kwapply'</span> <span class='hs-layout'>(</span><span class='hs-conid'>Proxy</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Proxy</span> <span class='hs-varid'>flag</span><span class='hs-layout'>)</span>
+<a name="line-371"></a>
+<a name="line-372"></a><a name="KWApply'"></a><span class='hs-keyword'>class</span> <span class='hs-conid'>KWApply'</span> <span class='hs-varid'>flag</span> <span class='hs-varid'>f</span> <span class='hs-varid'>arg_values</span> <span class='hs-varid'>r</span>  <span class='hs-keyword'>where</span>
+<a name="line-373"></a>    <span class='hs-varid'>kwapply'</span><span class='hs-keyglyph'>::</span> <span class='hs-conid'>Proxy</span> <span class='hs-varid'>flag</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>f</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>HList</span> <span class='hs-varid'>arg_values</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>r</span>
+<a name="line-374"></a>
+<a name="line-375"></a><a name="instance%20KWApply'%20True%20(kw-%3ev-%3ef')%20(kw%20':%20v'%20':%20tail)%20r"></a><span class='hs-keyword'>instance</span>  <span class='hs-layout'>(</span><span class='hs-varid'>v'</span> <span class='hs-keyglyph'>~</span> <span class='hs-varid'>v</span><span class='hs-layout'>,</span> <span class='hs-conid'>KWApply</span> <span class='hs-varid'>f'</span> <span class='hs-varid'>tail</span> <span class='hs-varid'>r</span><span class='hs-layout'>)</span>
+<a name="line-376"></a>    <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>KWApply'</span> <span class='hs-conid'>True</span> <span class='hs-layout'>(</span><span class='hs-varid'>kw</span><span class='hs-keyglyph'>-&gt;</span><span class='hs-varid'>v</span><span class='hs-keyglyph'>-&gt;</span><span class='hs-varid'>f'</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>kw</span> <span class='hs-chr'>'</span><span class='hs-conop'>:</span> <span class='hs-varid'>v'</span> <span class='hs-chr'>'</span><span class='hs-conop'>:</span> <span class='hs-varid'>tail</span><span class='hs-layout'>)</span> <span class='hs-varid'>r</span> <span class='hs-keyword'>where</span>
+<a name="line-377"></a>    <span class='hs-varid'>kwapply'</span> <span class='hs-keyword'>_</span> <span class='hs-varid'>f</span> <span class='hs-layout'>(</span><span class='hs-conid'>HCons</span> <span class='hs-varid'>kw_</span> <span class='hs-layout'>(</span><span class='hs-conid'>HCons</span> <span class='hs-varid'>v'</span> <span class='hs-varid'>tl</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span>
+<a name="line-378"></a>                   <span class='hs-varid'>kwapply</span> <span class='hs-layout'>(</span><span class='hs-varid'>f</span> <span class='hs-varid'>kw_</span> <span class='hs-varid'>v'</span><span class='hs-layout'>)</span> <span class='hs-varid'>tl</span>
+<a name="line-379"></a>    <span class='hs-varid'>kwapply'</span> <span class='hs-keyword'>_</span> <span class='hs-keyword'>_</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>error</span> <span class='hs-str'>"Data.HList.Keyword.kwapply': impossible 1"</span>
+<a name="line-380"></a>
+<a name="line-381"></a><a name="instance%20KWApply'%20False%20f%20(kw%20':%20v%20':%20tail)%20r"></a><span class='hs-comment'>-- | Rotate the arg list ...</span>
+<a name="line-382"></a><a name="instance%20KWApply'%20False%20f%20(kw%20':%20v%20':%20tail)%20r"></a><span class='hs-keyword'>instance</span>  <span class='hs-layout'>(</span><span class='hs-conid'>HAppendList</span> <span class='hs-varid'>tail</span> <span class='hs-chr'>'</span><span class='hs-keyglyph'>[</span><span class='hs-varid'>kw</span> <span class='hs-layout'>,</span> <span class='hs-varid'>v</span><span class='hs-keyglyph'>]</span> <span class='hs-keyglyph'>~</span> <span class='hs-varid'>l'</span><span class='hs-layout'>,</span>
+<a name="line-383"></a>	   <span class='hs-conid'>KWApply</span> <span class='hs-varid'>f</span> <span class='hs-varid'>l'</span> <span class='hs-varid'>r</span><span class='hs-layout'>)</span>
+<a name="line-384"></a>    <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>KWApply'</span> <span class='hs-conid'>False</span> <span class='hs-varid'>f</span> <span class='hs-layout'>(</span><span class='hs-varid'>kw</span> <span class='hs-chr'>'</span><span class='hs-conop'>:</span> <span class='hs-varid'>v</span> <span class='hs-chr'>'</span><span class='hs-conop'>:</span> <span class='hs-varid'>tail</span><span class='hs-layout'>)</span> <span class='hs-varid'>r</span> <span class='hs-keyword'>where</span>
+<a name="line-385"></a>    <span class='hs-varid'>kwapply'</span> <span class='hs-keyword'>_</span> <span class='hs-varid'>f</span> <span class='hs-layout'>(</span><span class='hs-conid'>HCons</span> <span class='hs-varid'>kw_</span> <span class='hs-layout'>(</span><span class='hs-conid'>HCons</span> <span class='hs-varid'>v</span> <span class='hs-varid'>tl</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span>
+<a name="line-386"></a>	<span class='hs-varid'>kwapply</span> <span class='hs-varid'>f</span> <span class='hs-layout'>(</span><span class='hs-varid'>hAppend</span> <span class='hs-varid'>tl</span> <span class='hs-layout'>(</span><span class='hs-varid'>kw_</span> <span class='hs-varop'>.*.</span> <span class='hs-varid'>v</span> <span class='hs-varop'>.*.</span> <span class='hs-conid'>HNil</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span>
+<a name="line-387"></a>    <span class='hs-varid'>kwapply'</span> <span class='hs-keyword'>_</span> <span class='hs-keyword'>_</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>error</span> <span class='hs-str'>"Data.HList.Keyword.kwapply': impossible 2"</span>
+<a name="line-388"></a>
+<a name="line-389"></a><span class='hs-comment'>{- |
+<a name="line-390"></a>
+<a name="line-391"></a>The datatype Arg below is to maintain the state of keyword
+<a name="line-392"></a>accumulation: which keywords we need, and which keyword and values we
+<a name="line-393"></a>have already got.
+<a name="line-394"></a>arg_types is the phantom HList of keywords that are yet to be satisfied.
+<a name="line-395"></a>arg_values is the @HList (kw .*. kw_value .*. etc)@
+<a name="line-396"></a>of already found keywords and their values.
+<a name="line-397"></a>-}</span>
+<a name="line-398"></a>
+<a name="line-399"></a><a name="Arg"></a><span class='hs-keyword'>newtype</span> <span class='hs-conid'>Arg</span> <span class='hs-varid'>arg_types</span> <span class='hs-varid'>arg_values</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>Arg</span> <span class='hs-layout'>(</span><span class='hs-conid'>HList</span> <span class='hs-varid'>arg_values</span><span class='hs-layout'>)</span>
+<a name="line-400"></a><span class='hs-keyword'>deriving</span> <span class='hs-keyword'>instance</span> <span class='hs-conid'>Show</span> <span class='hs-layout'>(</span><span class='hs-conid'>HList</span> <span class='hs-varid'>vals</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>Show</span> <span class='hs-layout'>(</span><span class='hs-conid'>Arg</span> <span class='hs-varid'>tys</span> <span class='hs-varid'>vals</span><span class='hs-layout'>)</span>
+<a name="line-401"></a>
+<a name="line-402"></a><span class='hs-comment'>{- | Reflection on a function:
+<a name="line-403"></a>Given a function, return the type list of its keywords
+<a name="line-404"></a>
+<a name="line-405"></a>&gt;&gt;&gt; :t reflect_fk (undefined::Size-&gt;Int-&gt;Color-&gt;CommonColor-&gt;String)
+<a name="line-406"></a>reflect_fk (undefined::Size-&gt;Int-&gt;Color-&gt;CommonColor-&gt;String)
+<a name="line-407"></a>  :: Arg [*] ((':) * Size ((':) * Color ('[] *))) ('[] *)
+<a name="line-408"></a>
+<a name="line-409"></a>&gt;&gt;&gt; :t reflect_fk (undefined::Size-&gt;Int-&gt;()-&gt;Int)
+<a name="line-410"></a>reflect_fk (undefined::Size-&gt;Int-&gt;()-&gt;Int)
+<a name="line-411"></a>  :: Arg [*] ((':) * Size ('[] *)) ('[] *)
+<a name="line-412"></a>
 <a name="line-413"></a>
-<a name="line-414"></a>
-<a name="line-415"></a>-}</span>
-<a name="line-416"></a>
-<a name="line-417"></a><a name="ReflectFK"></a><span class='hs-keyword'>class</span> <span class='hs-conid'>ReflectFK</span> <span class='hs-varid'>f</span> <span class='hs-layout'>(</span><span class='hs-varid'>kws</span> <span class='hs-keyglyph'>::</span> <span class='hs-keyglyph'>[</span><span class='hs-varop'>*</span><span class='hs-keyglyph'>]</span><span class='hs-layout'>)</span>
-<a name="line-418"></a><a name="instance%20ReflectFK%20f%20kws%20class%20ReflectFK'%20(flag%20::%20Bool)%20f%20kws%20instance%20(kkws%20~%20(kw%20':%20kws),%20ReflectFK%20rest%20kws)%20=%3e%20ReflectFK'%20True%20(kw-%3ea-%3erest)%20kkws%20instance%20('%5b%5d%20~%20nil)%20=%3e%20ReflectFK'%20False%20f%20nil%20--%20%7c%20The%20main%20class:%20collect%20and%20apply%20the%20keyword%20arguments%20class%20KW%20f%20arg_desc%20arg_def%20r"></a><span class='hs-keyword'>instance</span> <span class='hs-layout'>(</span><span class='hs-conid'>IsKeyFN</span> <span class='hs-varid'>f</span> <span class='hs-varid'>flag</span><span class='hs-layout'>,</span> <span class='hs-conid'>ReflectFK'</span> <span class='hs-varid'>flag</span> <span class='hs-varid'>f</span> <span class='hs-varid'>kws</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>ReflectFK</span> <span class='hs-varid'>f</span> <span class='hs-varid'>kws</span>
-<a name="line-419"></a><a name="ReflectFK'"></a><span class='hs-keyword'>class</span> <span class='hs-conid'>ReflectFK'</span> <span class='hs-layout'>(</span><span class='hs-varid'>flag</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Bool</span><span class='hs-layout'>)</span> <span class='hs-varid'>f</span> <span class='hs-varid'>kws</span>
-<a name="line-420"></a><a name="instance%20ReflectFK'%20True%20(kw-%3ea-%3erest)%20kkws%20instance%20('%5b%5d%20~%20nil)%20=%3e%20ReflectFK'%20False%20f%20nil%20--%20%7c%20The%20main%20class:%20collect%20and%20apply%20the%20keyword%20arguments%20class%20KW%20f%20arg_desc%20arg_def%20r"></a><span class='hs-keyword'>instance</span> <span class='hs-layout'>(</span><span class='hs-varid'>kkws</span> <span class='hs-keyglyph'>~</span> <span class='hs-layout'>(</span><span class='hs-varid'>kw</span> <span class='hs-chr'>'</span><span class='hs-conop'>:</span> <span class='hs-varid'>kws</span><span class='hs-layout'>)</span><span class='hs-layout'>,</span> <span class='hs-conid'>ReflectFK</span> <span class='hs-varid'>rest</span> <span class='hs-varid'>kws</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>ReflectFK'</span> <span class='hs-conid'>True</span> <span class='hs-layout'>(</span><span class='hs-varid'>kw</span><span class='hs-keyglyph'>-&gt;</span><span class='hs-varid'>a</span><span class='hs-keyglyph'>-&gt;</span><span class='hs-varid'>rest</span><span class='hs-layout'>)</span> <span class='hs-varid'>kkws</span>
-<a name="line-421"></a><a name="instance%20ReflectFK'%20False%20f%20nil%20--%20%7c%20The%20main%20class:%20collect%20and%20apply%20the%20keyword%20arguments%20class%20KW%20f%20arg_desc%20arg_def%20r"></a><span class='hs-keyword'>instance</span> <span class='hs-layout'>(</span><span class='hs-chr'>'</span><span class='hs-conid'>[]</span> <span class='hs-keyglyph'>~</span> <span class='hs-varid'>nil</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>ReflectFK'</span> <span class='hs-conid'>False</span> <span class='hs-varid'>f</span> <span class='hs-varid'>nil</span>
+<a name="line-414"></a>-}</span>
+<a name="line-415"></a>
+<a name="line-416"></a><a name="ReflectFK"></a><span class='hs-keyword'>class</span> <span class='hs-conid'>ReflectFK</span> <span class='hs-varid'>f</span> <span class='hs-layout'>(</span><span class='hs-varid'>kws</span> <span class='hs-keyglyph'>::</span> <span class='hs-keyglyph'>[</span><span class='hs-varop'>*</span><span class='hs-keyglyph'>]</span><span class='hs-layout'>)</span>
+<a name="line-417"></a><a name="instance%20ReflectFK%20f%20kws%20class%20ReflectFK'%20(flag%20::%20Bool)%20f%20kws%20instance%20(kkws%20~%20(kw%20':%20kws),%20ReflectFK%20rest%20kws)%20=%3e%20ReflectFK'%20True%20(kw-%3ea-%3erest)%20kkws%20instance%20('%5b%5d%20~%20nil)%20=%3e%20ReflectFK'%20False%20f%20nil%20--%20%7c%20The%20main%20class:%20collect%20and%20apply%20the%20keyword%20arguments%20class%20KW%20f%20arg_desc%20arg_def%20r"></a><span class='hs-keyword'>instance</span> <span class='hs-layout'>(</span><span class='hs-conid'>IsKeyFN</span> <span class='hs-varid'>f</span> <span class='hs-varid'>flag</span><span class='hs-layout'>,</span> <span class='hs-conid'>ReflectFK'</span> <span class='hs-varid'>flag</span> <span class='hs-varid'>f</span> <span class='hs-varid'>kws</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>ReflectFK</span> <span class='hs-varid'>f</span> <span class='hs-varid'>kws</span>
+<a name="line-418"></a><a name="ReflectFK'"></a><span class='hs-keyword'>class</span> <span class='hs-conid'>ReflectFK'</span> <span class='hs-layout'>(</span><span class='hs-varid'>flag</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Bool</span><span class='hs-layout'>)</span> <span class='hs-varid'>f</span> <span class='hs-varid'>kws</span>
+<a name="line-419"></a><a name="instance%20ReflectFK'%20True%20(kw-%3ea-%3erest)%20kkws%20instance%20('%5b%5d%20~%20nil)%20=%3e%20ReflectFK'%20False%20f%20nil%20--%20%7c%20The%20main%20class:%20collect%20and%20apply%20the%20keyword%20arguments%20class%20KW%20f%20arg_desc%20arg_def%20r"></a><span class='hs-keyword'>instance</span> <span class='hs-layout'>(</span><span class='hs-varid'>kkws</span> <span class='hs-keyglyph'>~</span> <span class='hs-layout'>(</span><span class='hs-varid'>kw</span> <span class='hs-chr'>'</span><span class='hs-conop'>:</span> <span class='hs-varid'>kws</span><span class='hs-layout'>)</span><span class='hs-layout'>,</span> <span class='hs-conid'>ReflectFK</span> <span class='hs-varid'>rest</span> <span class='hs-varid'>kws</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>ReflectFK'</span> <span class='hs-conid'>True</span> <span class='hs-layout'>(</span><span class='hs-varid'>kw</span><span class='hs-keyglyph'>-&gt;</span><span class='hs-varid'>a</span><span class='hs-keyglyph'>-&gt;</span><span class='hs-varid'>rest</span><span class='hs-layout'>)</span> <span class='hs-varid'>kkws</span>
+<a name="line-420"></a><a name="instance%20ReflectFK'%20False%20f%20nil%20--%20%7c%20The%20main%20class:%20collect%20and%20apply%20the%20keyword%20arguments%20class%20KW%20f%20arg_desc%20arg_def%20r"></a><span class='hs-keyword'>instance</span> <span class='hs-layout'>(</span><span class='hs-chr'>'</span><span class='hs-conid'>[]</span> <span class='hs-keyglyph'>~</span> <span class='hs-varid'>nil</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>ReflectFK'</span> <span class='hs-conid'>False</span> <span class='hs-varid'>f</span> <span class='hs-varid'>nil</span>
+<a name="line-421"></a>
 <a name="line-422"></a>
-<a name="line-423"></a>
-<a name="line-424"></a><span class='hs-comment'>-- | The main class: collect and apply the keyword arguments</span>
-<a name="line-425"></a>
-<a name="line-426"></a><a name="KW"></a><span class='hs-keyword'>class</span> <span class='hs-conid'>KW</span> <span class='hs-varid'>f</span> <span class='hs-varid'>arg_desc</span> <span class='hs-varid'>arg_def</span> <span class='hs-varid'>r</span> <span class='hs-keyword'>where</span>
-<a name="line-427"></a>    <span class='hs-varid'>kwdo</span> <span class='hs-keyglyph'>::</span> <span class='hs-varid'>f</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>arg_desc</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>HList</span> <span class='hs-varid'>arg_def</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>r</span>
-<a name="line-428"></a>
-<a name="line-429"></a><a name="instance%20KW%20f%20arg_desc%20arg_def%20r"></a><span class='hs-keyword'>instance</span> <span class='hs-layout'>(</span><span class='hs-conid'>IsKeyFN</span> <span class='hs-varid'>r</span> <span class='hs-varid'>rflag</span><span class='hs-layout'>,</span>
-<a name="line-430"></a>	    <span class='hs-conid'>KW'</span> <span class='hs-varid'>rflag</span> <span class='hs-varid'>f</span> <span class='hs-varid'>arg_desc</span> <span class='hs-varid'>arg_def</span> <span class='hs-varid'>r</span><span class='hs-layout'>)</span>
-<a name="line-431"></a>    <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>KW</span> <span class='hs-varid'>f</span> <span class='hs-varid'>arg_desc</span> <span class='hs-varid'>arg_def</span> <span class='hs-varid'>r</span> <span class='hs-keyword'>where</span>
-<a name="line-432"></a>    <span class='hs-varid'>kwdo</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>kw'</span> <span class='hs-layout'>(</span><span class='hs-varid'>proxy</span> <span class='hs-keyglyph'>::</span><span class='hs-conid'>Proxy</span> <span class='hs-varid'>rflag</span><span class='hs-layout'>)</span>
-<a name="line-433"></a>
-<a name="line-434"></a><a name="KW'"></a><span class='hs-keyword'>class</span> <span class='hs-conid'>KW'</span> <span class='hs-varid'>rflag</span> <span class='hs-varid'>f</span> <span class='hs-varid'>arg_desc</span> <span class='hs-varid'>arg_def</span> <span class='hs-varid'>r</span> <span class='hs-keyword'>where</span>
-<a name="line-435"></a>    <span class='hs-varid'>kw'</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Proxy</span> <span class='hs-varid'>rflag</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>f</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>arg_desc</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>HList</span> <span class='hs-varid'>arg_def</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>r</span>
-<a name="line-436"></a>
-<a name="line-437"></a><span class='hs-comment'>{- |
-<a name="line-438"></a>If the continuation r does not promise any more keyword
-<a name="line-439"></a>arguments, apply the defaults -}</span>
-<a name="line-440"></a>
-<a name="line-441"></a><a name="instance%20KW'%20False%20f%20(Arg%20arg_needed%20arg_values)%20arg_def%20r"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>KWMerge</span> <span class='hs-varid'>arg_needed</span> <span class='hs-varid'>arg_values</span> <span class='hs-varid'>arg_def</span> <span class='hs-varid'>f</span> <span class='hs-varid'>r</span>
-<a name="line-442"></a>    <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>KW'</span> <span class='hs-conid'>False</span> <span class='hs-varid'>f</span> <span class='hs-layout'>(</span><span class='hs-conid'>Arg</span> <span class='hs-varid'>arg_needed</span> <span class='hs-varid'>arg_values</span><span class='hs-layout'>)</span> <span class='hs-varid'>arg_def</span> <span class='hs-varid'>r</span> <span class='hs-keyword'>where</span>
-<a name="line-443"></a>    <span class='hs-varid'>kw'</span> <span class='hs-keyword'>_</span> <span class='hs-varid'>f</span> <span class='hs-varid'>args_given</span> <span class='hs-varid'>arg_def</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>kwmerge</span> <span class='hs-varid'>args_given</span> <span class='hs-varid'>arg_def</span> <span class='hs-varid'>f</span>
-<a name="line-444"></a>
-<a name="line-445"></a><span class='hs-comment'>{- | Otherwise, collect the supplied keyword and its value, and recurse for
-<a name="line-446"></a>more: -}</span>
-<a name="line-447"></a>
-<a name="line-448"></a><a name="instance%20KW'%20True%20f%20arg_desc%20arg_def%20kwar"></a><span class='hs-keyword'>instance</span> <span class='hs-layout'>(</span><span class='hs-conid'>KWAcc</span> <span class='hs-varid'>arg_desc</span> <span class='hs-varid'>kw</span> <span class='hs-varid'>a</span> <span class='hs-varid'>f</span> <span class='hs-varid'>arg_def</span> <span class='hs-varid'>r</span><span class='hs-layout'>,</span> <span class='hs-layout'>(</span><span class='hs-varid'>kw</span><span class='hs-keyglyph'>-&gt;</span><span class='hs-varid'>a</span><span class='hs-keyglyph'>-&gt;</span><span class='hs-varid'>r</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>~</span> <span class='hs-varid'>kwar</span><span class='hs-layout'>)</span>
-<a name="line-449"></a>    <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>KW'</span> <span class='hs-conid'>True</span> <span class='hs-varid'>f</span> <span class='hs-varid'>arg_desc</span> <span class='hs-varid'>arg_def</span> <span class='hs-varid'>kwar</span> <span class='hs-keyword'>where</span>
-<a name="line-450"></a>    <span class='hs-varid'>kw'</span> <span class='hs-keyword'>_</span> <span class='hs-varid'>f</span> <span class='hs-varid'>arg_desc</span> <span class='hs-varid'>arg_def</span> <span class='hs-varid'>kw_</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>kwaccum</span> <span class='hs-varid'>arg_desc</span> <span class='hs-varid'>kw_</span> <span class='hs-varid'>a</span> <span class='hs-varid'>f</span> <span class='hs-varid'>arg_def</span>
+<a name="line-423"></a><span class='hs-comment'>-- | The main class: collect and apply the keyword arguments</span>
+<a name="line-424"></a>
+<a name="line-425"></a><a name="KW"></a><span class='hs-keyword'>class</span> <span class='hs-conid'>KW</span> <span class='hs-varid'>f</span> <span class='hs-varid'>arg_desc</span> <span class='hs-varid'>arg_def</span> <span class='hs-varid'>r</span> <span class='hs-keyword'>where</span>
+<a name="line-426"></a>    <span class='hs-varid'>kwdo</span> <span class='hs-keyglyph'>::</span> <span class='hs-varid'>f</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>arg_desc</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>HList</span> <span class='hs-varid'>arg_def</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>r</span>
+<a name="line-427"></a>
+<a name="line-428"></a><a name="instance%20KW%20f%20arg_desc%20arg_def%20r"></a><span class='hs-keyword'>instance</span> <span class='hs-layout'>(</span><span class='hs-conid'>IsKeyFN</span> <span class='hs-varid'>r</span> <span class='hs-varid'>rflag</span><span class='hs-layout'>,</span>
+<a name="line-429"></a>	    <span class='hs-conid'>KW'</span> <span class='hs-varid'>rflag</span> <span class='hs-varid'>f</span> <span class='hs-varid'>arg_desc</span> <span class='hs-varid'>arg_def</span> <span class='hs-varid'>r</span><span class='hs-layout'>)</span>
+<a name="line-430"></a>    <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>KW</span> <span class='hs-varid'>f</span> <span class='hs-varid'>arg_desc</span> <span class='hs-varid'>arg_def</span> <span class='hs-varid'>r</span> <span class='hs-keyword'>where</span>
+<a name="line-431"></a>    <span class='hs-varid'>kwdo</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>kw'</span> <span class='hs-layout'>(</span><span class='hs-conid'>Proxy</span> <span class='hs-keyglyph'>::</span><span class='hs-conid'>Proxy</span> <span class='hs-varid'>rflag</span><span class='hs-layout'>)</span>
+<a name="line-432"></a>
+<a name="line-433"></a><a name="KW'"></a><span class='hs-keyword'>class</span> <span class='hs-conid'>KW'</span> <span class='hs-varid'>rflag</span> <span class='hs-varid'>f</span> <span class='hs-varid'>arg_desc</span> <span class='hs-varid'>arg_def</span> <span class='hs-varid'>r</span> <span class='hs-keyword'>where</span>
+<a name="line-434"></a>    <span class='hs-varid'>kw'</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Proxy</span> <span class='hs-varid'>rflag</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>f</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>arg_desc</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>HList</span> <span class='hs-varid'>arg_def</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>r</span>
+<a name="line-435"></a>
+<a name="line-436"></a><span class='hs-comment'>{- |
+<a name="line-437"></a>If the continuation r does not promise any more keyword
+<a name="line-438"></a>arguments, apply the defaults -}</span>
+<a name="line-439"></a>
+<a name="line-440"></a><a name="instance%20KW'%20False%20f%20(Arg%20arg_needed%20arg_values)%20arg_def%20r"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>KWMerge</span> <span class='hs-varid'>arg_needed</span> <span class='hs-varid'>arg_values</span> <span class='hs-varid'>arg_def</span> <span class='hs-varid'>f</span> <span class='hs-varid'>r</span>
+<a name="line-441"></a>    <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>KW'</span> <span class='hs-conid'>False</span> <span class='hs-varid'>f</span> <span class='hs-layout'>(</span><span class='hs-conid'>Arg</span> <span class='hs-varid'>arg_needed</span> <span class='hs-varid'>arg_values</span><span class='hs-layout'>)</span> <span class='hs-varid'>arg_def</span> <span class='hs-varid'>r</span> <span class='hs-keyword'>where</span>
+<a name="line-442"></a>    <span class='hs-varid'>kw'</span> <span class='hs-keyword'>_</span> <span class='hs-varid'>f</span> <span class='hs-varid'>args_given</span> <span class='hs-varid'>arg_def</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>kwmerge</span> <span class='hs-varid'>args_given</span> <span class='hs-varid'>arg_def</span> <span class='hs-varid'>f</span>
+<a name="line-443"></a>
+<a name="line-444"></a><span class='hs-comment'>{- | Otherwise, collect the supplied keyword and its value, and recurse for
+<a name="line-445"></a>more: -}</span>
+<a name="line-446"></a>
+<a name="line-447"></a><a name="instance%20KW'%20True%20f%20arg_desc%20arg_def%20kwar"></a><span class='hs-keyword'>instance</span> <span class='hs-layout'>(</span><span class='hs-conid'>KWAcc</span> <span class='hs-varid'>arg_desc</span> <span class='hs-varid'>kw</span> <span class='hs-varid'>a</span> <span class='hs-varid'>f</span> <span class='hs-varid'>arg_def</span> <span class='hs-varid'>r</span><span class='hs-layout'>,</span> <span class='hs-layout'>(</span><span class='hs-varid'>kw</span><span class='hs-keyglyph'>-&gt;</span><span class='hs-varid'>a</span><span class='hs-keyglyph'>-&gt;</span><span class='hs-varid'>r</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>~</span> <span class='hs-varid'>kwar</span><span class='hs-layout'>)</span>
+<a name="line-448"></a>    <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>KW'</span> <span class='hs-conid'>True</span> <span class='hs-varid'>f</span> <span class='hs-varid'>arg_desc</span> <span class='hs-varid'>arg_def</span> <span class='hs-varid'>kwar</span> <span class='hs-keyword'>where</span>
+<a name="line-449"></a>    <span class='hs-varid'>kw'</span> <span class='hs-keyword'>_</span> <span class='hs-varid'>f</span> <span class='hs-varid'>arg_desc</span> <span class='hs-varid'>arg_def</span> <span class='hs-varid'>kw_</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>kwaccum</span> <span class='hs-varid'>arg_desc</span> <span class='hs-varid'>kw_</span> <span class='hs-varid'>a</span> <span class='hs-varid'>f</span> <span class='hs-varid'>arg_def</span>
+<a name="line-450"></a>
 <a name="line-451"></a>
-<a name="line-452"></a>
-<a name="line-453"></a><span class='hs-comment'>{- | Add the needed arguments from arg_def to arg_values and continue
-<a name="line-454"></a>with kwapply.
-<a name="line-455"></a>
-<a name="line-456"></a>That is, we try to satisfy the missing arguments from the defaults.
-<a name="line-457"></a>It will be a type error if some required arguments are missing -}</span>
-<a name="line-458"></a>
-<a name="line-459"></a><a name="KWMerge"></a><span class='hs-keyword'>class</span> <span class='hs-conid'>KWMerge</span> <span class='hs-varid'>arg_needed</span> <span class='hs-varid'>arg_values</span> <span class='hs-varid'>arg_def</span> <span class='hs-varid'>f</span> <span class='hs-varid'>r</span> <span class='hs-keyword'>where</span>
-<a name="line-460"></a>    <span class='hs-varid'>kwmerge</span><span class='hs-keyglyph'>::</span> <span class='hs-conid'>Arg</span> <span class='hs-varid'>arg_needed</span> <span class='hs-varid'>arg_values</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>HList</span> <span class='hs-varid'>arg_def</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>f</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>r</span>
-<a name="line-461"></a>
-<a name="line-462"></a><a name="instance%20KWMerge%20'%5b%5d%20arg_values%20arg_def%20f%20r"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>KWApply</span> <span class='hs-varid'>f</span> <span class='hs-varid'>arg_values</span> <span class='hs-varid'>r</span>
-<a name="line-463"></a>    <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>KWMerge</span> <span class='hs-chr'>'</span><span class='hs-conid'>[]</span> <span class='hs-varid'>arg_values</span> <span class='hs-varid'>arg_def</span> <span class='hs-varid'>f</span> <span class='hs-varid'>r</span> <span class='hs-keyword'>where</span>
-<a name="line-464"></a>    <span class='hs-varid'>kwmerge</span> <span class='hs-layout'>(</span><span class='hs-conid'>Arg</span> <span class='hs-varid'>arg_values</span><span class='hs-layout'>)</span> <span class='hs-keyword'>_</span> <span class='hs-varid'>f</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>kwapply</span> <span class='hs-varid'>f</span> <span class='hs-varid'>arg_values</span>
-<a name="line-465"></a>
-<a name="line-466"></a><a name="instance%20KWMerge%20(kw%20':%20atail)%20arg_values%20arg_def%20f%20r"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>KWMerge'</span> <span class='hs-varid'>kw</span> <span class='hs-varid'>arg_def</span> <span class='hs-varid'>atail</span> <span class='hs-varid'>arg_values</span> <span class='hs-varid'>arg_def</span> <span class='hs-varid'>f</span> <span class='hs-varid'>r</span>
-<a name="line-467"></a>    <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>KWMerge</span> <span class='hs-layout'>(</span><span class='hs-varid'>kw</span> <span class='hs-chr'>'</span><span class='hs-conop'>:</span> <span class='hs-varid'>atail</span><span class='hs-layout'>)</span> <span class='hs-varid'>arg_values</span> <span class='hs-varid'>arg_def</span> <span class='hs-varid'>f</span> <span class='hs-varid'>r</span> <span class='hs-keyword'>where</span>
-<a name="line-468"></a>    <span class='hs-varid'>kwmerge</span> <span class='hs-layout'>(</span><span class='hs-conid'>Arg</span> <span class='hs-varid'>arg_values</span><span class='hs-layout'>)</span> <span class='hs-varid'>arg_def</span> <span class='hs-keyglyph'>=</span>
-<a name="line-469"></a>	<span class='hs-varid'>kwmerge'</span> <span class='hs-layout'>(</span><span class='hs-varid'>undefined</span> <span class='hs-keyglyph'>::</span> <span class='hs-varid'>kw</span><span class='hs-layout'>)</span> <span class='hs-varid'>arg_def</span>
-<a name="line-470"></a>	         <span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-conid'>Arg</span> <span class='hs-varid'>arg_values</span><span class='hs-layout'>)</span><span class='hs-keyglyph'>::</span><span class='hs-conid'>Arg</span> <span class='hs-varid'>atail</span> <span class='hs-varid'>arg_values</span><span class='hs-layout'>)</span> <span class='hs-varid'>arg_def</span>
-<a name="line-471"></a>
-<a name="line-472"></a><a name="KWMerge'"></a><span class='hs-keyword'>class</span> <span class='hs-conid'>KWMerge'</span> <span class='hs-varid'>kw</span> <span class='hs-varid'>list</span> <span class='hs-varid'>atail</span> <span class='hs-varid'>arg_values</span> <span class='hs-varid'>arg_def</span> <span class='hs-varid'>f</span> <span class='hs-varid'>r</span> <span class='hs-keyword'>where</span>
-<a name="line-473"></a>    <span class='hs-varid'>kwmerge'</span><span class='hs-keyglyph'>::</span> <span class='hs-varid'>kw</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>HList</span> <span class='hs-varid'>list</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-layout'>(</span><span class='hs-conid'>Arg</span> <span class='hs-varid'>atail</span> <span class='hs-varid'>arg_values</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>HList</span> <span class='hs-varid'>arg_def</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>f</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>r</span>
-<a name="line-474"></a>
-<a name="line-475"></a><a name="instance%20KWMerge'%20kw%20'%5b%5d%20atail%20arg_values%20arg_def%20f%20nff"></a><span class='hs-keyword'>instance</span> <span class='hs-layout'>(</span><span class='hs-conid'>Fail</span> <span class='hs-layout'>(</span><span class='hs-conid'>ErrReqdArgNotFound</span> <span class='hs-varid'>kw</span><span class='hs-layout'>)</span><span class='hs-layout'>,</span> <span class='hs-varid'>nff</span> <span class='hs-keyglyph'>~</span> <span class='hs-layout'>(</span><span class='hs-conid'>ErrReqdArgNotFound</span> <span class='hs-varid'>kw</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span>
-<a name="line-476"></a>    <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>KWMerge'</span> <span class='hs-varid'>kw</span> <span class='hs-chr'>'</span><span class='hs-conid'>[]</span> <span class='hs-varid'>atail</span> <span class='hs-varid'>arg_values</span> <span class='hs-varid'>arg_def</span> <span class='hs-varid'>f</span>
-<a name="line-477"></a>                <span class='hs-varid'>nff</span> <span class='hs-keyword'>where</span>
-<a name="line-478"></a>    <span class='hs-varid'>kwmerge'</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>undefined</span>
-<a name="line-479"></a><a name="instance%20KWMerge'%20kw%20(kw'%20':%20etc)%20atail%20arg_values%20arg_def%20f%20r"></a><span class='hs-keyword'>instance</span> <span class='hs-layout'>(</span><span class='hs-conid'>HEq</span> <span class='hs-varid'>kw</span> <span class='hs-varid'>kw'</span> <span class='hs-varid'>flag</span><span class='hs-layout'>,</span>
-<a name="line-480"></a>	  <span class='hs-conid'>KWMerge''</span> <span class='hs-varid'>flag</span> <span class='hs-varid'>kw</span> <span class='hs-layout'>(</span><span class='hs-varid'>kw'</span> <span class='hs-chr'>'</span><span class='hs-conop'>:</span> <span class='hs-varid'>etc</span><span class='hs-layout'>)</span> <span class='hs-varid'>atail</span> <span class='hs-varid'>arg_values</span> <span class='hs-varid'>arg_def</span> <span class='hs-varid'>f</span> <span class='hs-varid'>r</span><span class='hs-layout'>)</span>
-<a name="line-481"></a>    <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>KWMerge'</span> <span class='hs-varid'>kw</span> <span class='hs-layout'>(</span><span class='hs-varid'>kw'</span> <span class='hs-chr'>'</span><span class='hs-conop'>:</span> <span class='hs-varid'>etc</span><span class='hs-layout'>)</span> <span class='hs-varid'>atail</span> <span class='hs-varid'>arg_values</span> <span class='hs-varid'>arg_def</span> <span class='hs-varid'>f</span> <span class='hs-varid'>r</span> <span class='hs-keyword'>where</span>
-<a name="line-482"></a>    <span class='hs-varid'>kwmerge'</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>kwmerge''</span> <span class='hs-layout'>(</span><span class='hs-varid'>undefined</span><span class='hs-keyglyph'>::</span> <span class='hs-conid'>Proxy</span> <span class='hs-varid'>flag</span><span class='hs-layout'>)</span>
-<a name="line-483"></a>
-<a name="line-484"></a><a name="KWMerge''"></a><span class='hs-keyword'>class</span> <span class='hs-conid'>KWMerge''</span> <span class='hs-layout'>(</span><span class='hs-varid'>flag</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Bool</span><span class='hs-layout'>)</span> <span class='hs-varid'>kw</span> <span class='hs-layout'>(</span><span class='hs-varid'>list</span> <span class='hs-keyglyph'>::</span> <span class='hs-keyglyph'>[</span><span class='hs-varop'>*</span><span class='hs-keyglyph'>]</span><span class='hs-layout'>)</span> <span class='hs-varid'>atail</span> <span class='hs-varid'>arg_values</span> <span class='hs-varid'>arg_def</span> <span class='hs-varid'>f</span> <span class='hs-varid'>r</span>
-<a name="line-485"></a>     <span class='hs-keyword'>where</span>
-<a name="line-486"></a>    <span class='hs-varid'>kwmerge''</span><span class='hs-keyglyph'>::</span> <span class='hs-conid'>Proxy</span> <span class='hs-varid'>flag</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>kw</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>HList</span> <span class='hs-varid'>list</span>
-<a name="line-487"></a>        <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Arg</span> <span class='hs-varid'>atail</span> <span class='hs-varid'>arg_values</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>HList</span> <span class='hs-varid'>arg_def</span>
-<a name="line-488"></a>		<span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>f</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>r</span>
-<a name="line-489"></a><a name="instance%20KWMerge''%20True%20kw%20(kw%20':%20v%20':%20tail)%20atail%20arg_values%20arg_def%20f%20r"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>KWMerge</span> <span class='hs-varid'>atail</span> <span class='hs-layout'>(</span><span class='hs-varid'>kw</span> <span class='hs-chr'>'</span><span class='hs-conop'>:</span> <span class='hs-varid'>v</span> <span class='hs-chr'>'</span><span class='hs-conop'>:</span> <span class='hs-varid'>arg_values</span><span class='hs-layout'>)</span> <span class='hs-varid'>arg_def</span> <span class='hs-varid'>f</span> <span class='hs-varid'>r</span>
-<a name="line-490"></a>    <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>KWMerge''</span> <span class='hs-conid'>True</span> <span class='hs-varid'>kw</span> <span class='hs-layout'>(</span><span class='hs-varid'>kw</span> <span class='hs-chr'>'</span><span class='hs-conop'>:</span> <span class='hs-varid'>v</span> <span class='hs-chr'>'</span><span class='hs-conop'>:</span> <span class='hs-varid'>tail</span><span class='hs-layout'>)</span>
-<a name="line-491"></a>                 <span class='hs-varid'>atail</span> <span class='hs-varid'>arg_values</span> <span class='hs-varid'>arg_def</span> <span class='hs-varid'>f</span> <span class='hs-varid'>r</span> <span class='hs-keyword'>where</span>
-<a name="line-492"></a>    <span class='hs-varid'>kwmerge''</span> <span class='hs-keyword'>_</span> <span class='hs-keyword'>_</span> <span class='hs-layout'>(</span><span class='hs-conid'>HCons</span> <span class='hs-varid'>kw_</span> <span class='hs-layout'>(</span><span class='hs-conid'>HCons</span> <span class='hs-varid'>v</span> <span class='hs-keyword'>_</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-conid'>Arg</span> <span class='hs-varid'>arg_values</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span>
-<a name="line-493"></a>	<span class='hs-varid'>kwmerge</span> <span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-conid'>Arg</span> <span class='hs-layout'>(</span><span class='hs-varid'>kw_</span> <span class='hs-varop'>.*.</span> <span class='hs-varid'>v</span> <span class='hs-varop'>.*.</span> <span class='hs-varid'>arg_values</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span><span class='hs-keyglyph'>::</span>
-<a name="line-494"></a>		 <span class='hs-layout'>(</span><span class='hs-conid'>Arg</span> <span class='hs-varid'>atail</span> <span class='hs-layout'>(</span><span class='hs-varid'>kw</span> <span class='hs-chr'>'</span><span class='hs-conop'>:</span> <span class='hs-varid'>v</span> <span class='hs-chr'>'</span><span class='hs-conop'>:</span> <span class='hs-varid'>arg_values</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span>
-<a name="line-495"></a>    <span class='hs-varid'>kwmerge''</span> <span class='hs-keyword'>_</span> <span class='hs-keyword'>_</span> <span class='hs-keyword'>_</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>error</span> <span class='hs-str'>"Data.HList.kwmerge'': impossible"</span>
-<a name="line-496"></a><a name="instance%20KWMerge''%20False%20kw%20(kw'%20':%20v'%20':%20tail)%20atail%20arg_values%20arg_def%20f%20r"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>KWMerge'</span> <span class='hs-varid'>kw</span> <span class='hs-varid'>tail</span> <span class='hs-varid'>atail</span> <span class='hs-varid'>arg_values</span> <span class='hs-varid'>arg_def</span> <span class='hs-varid'>f</span> <span class='hs-varid'>r</span>
-<a name="line-497"></a>    <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>KWMerge''</span> <span class='hs-conid'>False</span> <span class='hs-varid'>kw</span> <span class='hs-layout'>(</span><span class='hs-varid'>kw'</span> <span class='hs-chr'>'</span><span class='hs-conop'>:</span> <span class='hs-varid'>v'</span> <span class='hs-chr'>'</span><span class='hs-conop'>:</span> <span class='hs-varid'>tail</span><span class='hs-layout'>)</span>
-<a name="line-498"></a>                 <span class='hs-varid'>atail</span> <span class='hs-varid'>arg_values</span> <span class='hs-varid'>arg_def</span> <span class='hs-varid'>f</span> <span class='hs-varid'>r</span> <span class='hs-keyword'>where</span>
-<a name="line-499"></a>    <span class='hs-varid'>kwmerge''</span> <span class='hs-keyword'>_</span> <span class='hs-varid'>kw_</span> <span class='hs-layout'>(</span><span class='hs-conid'>HCons</span> <span class='hs-keyword'>_</span> <span class='hs-layout'>(</span><span class='hs-conid'>HCons</span> <span class='hs-keyword'>_</span> <span class='hs-varid'>tl</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>kwmerge'</span> <span class='hs-varid'>kw_</span> <span class='hs-varid'>tl</span>
-<a name="line-500"></a>    <span class='hs-varid'>kwmerge''</span> <span class='hs-keyword'>_</span> <span class='hs-keyword'>_</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>error</span> <span class='hs-str'>"Data.HList.kwmerge'': impossible 2"</span>
-<a name="line-501"></a>
-<a name="line-502"></a><span class='hs-comment'>-- | Add the real argument to the Arg structure, and continue</span>
-<a name="line-503"></a>
-<a name="line-504"></a><a name="KWAcc"></a><span class='hs-keyword'>class</span> <span class='hs-conid'>KWAcc</span> <span class='hs-varid'>arg_desc</span> <span class='hs-varid'>kw</span> <span class='hs-varid'>a</span> <span class='hs-varid'>f</span> <span class='hs-varid'>arg_def</span> <span class='hs-varid'>r</span> <span class='hs-keyword'>where</span>
-<a name="line-505"></a>    <span class='hs-varid'>kwaccum</span><span class='hs-keyglyph'>::</span> <span class='hs-varid'>arg_desc</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>kw</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>f</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>HList</span> <span class='hs-varid'>arg_def</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>r</span>
+<a name="line-452"></a><span class='hs-comment'>{- | Add the needed arguments from arg_def to arg_values and continue
+<a name="line-453"></a>with kwapply.
+<a name="line-454"></a>
+<a name="line-455"></a>That is, we try to satisfy the missing arguments from the defaults.
+<a name="line-456"></a>It will be a type error if some required arguments are missing -}</span>
+<a name="line-457"></a>
+<a name="line-458"></a><a name="KWMerge"></a><span class='hs-keyword'>class</span> <span class='hs-conid'>KWMerge</span> <span class='hs-varid'>arg_needed</span> <span class='hs-varid'>arg_values</span> <span class='hs-varid'>arg_def</span> <span class='hs-varid'>f</span> <span class='hs-varid'>r</span> <span class='hs-keyword'>where</span>
+<a name="line-459"></a>    <span class='hs-varid'>kwmerge</span><span class='hs-keyglyph'>::</span> <span class='hs-conid'>Arg</span> <span class='hs-varid'>arg_needed</span> <span class='hs-varid'>arg_values</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>HList</span> <span class='hs-varid'>arg_def</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>f</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>r</span>
+<a name="line-460"></a>
+<a name="line-461"></a><a name="instance%20KWMerge%20'%5b%5d%20arg_values%20arg_def%20f%20r"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>KWApply</span> <span class='hs-varid'>f</span> <span class='hs-varid'>arg_values</span> <span class='hs-varid'>r</span>
+<a name="line-462"></a>    <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>KWMerge</span> <span class='hs-chr'>'</span><span class='hs-conid'>[]</span> <span class='hs-varid'>arg_values</span> <span class='hs-varid'>arg_def</span> <span class='hs-varid'>f</span> <span class='hs-varid'>r</span> <span class='hs-keyword'>where</span>
+<a name="line-463"></a>    <span class='hs-varid'>kwmerge</span> <span class='hs-layout'>(</span><span class='hs-conid'>Arg</span> <span class='hs-varid'>arg_values</span><span class='hs-layout'>)</span> <span class='hs-keyword'>_</span> <span class='hs-varid'>f</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>kwapply</span> <span class='hs-varid'>f</span> <span class='hs-varid'>arg_values</span>
+<a name="line-464"></a>
+<a name="line-465"></a><a name="instance%20KWMerge%20(kw%20':%20atail)%20arg_values%20arg_def%20f%20r"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>KWMerge'</span> <span class='hs-varid'>kw</span> <span class='hs-varid'>arg_def</span> <span class='hs-varid'>atail</span> <span class='hs-varid'>arg_values</span> <span class='hs-varid'>arg_def</span> <span class='hs-varid'>f</span> <span class='hs-varid'>r</span>
+<a name="line-466"></a>    <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>KWMerge</span> <span class='hs-layout'>(</span><span class='hs-varid'>kw</span> <span class='hs-chr'>'</span><span class='hs-conop'>:</span> <span class='hs-varid'>atail</span><span class='hs-layout'>)</span> <span class='hs-varid'>arg_values</span> <span class='hs-varid'>arg_def</span> <span class='hs-varid'>f</span> <span class='hs-varid'>r</span> <span class='hs-keyword'>where</span>
+<a name="line-467"></a>    <span class='hs-varid'>kwmerge</span> <span class='hs-layout'>(</span><span class='hs-conid'>Arg</span> <span class='hs-varid'>arg_values</span><span class='hs-layout'>)</span> <span class='hs-varid'>arg_def</span> <span class='hs-keyglyph'>=</span>
+<a name="line-468"></a>	<span class='hs-varid'>kwmerge'</span> <span class='hs-layout'>(</span><span class='hs-varid'>undefined</span> <span class='hs-keyglyph'>::</span> <span class='hs-varid'>kw</span><span class='hs-layout'>)</span> <span class='hs-varid'>arg_def</span>
+<a name="line-469"></a>	         <span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-conid'>Arg</span> <span class='hs-varid'>arg_values</span><span class='hs-layout'>)</span><span class='hs-keyglyph'>::</span><span class='hs-conid'>Arg</span> <span class='hs-varid'>atail</span> <span class='hs-varid'>arg_values</span><span class='hs-layout'>)</span> <span class='hs-varid'>arg_def</span>
+<a name="line-470"></a>
+<a name="line-471"></a><a name="KWMerge'"></a><span class='hs-keyword'>class</span> <span class='hs-conid'>KWMerge'</span> <span class='hs-varid'>kw</span> <span class='hs-varid'>list</span> <span class='hs-varid'>atail</span> <span class='hs-varid'>arg_values</span> <span class='hs-varid'>arg_def</span> <span class='hs-varid'>f</span> <span class='hs-varid'>r</span> <span class='hs-keyword'>where</span>
+<a name="line-472"></a>    <span class='hs-varid'>kwmerge'</span><span class='hs-keyglyph'>::</span> <span class='hs-varid'>kw</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>HList</span> <span class='hs-varid'>list</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-layout'>(</span><span class='hs-conid'>Arg</span> <span class='hs-varid'>atail</span> <span class='hs-varid'>arg_values</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>HList</span> <span class='hs-varid'>arg_def</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>f</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>r</span>
+<a name="line-473"></a>
+<a name="line-474"></a><a name="instance%20KWMerge'%20kw%20'%5b%5d%20atail%20arg_values%20arg_def%20f%20nff"></a><span class='hs-keyword'>instance</span> <span class='hs-layout'>(</span><span class='hs-conid'>Fail</span> <span class='hs-layout'>(</span><span class='hs-conid'>ErrReqdArgNotFound</span> <span class='hs-varid'>kw</span><span class='hs-layout'>)</span><span class='hs-layout'>,</span> <span class='hs-varid'>nff</span> <span class='hs-keyglyph'>~</span> <span class='hs-layout'>(</span><span class='hs-conid'>ErrReqdArgNotFound</span> <span class='hs-varid'>kw</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span>
+<a name="line-475"></a>    <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>KWMerge'</span> <span class='hs-varid'>kw</span> <span class='hs-chr'>'</span><span class='hs-conid'>[]</span> <span class='hs-varid'>atail</span> <span class='hs-varid'>arg_values</span> <span class='hs-varid'>arg_def</span> <span class='hs-varid'>f</span>
+<a name="line-476"></a>                <span class='hs-varid'>nff</span> <span class='hs-keyword'>where</span>
+<a name="line-477"></a>    <span class='hs-varid'>kwmerge'</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>undefined</span>
+<a name="line-478"></a><a name="instance%20KWMerge'%20kw%20(kw'%20':%20etc)%20atail%20arg_values%20arg_def%20f%20r"></a><span class='hs-keyword'>instance</span> <span class='hs-layout'>(</span><span class='hs-conid'>HEq</span> <span class='hs-varid'>kw</span> <span class='hs-varid'>kw'</span> <span class='hs-varid'>flag</span><span class='hs-layout'>,</span>
+<a name="line-479"></a>	  <span class='hs-conid'>KWMerge''</span> <span class='hs-varid'>flag</span> <span class='hs-varid'>kw</span> <span class='hs-layout'>(</span><span class='hs-varid'>kw'</span> <span class='hs-chr'>'</span><span class='hs-conop'>:</span> <span class='hs-varid'>etc</span><span class='hs-layout'>)</span> <span class='hs-varid'>atail</span> <span class='hs-varid'>arg_values</span> <span class='hs-varid'>arg_def</span> <span class='hs-varid'>f</span> <span class='hs-varid'>r</span><span class='hs-layout'>)</span>
+<a name="line-480"></a>    <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>KWMerge'</span> <span class='hs-varid'>kw</span> <span class='hs-layout'>(</span><span class='hs-varid'>kw'</span> <span class='hs-chr'>'</span><span class='hs-conop'>:</span> <span class='hs-varid'>etc</span><span class='hs-layout'>)</span> <span class='hs-varid'>atail</span> <span class='hs-varid'>arg_values</span> <span class='hs-varid'>arg_def</span> <span class='hs-varid'>f</span> <span class='hs-varid'>r</span> <span class='hs-keyword'>where</span>
+<a name="line-481"></a>    <span class='hs-varid'>kwmerge'</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>kwmerge''</span> <span class='hs-layout'>(</span><span class='hs-conid'>Proxy</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Proxy</span> <span class='hs-varid'>flag</span><span class='hs-layout'>)</span>
+<a name="line-482"></a>
+<a name="line-483"></a><a name="KWMerge''"></a><span class='hs-keyword'>class</span> <span class='hs-conid'>KWMerge''</span> <span class='hs-layout'>(</span><span class='hs-varid'>flag</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Bool</span><span class='hs-layout'>)</span> <span class='hs-varid'>kw</span> <span class='hs-layout'>(</span><span class='hs-varid'>list</span> <span class='hs-keyglyph'>::</span> <span class='hs-keyglyph'>[</span><span class='hs-varop'>*</span><span class='hs-keyglyph'>]</span><span class='hs-layout'>)</span> <span class='hs-varid'>atail</span> <span class='hs-varid'>arg_values</span> <span class='hs-varid'>arg_def</span> <span class='hs-varid'>f</span> <span class='hs-varid'>r</span>
+<a name="line-484"></a>     <span class='hs-keyword'>where</span>
+<a name="line-485"></a>    <span class='hs-varid'>kwmerge''</span><span class='hs-keyglyph'>::</span> <span class='hs-conid'>Proxy</span> <span class='hs-varid'>flag</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>kw</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>HList</span> <span class='hs-varid'>list</span>
+<a name="line-486"></a>        <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Arg</span> <span class='hs-varid'>atail</span> <span class='hs-varid'>arg_values</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>HList</span> <span class='hs-varid'>arg_def</span>
+<a name="line-487"></a>		<span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>f</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>r</span>
+<a name="line-488"></a><a name="instance%20KWMerge''%20True%20kw%20(kw%20':%20v%20':%20tail)%20atail%20arg_values%20arg_def%20f%20r"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>KWMerge</span> <span class='hs-varid'>atail</span> <span class='hs-layout'>(</span><span class='hs-varid'>kw</span> <span class='hs-chr'>'</span><span class='hs-conop'>:</span> <span class='hs-varid'>v</span> <span class='hs-chr'>'</span><span class='hs-conop'>:</span> <span class='hs-varid'>arg_values</span><span class='hs-layout'>)</span> <span class='hs-varid'>arg_def</span> <span class='hs-varid'>f</span> <span class='hs-varid'>r</span>
+<a name="line-489"></a>    <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>KWMerge''</span> <span class='hs-conid'>True</span> <span class='hs-varid'>kw</span> <span class='hs-layout'>(</span><span class='hs-varid'>kw</span> <span class='hs-chr'>'</span><span class='hs-conop'>:</span> <span class='hs-varid'>v</span> <span class='hs-chr'>'</span><span class='hs-conop'>:</span> <span class='hs-varid'>tail</span><span class='hs-layout'>)</span>
+<a name="line-490"></a>                 <span class='hs-varid'>atail</span> <span class='hs-varid'>arg_values</span> <span class='hs-varid'>arg_def</span> <span class='hs-varid'>f</span> <span class='hs-varid'>r</span> <span class='hs-keyword'>where</span>
+<a name="line-491"></a>    <span class='hs-varid'>kwmerge''</span> <span class='hs-keyword'>_</span> <span class='hs-keyword'>_</span> <span class='hs-layout'>(</span><span class='hs-conid'>HCons</span> <span class='hs-varid'>kw_</span> <span class='hs-layout'>(</span><span class='hs-conid'>HCons</span> <span class='hs-varid'>v</span> <span class='hs-keyword'>_</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-conid'>Arg</span> <span class='hs-varid'>arg_values</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span>
+<a name="line-492"></a>	<span class='hs-varid'>kwmerge</span> <span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-conid'>Arg</span> <span class='hs-layout'>(</span><span class='hs-varid'>kw_</span> <span class='hs-varop'>.*.</span> <span class='hs-varid'>v</span> <span class='hs-varop'>.*.</span> <span class='hs-varid'>arg_values</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span><span class='hs-keyglyph'>::</span>
+<a name="line-493"></a>		 <span class='hs-layout'>(</span><span class='hs-conid'>Arg</span> <span class='hs-varid'>atail</span> <span class='hs-layout'>(</span><span class='hs-varid'>kw</span> <span class='hs-chr'>'</span><span class='hs-conop'>:</span> <span class='hs-varid'>v</span> <span class='hs-chr'>'</span><span class='hs-conop'>:</span> <span class='hs-varid'>arg_values</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span>
+<a name="line-494"></a>    <span class='hs-varid'>kwmerge''</span> <span class='hs-keyword'>_</span> <span class='hs-keyword'>_</span> <span class='hs-keyword'>_</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>error</span> <span class='hs-str'>"Data.HList.kwmerge'': impossible"</span>
+<a name="line-495"></a><a name="instance%20KWMerge''%20False%20kw%20(kw'%20':%20v'%20':%20tail)%20atail%20arg_values%20arg_def%20f%20r"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>KWMerge'</span> <span class='hs-varid'>kw</span> <span class='hs-varid'>tail</span> <span class='hs-varid'>atail</span> <span class='hs-varid'>arg_values</span> <span class='hs-varid'>arg_def</span> <span class='hs-varid'>f</span> <span class='hs-varid'>r</span>
+<a name="line-496"></a>    <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>KWMerge''</span> <span class='hs-conid'>False</span> <span class='hs-varid'>kw</span> <span class='hs-layout'>(</span><span class='hs-varid'>kw'</span> <span class='hs-chr'>'</span><span class='hs-conop'>:</span> <span class='hs-varid'>v'</span> <span class='hs-chr'>'</span><span class='hs-conop'>:</span> <span class='hs-varid'>tail</span><span class='hs-layout'>)</span>
+<a name="line-497"></a>                 <span class='hs-varid'>atail</span> <span class='hs-varid'>arg_values</span> <span class='hs-varid'>arg_def</span> <span class='hs-varid'>f</span> <span class='hs-varid'>r</span> <span class='hs-keyword'>where</span>
+<a name="line-498"></a>    <span class='hs-varid'>kwmerge''</span> <span class='hs-keyword'>_</span> <span class='hs-varid'>kw_</span> <span class='hs-layout'>(</span><span class='hs-conid'>HCons</span> <span class='hs-keyword'>_</span> <span class='hs-layout'>(</span><span class='hs-conid'>HCons</span> <span class='hs-keyword'>_</span> <span class='hs-varid'>tl</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>kwmerge'</span> <span class='hs-varid'>kw_</span> <span class='hs-varid'>tl</span>
+<a name="line-499"></a>    <span class='hs-varid'>kwmerge''</span> <span class='hs-keyword'>_</span> <span class='hs-keyword'>_</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>error</span> <span class='hs-str'>"Data.HList.kwmerge'': impossible 2"</span>
+<a name="line-500"></a>
+<a name="line-501"></a><span class='hs-comment'>-- | Add the real argument to the Arg structure, and continue</span>
+<a name="line-502"></a>
+<a name="line-503"></a><a name="KWAcc"></a><span class='hs-keyword'>class</span> <span class='hs-conid'>KWAcc</span> <span class='hs-varid'>arg_desc</span> <span class='hs-varid'>kw</span> <span class='hs-varid'>a</span> <span class='hs-varid'>f</span> <span class='hs-varid'>arg_def</span> <span class='hs-varid'>r</span> <span class='hs-keyword'>where</span>
+<a name="line-504"></a>    <span class='hs-varid'>kwaccum</span><span class='hs-keyglyph'>::</span> <span class='hs-varid'>arg_desc</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>kw</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>f</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>HList</span> <span class='hs-varid'>arg_def</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>r</span>
+<a name="line-505"></a>
 <a name="line-506"></a>
-<a name="line-507"></a>
-<a name="line-508"></a><a name="instance%20KWAcc%20(Arg%20arg_types%20arg_values)%20kw%20a%20f%20arg_def%20r"></a><span class='hs-keyword'>instance</span> <span class='hs-layout'>(</span><span class='hs-conid'>HDelete</span> <span class='hs-varid'>kw</span> <span class='hs-varid'>arg_types</span> <span class='hs-varid'>arg_types'</span><span class='hs-layout'>,</span>
-<a name="line-509"></a>	  <span class='hs-conid'>KW</span> <span class='hs-varid'>f</span> <span class='hs-layout'>(</span><span class='hs-conid'>Arg</span> <span class='hs-varid'>arg_types'</span> <span class='hs-layout'>(</span><span class='hs-varid'>kw</span> <span class='hs-chr'>'</span><span class='hs-conop'>:</span> <span class='hs-varid'>a</span> <span class='hs-chr'>'</span><span class='hs-conop'>:</span> <span class='hs-varid'>arg_values</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span> <span class='hs-varid'>arg_def</span> <span class='hs-varid'>r</span><span class='hs-layout'>)</span>
-<a name="line-510"></a>    <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>KWAcc</span> <span class='hs-layout'>(</span><span class='hs-conid'>Arg</span> <span class='hs-varid'>arg_types</span> <span class='hs-varid'>arg_values</span><span class='hs-layout'>)</span> <span class='hs-varid'>kw</span> <span class='hs-varid'>a</span> <span class='hs-varid'>f</span> <span class='hs-varid'>arg_def</span> <span class='hs-varid'>r</span>  <span class='hs-keyword'>where</span>
-<a name="line-511"></a>    <span class='hs-varid'>kwaccum</span> <span class='hs-layout'>(</span><span class='hs-conid'>Arg</span> <span class='hs-varid'>arg_values</span><span class='hs-layout'>)</span> <span class='hs-varid'>kw_</span> <span class='hs-varid'>a</span> <span class='hs-varid'>f</span> <span class='hs-keyglyph'>=</span>
-<a name="line-512"></a>	<span class='hs-varid'>kwdo</span> <span class='hs-varid'>f</span> <span class='hs-layout'>(</span><span class='hs-conid'>Arg</span> <span class='hs-layout'>(</span><span class='hs-varid'>kw_</span> <span class='hs-varop'>.*.</span> <span class='hs-varid'>a</span> <span class='hs-varop'>.*.</span> <span class='hs-varid'>arg_values</span><span class='hs-layout'>)</span><span class='hs-keyglyph'>::</span>
-<a name="line-513"></a>		<span class='hs-conid'>Arg</span> <span class='hs-varid'>arg_types'</span> <span class='hs-layout'>(</span><span class='hs-varid'>kw</span> <span class='hs-chr'>'</span><span class='hs-conop'>:</span> <span class='hs-varid'>a</span> <span class='hs-chr'>'</span><span class='hs-conop'>:</span> <span class='hs-varid'>arg_values</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span>
+<a name="line-507"></a><a name="instance%20KWAcc%20(Arg%20arg_types%20arg_values)%20kw%20a%20f%20arg_def%20r"></a><span class='hs-keyword'>instance</span> <span class='hs-layout'>(</span><span class='hs-conid'>HDelete</span> <span class='hs-varid'>kw</span> <span class='hs-varid'>arg_types</span> <span class='hs-varid'>arg_types'</span><span class='hs-layout'>,</span>
+<a name="line-508"></a>	  <span class='hs-conid'>KW</span> <span class='hs-varid'>f</span> <span class='hs-layout'>(</span><span class='hs-conid'>Arg</span> <span class='hs-varid'>arg_types'</span> <span class='hs-layout'>(</span><span class='hs-varid'>kw</span> <span class='hs-chr'>'</span><span class='hs-conop'>:</span> <span class='hs-varid'>a</span> <span class='hs-chr'>'</span><span class='hs-conop'>:</span> <span class='hs-varid'>arg_values</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span> <span class='hs-varid'>arg_def</span> <span class='hs-varid'>r</span><span class='hs-layout'>)</span>
+<a name="line-509"></a>    <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>KWAcc</span> <span class='hs-layout'>(</span><span class='hs-conid'>Arg</span> <span class='hs-varid'>arg_types</span> <span class='hs-varid'>arg_values</span><span class='hs-layout'>)</span> <span class='hs-varid'>kw</span> <span class='hs-varid'>a</span> <span class='hs-varid'>f</span> <span class='hs-varid'>arg_def</span> <span class='hs-varid'>r</span>  <span class='hs-keyword'>where</span>
+<a name="line-510"></a>    <span class='hs-varid'>kwaccum</span> <span class='hs-layout'>(</span><span class='hs-conid'>Arg</span> <span class='hs-varid'>arg_values</span><span class='hs-layout'>)</span> <span class='hs-varid'>kw_</span> <span class='hs-varid'>a</span> <span class='hs-varid'>f</span> <span class='hs-keyglyph'>=</span>
+<a name="line-511"></a>	<span class='hs-varid'>kwdo</span> <span class='hs-varid'>f</span> <span class='hs-layout'>(</span><span class='hs-conid'>Arg</span> <span class='hs-layout'>(</span><span class='hs-varid'>kw_</span> <span class='hs-varop'>.*.</span> <span class='hs-varid'>a</span> <span class='hs-varop'>.*.</span> <span class='hs-varid'>arg_values</span><span class='hs-layout'>)</span><span class='hs-keyglyph'>::</span>
+<a name="line-512"></a>		<span class='hs-conid'>Arg</span> <span class='hs-varid'>arg_types'</span> <span class='hs-layout'>(</span><span class='hs-varid'>kw</span> <span class='hs-chr'>'</span><span class='hs-conop'>:</span> <span class='hs-varid'>a</span> <span class='hs-chr'>'</span><span class='hs-conop'>:</span> <span class='hs-varid'>arg_values</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span>
+<a name="line-513"></a>
 <a name="line-514"></a>
-<a name="line-515"></a>
-<a name="line-516"></a><span class='hs-comment'>-- | Delete e from l to yield l' The element e must occur in l</span>
-<a name="line-517"></a>
-<a name="line-518"></a><a name="HDelete"></a><span class='hs-keyword'>class</span> <span class='hs-conid'>HDelete</span> <span class='hs-varid'>e</span> <span class='hs-layout'>(</span><span class='hs-varid'>l</span> <span class='hs-keyglyph'>::</span> <span class='hs-keyglyph'>[</span><span class='hs-varid'>k</span><span class='hs-keyglyph'>]</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>l'</span> <span class='hs-keyglyph'>::</span> <span class='hs-keyglyph'>[</span><span class='hs-varid'>k</span><span class='hs-keyglyph'>]</span><span class='hs-layout'>)</span>
-<a name="line-519"></a><a name="instance%20HDelete%20e%20'%5b%5d%20r%20instance%20(HEq%20e%20e'%20flag,%20HDelete'%20flag%20e%20(e'%20':%20tail)%20l')%20=%3e%20HDelete%20e%20(e'%20':%20tail)%20l'%20class%20HDelete'%20(flag%20::%20Bool)%20e%20l%20l'%20instance%20(tail'%20~%20tail)%20=%3e%20HDelete'%20True%20e%20(e%20':%20tail)%20tail'%20instance%20(HDelete%20e%20tail%20tail',%20e'tail%20~%20(e'%20':%20tail'))%20=%3e%20HDelete'%20False%20e%20(e'%20':%20tail)%20e'tail%20%7b-%20%7c%20@kw@%20takes%20a%20'HList'%20whose%20first%20element%20is%20a%20function,%20and%20the%20rest%20of%20the%20elements%20are%20default%20values.%20A%20useful%20trick%20is%20to%20have%20a%20final%20argument%20@()@%20which%20is%20not%20eaten%20up%20by%20a%20label%20(A%20only%20takes%201%20argument).%20That%20way%20when%20you%20supply%20the%20()%20it%20knows%20there%20are%20no%20more%20arguments%20(?).%20%3e%3e%3e%20data%20A%20=%20A%20%3e%3e%3e%20instance%20IsKeyFN%20(A%20-%3e%20a%20-%3e%20b)%20True%20%3e%3e%3e%20let%20f%20A%20a%20()%20=%20a%20+%201%20%3e%3e%3e%20let%20f'%20=%20f%20.*.%20A%20.*.%201%20.*.%20HNil%20%3e%3e%3e%20kw%20f'%20A%200%20()%201%20%3e%3e%3e%20kw%20f'%20()%202%20-%7d%20class%20Kw%20(fn%20::%20*)%20(arg_def%20::%20%5b*%5d)%20r"></a><span class='hs-keyword'>instance</span> <span class='hs-layout'>(</span><span class='hs-conid'>Fail</span> <span class='hs-layout'>(</span><span class='hs-conid'>ErrUnexpectedKW</span> <span class='hs-varid'>e</span><span class='hs-layout'>)</span><span class='hs-layout'>,</span> <span class='hs-varid'>r</span> <span class='hs-keyglyph'>~</span> <span class='hs-chr'>'</span><span class='hs-conid'>[]</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>HDelete</span> <span class='hs-varid'>e</span> <span class='hs-chr'>'</span><span class='hs-conid'>[]</span> <span class='hs-varid'>r</span>
-<a name="line-520"></a><a name="instance%20HDelete%20e%20(e'%20':%20tail)%20l'%20class%20HDelete'%20(flag%20::%20Bool)%20e%20l%20l'%20instance%20(tail'%20~%20tail)%20=%3e%20HDelete'%20True%20e%20(e%20':%20tail)%20tail'%20instance%20(HDelete%20e%20tail%20tail',%20e'tail%20~%20(e'%20':%20tail'))%20=%3e%20HDelete'%20False%20e%20(e'%20':%20tail)%20e'tail%20%7b-%20%7c%20@kw@%20takes%20a%20'HList'%20whose%20first%20element%20is%20a%20function,%20and%20the%20rest%20of%20the%20elements%20are%20default%20values.%20A%20useful%20trick%20is%20to%20have%20a%20final%20argument%20@()@%20which%20is%20not%20eaten%20up%20by%20a%20label%20(A%20only%20takes%201%20argument).%20That%20way%20when%20you%20supply%20the%20()%20it%20knows%20there%20are%20no%20more%20arguments%20(?).%20%3e%3e%3e%20data%20A%20=%20A%20%3e%3e%3e%20instance%20IsKeyFN%20(A%20-%3e%20a%20-%3e%20b)%20True%20%3e%3e%3e%20let%20f%20A%20a%20()%20=%20a%20+%201%20%3e%3e%3e%20let%20f'%20=%20f%20.*.%20A%20.*.%201%20.*.%20HNil%20%3e%3e%3e%20kw%20f'%20A%200%20()%201%20%3e%3e%3e%20kw%20f'%20()%202%20-%7d%20class%20Kw%20(fn%20::%20*)%20(arg_def%20::%20%5b*%5d)%20r"></a><span class='hs-keyword'>instance</span> <span class='hs-layout'>(</span><span class='hs-conid'>HEq</span> <span class='hs-varid'>e</span> <span class='hs-varid'>e'</span> <span class='hs-varid'>flag</span><span class='hs-layout'>,</span> <span class='hs-conid'>HDelete'</span> <span class='hs-varid'>flag</span> <span class='hs-varid'>e</span> <span class='hs-layout'>(</span><span class='hs-varid'>e'</span> <span class='hs-chr'>'</span><span class='hs-conop'>:</span> <span class='hs-varid'>tail</span><span class='hs-layout'>)</span> <span class='hs-varid'>l'</span><span class='hs-layout'>)</span>
-<a name="line-521"></a>    <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>HDelete</span> <span class='hs-varid'>e</span> <span class='hs-layout'>(</span><span class='hs-varid'>e'</span> <span class='hs-chr'>'</span><span class='hs-conop'>:</span> <span class='hs-varid'>tail</span><span class='hs-layout'>)</span> <span class='hs-varid'>l'</span>
-<a name="line-522"></a><a name="HDelete'"></a><span class='hs-keyword'>class</span> <span class='hs-conid'>HDelete'</span> <span class='hs-layout'>(</span><span class='hs-varid'>flag</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Bool</span><span class='hs-layout'>)</span> <span class='hs-varid'>e</span> <span class='hs-varid'>l</span> <span class='hs-varid'>l'</span>
-<a name="line-523"></a><a name="instance%20HDelete'%20True%20e%20(e%20':%20tail)%20tail'%20instance%20(HDelete%20e%20tail%20tail',%20e'tail%20~%20(e'%20':%20tail'))%20=%3e%20HDelete'%20False%20e%20(e'%20':%20tail)%20e'tail%20%7b-%20%7c%20@kw@%20takes%20a%20'HList'%20whose%20first%20element%20is%20a%20function,%20and%20the%20rest%20of%20the%20elements%20are%20default%20values.%20A%20useful%20trick%20is%20to%20have%20a%20final%20argument%20@()@%20which%20is%20not%20eaten%20up%20by%20a%20label%20(A%20only%20takes%201%20argument).%20That%20way%20when%20you%20supply%20the%20()%20it%20knows%20there%20are%20no%20more%20arguments%20(?).%20%3e%3e%3e%20data%20A%20=%20A%20%3e%3e%3e%20instance%20IsKeyFN%20(A%20-%3e%20a%20-%3e%20b)%20True%20%3e%3e%3e%20let%20f%20A%20a%20()%20=%20a%20+%201%20%3e%3e%3e%20let%20f'%20=%20f%20.*.%20A%20.*.%201%20.*.%20HNil%20%3e%3e%3e%20kw%20f'%20A%200%20()%201%20%3e%3e%3e%20kw%20f'%20()%202%20-%7d%20class%20Kw%20(fn%20::%20*)%20(arg_def%20::%20%5b*%5d)%20r"></a><span class='hs-keyword'>instance</span> <span class='hs-layout'>(</span><span class='hs-varid'>tail'</span> <span class='hs-keyglyph'>~</span> <span class='hs-varid'>tail</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>HDelete'</span> <span class='hs-conid'>True</span> <span class='hs-varid'>e</span> <span class='hs-layout'>(</span><span class='hs-varid'>e</span> <span class='hs-chr'>'</span><span class='hs-conop'>:</span> <span class='hs-varid'>tail</span><span class='hs-layout'>)</span> <span class='hs-varid'>tail'</span>
-<a name="line-524"></a><a name="instance%20HDelete'%20False%20e%20(e'%20':%20tail)%20e'tail%20%7b-%20%7c%20@kw@%20takes%20a%20'HList'%20whose%20first%20element%20is%20a%20function,%20and%20the%20rest%20of%20the%20elements%20are%20default%20values.%20A%20useful%20trick%20is%20to%20have%20a%20final%20argument%20@()@%20which%20is%20not%20eaten%20up%20by%20a%20label%20(A%20only%20takes%201%20argument).%20That%20way%20when%20you%20supply%20the%20()%20it%20knows%20there%20are%20no%20more%20arguments%20(?).%20%3e%3e%3e%20data%20A%20=%20A%20%3e%3e%3e%20instance%20IsKeyFN%20(A%20-%3e%20a%20-%3e%20b)%20True%20%3e%3e%3e%20let%20f%20A%20a%20()%20=%20a%20+%201%20%3e%3e%3e%20let%20f'%20=%20f%20.*.%20A%20.*.%201%20.*.%20HNil%20%3e%3e%3e%20kw%20f'%20A%200%20()%201%20%3e%3e%3e%20kw%20f'%20()%202%20-%7d%20class%20Kw%20(fn%20::%20*)%20(arg_def%20::%20%5b*%5d)%20r"></a><span class='hs-keyword'>instance</span> <span class='hs-layout'>(</span><span class='hs-conid'>HDelete</span> <span class='hs-varid'>e</span> <span class='hs-varid'>tail</span> <span class='hs-varid'>tail'</span><span class='hs-layout'>,</span> <span class='hs-varid'>e'tail</span> <span class='hs-keyglyph'>~</span> <span class='hs-layout'>(</span><span class='hs-varid'>e'</span> <span class='hs-chr'>'</span><span class='hs-conop'>:</span> <span class='hs-varid'>tail'</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span>
-<a name="line-525"></a>    <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>HDelete'</span> <span class='hs-conid'>False</span> <span class='hs-varid'>e</span> <span class='hs-layout'>(</span><span class='hs-varid'>e'</span> <span class='hs-chr'>'</span><span class='hs-conop'>:</span> <span class='hs-varid'>tail</span><span class='hs-layout'>)</span> <span class='hs-varid'>e'tail</span>
+<a name="line-515"></a><span class='hs-comment'>-- | Delete e from l to yield l' The element e must occur in l</span>
+<a name="line-516"></a>
+<a name="line-517"></a><a name="HDelete"></a><span class='hs-keyword'>class</span> <span class='hs-conid'>HDelete</span> <span class='hs-varid'>e</span> <span class='hs-layout'>(</span><span class='hs-varid'>l</span> <span class='hs-keyglyph'>::</span> <span class='hs-keyglyph'>[</span><span class='hs-varid'>k</span><span class='hs-keyglyph'>]</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>l'</span> <span class='hs-keyglyph'>::</span> <span class='hs-keyglyph'>[</span><span class='hs-varid'>k</span><span class='hs-keyglyph'>]</span><span class='hs-layout'>)</span>
+<a name="line-518"></a><a name="instance%20HDelete%20e%20'%5b%5d%20r%20instance%20(HEq%20e%20e'%20flag,%20HDelete'%20flag%20e%20(e'%20':%20tail)%20l')%20=%3e%20HDelete%20e%20(e'%20':%20tail)%20l'%20class%20HDelete'%20(flag%20::%20Bool)%20e%20l%20l'%20instance%20(tail'%20~%20tail)%20=%3e%20HDelete'%20True%20e%20(e%20':%20tail)%20tail'%20instance%20(HDelete%20e%20tail%20tail',%20e'tail%20~%20(e'%20':%20tail'))%20=%3e%20HDelete'%20False%20e%20(e'%20':%20tail)%20e'tail%20%7b-%20%7c%20@kw@%20takes%20a%20'HList'%20whose%20first%20element%20is%20a%20function,%20and%20the%20rest%20of%20the%20elements%20are%20default%20values.%20A%20useful%20trick%20is%20to%20have%20a%20final%20argument%20@()@%20which%20is%20not%20eaten%20up%20by%20a%20label%20(A%20only%20takes%201%20argument).%20That%20way%20when%20you%20supply%20the%20()%20it%20knows%20there%20are%20no%20more%20arguments%20(?).%20%3e%3e%3e%20data%20A%20=%20A%20%3e%3e%3e%20instance%20IsKeyFN%20(A%20-%3e%20a%20-%3e%20b)%20True%20%3e%3e%3e%20let%20f%20A%20a%20()%20=%20a%20+%201%20%3e%3e%3e%20let%20f'%20=%20f%20.*.%20A%20.*.%201%20.*.%20HNil%20%3e%3e%3e%20kw%20f'%20A%200%20()%201%20%3e%3e%3e%20kw%20f'%20()%202%20-%7d%20class%20Kw%20(fn%20::%20*)%20(arg_def%20::%20%5b*%5d)%20r"></a><span class='hs-keyword'>instance</span> <span class='hs-layout'>(</span><span class='hs-conid'>Fail</span> <span class='hs-layout'>(</span><span class='hs-conid'>ErrUnexpectedKW</span> <span class='hs-varid'>e</span><span class='hs-layout'>)</span><span class='hs-layout'>,</span> <span class='hs-varid'>r</span> <span class='hs-keyglyph'>~</span> <span class='hs-chr'>'</span><span class='hs-conid'>[]</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>HDelete</span> <span class='hs-varid'>e</span> <span class='hs-chr'>'</span><span class='hs-conid'>[]</span> <span class='hs-varid'>r</span>
+<a name="line-519"></a><a name="instance%20HDelete%20e%20(e'%20':%20tail)%20l'%20class%20HDelete'%20(flag%20::%20Bool)%20e%20l%20l'%20instance%20(tail'%20~%20tail)%20=%3e%20HDelete'%20True%20e%20(e%20':%20tail)%20tail'%20instance%20(HDelete%20e%20tail%20tail',%20e'tail%20~%20(e'%20':%20tail'))%20=%3e%20HDelete'%20False%20e%20(e'%20':%20tail)%20e'tail%20%7b-%20%7c%20@kw@%20takes%20a%20'HList'%20whose%20first%20element%20is%20a%20function,%20and%20the%20rest%20of%20the%20elements%20are%20default%20values.%20A%20useful%20trick%20is%20to%20have%20a%20final%20argument%20@()@%20which%20is%20not%20eaten%20up%20by%20a%20label%20(A%20only%20takes%201%20argument).%20That%20way%20when%20you%20supply%20the%20()%20it%20knows%20there%20are%20no%20more%20arguments%20(?).%20%3e%3e%3e%20data%20A%20=%20A%20%3e%3e%3e%20instance%20IsKeyFN%20(A%20-%3e%20a%20-%3e%20b)%20True%20%3e%3e%3e%20let%20f%20A%20a%20()%20=%20a%20+%201%20%3e%3e%3e%20let%20f'%20=%20f%20.*.%20A%20.*.%201%20.*.%20HNil%20%3e%3e%3e%20kw%20f'%20A%200%20()%201%20%3e%3e%3e%20kw%20f'%20()%202%20-%7d%20class%20Kw%20(fn%20::%20*)%20(arg_def%20::%20%5b*%5d)%20r"></a><span class='hs-keyword'>instance</span> <span class='hs-layout'>(</span><span class='hs-conid'>HEq</span> <span class='hs-varid'>e</span> <span class='hs-varid'>e'</span> <span class='hs-varid'>flag</span><span class='hs-layout'>,</span> <span class='hs-conid'>HDelete'</span> <span class='hs-varid'>flag</span> <span class='hs-varid'>e</span> <span class='hs-layout'>(</span><span class='hs-varid'>e'</span> <span class='hs-chr'>'</span><span class='hs-conop'>:</span> <span class='hs-varid'>tail</span><span class='hs-layout'>)</span> <span class='hs-varid'>l'</span><span class='hs-layout'>)</span>
+<a name="line-520"></a>    <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>HDelete</span> <span class='hs-varid'>e</span> <span class='hs-layout'>(</span><span class='hs-varid'>e'</span> <span class='hs-chr'>'</span><span class='hs-conop'>:</span> <span class='hs-varid'>tail</span><span class='hs-layout'>)</span> <span class='hs-varid'>l'</span>
+<a name="line-521"></a><a name="HDelete'"></a><span class='hs-keyword'>class</span> <span class='hs-conid'>HDelete'</span> <span class='hs-layout'>(</span><span class='hs-varid'>flag</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Bool</span><span class='hs-layout'>)</span> <span class='hs-varid'>e</span> <span class='hs-varid'>l</span> <span class='hs-varid'>l'</span>
+<a name="line-522"></a><a name="instance%20HDelete'%20True%20e%20(e%20':%20tail)%20tail'%20instance%20(HDelete%20e%20tail%20tail',%20e'tail%20~%20(e'%20':%20tail'))%20=%3e%20HDelete'%20False%20e%20(e'%20':%20tail)%20e'tail%20%7b-%20%7c%20@kw@%20takes%20a%20'HList'%20whose%20first%20element%20is%20a%20function,%20and%20the%20rest%20of%20the%20elements%20are%20default%20values.%20A%20useful%20trick%20is%20to%20have%20a%20final%20argument%20@()@%20which%20is%20not%20eaten%20up%20by%20a%20label%20(A%20only%20takes%201%20argument).%20That%20way%20when%20you%20supply%20the%20()%20it%20knows%20there%20are%20no%20more%20arguments%20(?).%20%3e%3e%3e%20data%20A%20=%20A%20%3e%3e%3e%20instance%20IsKeyFN%20(A%20-%3e%20a%20-%3e%20b)%20True%20%3e%3e%3e%20let%20f%20A%20a%20()%20=%20a%20+%201%20%3e%3e%3e%20let%20f'%20=%20f%20.*.%20A%20.*.%201%20.*.%20HNil%20%3e%3e%3e%20kw%20f'%20A%200%20()%201%20%3e%3e%3e%20kw%20f'%20()%202%20-%7d%20class%20Kw%20(fn%20::%20*)%20(arg_def%20::%20%5b*%5d)%20r"></a><span class='hs-keyword'>instance</span> <span class='hs-layout'>(</span><span class='hs-varid'>tail'</span> <span class='hs-keyglyph'>~</span> <span class='hs-varid'>tail</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>HDelete'</span> <span class='hs-conid'>True</span> <span class='hs-varid'>e</span> <span class='hs-layout'>(</span><span class='hs-varid'>e</span> <span class='hs-chr'>'</span><span class='hs-conop'>:</span> <span class='hs-varid'>tail</span><span class='hs-layout'>)</span> <span class='hs-varid'>tail'</span>
+<a name="line-523"></a><a name="instance%20HDelete'%20False%20e%20(e'%20':%20tail)%20e'tail%20%7b-%20%7c%20@kw@%20takes%20a%20'HList'%20whose%20first%20element%20is%20a%20function,%20and%20the%20rest%20of%20the%20elements%20are%20default%20values.%20A%20useful%20trick%20is%20to%20have%20a%20final%20argument%20@()@%20which%20is%20not%20eaten%20up%20by%20a%20label%20(A%20only%20takes%201%20argument).%20That%20way%20when%20you%20supply%20the%20()%20it%20knows%20there%20are%20no%20more%20arguments%20(?).%20%3e%3e%3e%20data%20A%20=%20A%20%3e%3e%3e%20instance%20IsKeyFN%20(A%20-%3e%20a%20-%3e%20b)%20True%20%3e%3e%3e%20let%20f%20A%20a%20()%20=%20a%20+%201%20%3e%3e%3e%20let%20f'%20=%20f%20.*.%20A%20.*.%201%20.*.%20HNil%20%3e%3e%3e%20kw%20f'%20A%200%20()%201%20%3e%3e%3e%20kw%20f'%20()%202%20-%7d%20class%20Kw%20(fn%20::%20*)%20(arg_def%20::%20%5b*%5d)%20r"></a><span class='hs-keyword'>instance</span> <span class='hs-layout'>(</span><span class='hs-conid'>HDelete</span> <span class='hs-varid'>e</span> <span class='hs-varid'>tail</span> <span class='hs-varid'>tail'</span><span class='hs-layout'>,</span> <span class='hs-varid'>e'tail</span> <span class='hs-keyglyph'>~</span> <span class='hs-layout'>(</span><span class='hs-varid'>e'</span> <span class='hs-chr'>'</span><span class='hs-conop'>:</span> <span class='hs-varid'>tail'</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span>
+<a name="line-524"></a>    <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>HDelete'</span> <span class='hs-conid'>False</span> <span class='hs-varid'>e</span> <span class='hs-layout'>(</span><span class='hs-varid'>e'</span> <span class='hs-chr'>'</span><span class='hs-conop'>:</span> <span class='hs-varid'>tail</span><span class='hs-layout'>)</span> <span class='hs-varid'>e'tail</span>
+<a name="line-525"></a>
 <a name="line-526"></a>
-<a name="line-527"></a>
-<a name="line-528"></a><a name="Kw"></a><span class='hs-comment'>{- |
-<a name="line-529"></a>
-<a name="line-530"></a>@kw@ takes a 'HList' whose first element is a function, and the rest
-<a name="line-531"></a>of the elements are default values.
-<a name="line-532"></a>A useful trick is to have a final argument @()@ which is not
-<a name="line-533"></a>eaten up by a label (A only takes 1 argument). That way when you supply
-<a name="line-534"></a>the () it knows there are no more arguments (?).
-<a name="line-535"></a>
-<a name="line-536"></a>&gt;&gt;&gt; data A = A
-<a name="line-537"></a>&gt;&gt;&gt; instance IsKeyFN (A -&gt; a -&gt; b) True
-<a name="line-538"></a>&gt;&gt;&gt; let f A a () = a + 1
-<a name="line-539"></a>&gt;&gt;&gt; let f' = f .*. A .*. 1 .*. HNil
-<a name="line-540"></a>
-<a name="line-541"></a>&gt;&gt;&gt; kw f' A 0 ()
-<a name="line-542"></a>1
-<a name="line-543"></a>
-<a name="line-544"></a>&gt;&gt;&gt; kw f' ()
-<a name="line-545"></a>2
-<a name="line-546"></a>
-<a name="line-547"></a>-}</span>
-<a name="line-548"></a><a name="Kw"></a><span class='hs-keyword'>class</span> <span class='hs-conid'>Kw</span> <span class='hs-layout'>(</span><span class='hs-varid'>fn</span> <span class='hs-keyglyph'>::</span> <span class='hs-varop'>*</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>arg_def</span> <span class='hs-keyglyph'>::</span> <span class='hs-keyglyph'>[</span><span class='hs-varop'>*</span><span class='hs-keyglyph'>]</span><span class='hs-layout'>)</span> <span class='hs-varid'>r</span> <span class='hs-keyword'>where</span>
-<a name="line-549"></a>    <span class='hs-varid'>kw</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>HList</span> <span class='hs-layout'>(</span><span class='hs-varid'>fn</span> <span class='hs-chr'>'</span><span class='hs-conop'>:</span> <span class='hs-varid'>arg_def</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>r</span>
-<a name="line-550"></a>
-<a name="line-551"></a><a name="instance%20Kw%20fn%20arg_def%20r"></a><span class='hs-keyword'>instance</span>
-<a name="line-552"></a>    <span class='hs-layout'>(</span><span class='hs-conid'>KW'</span> <span class='hs-varid'>rflag</span> <span class='hs-varid'>fn</span> <span class='hs-varid'>akws</span> <span class='hs-varid'>arg_def</span> <span class='hs-varid'>r</span><span class='hs-layout'>,</span>
-<a name="line-553"></a>     <span class='hs-varid'>akws</span> <span class='hs-keyglyph'>~</span> <span class='hs-layout'>(</span><span class='hs-conid'>Arg</span> <span class='hs-layout'>(</span><span class='hs-varid'>kws</span> <span class='hs-keyglyph'>::</span> <span class='hs-keyglyph'>[</span><span class='hs-varop'>*</span><span class='hs-keyglyph'>]</span><span class='hs-layout'>)</span> <span class='hs-chr'>'</span><span class='hs-conid'>[]</span><span class='hs-layout'>)</span><span class='hs-layout'>,</span>
-<a name="line-554"></a>     <span class='hs-conid'>ReflectFK'</span> <span class='hs-varid'>flag</span> <span class='hs-varid'>fn</span> <span class='hs-varid'>kws</span><span class='hs-layout'>,</span> <span class='hs-conid'>IsKeyFN</span> <span class='hs-varid'>r</span> <span class='hs-varid'>rflag</span><span class='hs-layout'>,</span>
-<a name="line-555"></a>     <span class='hs-conid'>IsKeyFN</span> <span class='hs-varid'>fn</span> <span class='hs-layout'>(</span><span class='hs-varid'>flag</span><span class='hs-keyglyph'>::</span><span class='hs-conid'>Bool</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>Kw</span> <span class='hs-varid'>fn</span> <span class='hs-varid'>arg_def</span> <span class='hs-varid'>r</span>
-<a name="line-556"></a>   <span class='hs-keyword'>where</span>
-<a name="line-557"></a>    <span class='hs-varid'>kw</span> <span class='hs-layout'>(</span><span class='hs-conid'>HCons</span> <span class='hs-varid'>f</span> <span class='hs-varid'>arg_def</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>kwdo</span> <span class='hs-varid'>f</span> <span class='hs-varid'>rfk</span> <span class='hs-varid'>arg_def</span> <span class='hs-keyglyph'>::</span> <span class='hs-varid'>r</span>
-<a name="line-558"></a>        <span class='hs-keyword'>where</span> <span class='hs-varid'>rfk</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>reflect_fk</span> <span class='hs-varid'>f</span> <span class='hs-keyglyph'>::</span> <span class='hs-varid'>akws</span>
-<a name="line-559"></a>
-<a name="line-560"></a><a name="LVPairToKW"></a><span class='hs-keyword'>data</span> <span class='hs-conid'>LVPairToKW</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>LVPairToKW</span>
-<a name="line-561"></a><a name="instance%20ApplyAB%20LVPairToKW%20x%20y"></a><span class='hs-keyword'>instance</span> <span class='hs-layout'>(</span><span class='hs-varid'>x</span> <span class='hs-keyglyph'>~</span> <span class='hs-conid'>LVPair</span> <span class='hs-varid'>l</span> <span class='hs-varid'>v</span><span class='hs-layout'>,</span> <span class='hs-varid'>y</span> <span class='hs-keyglyph'>~</span> <span class='hs-conid'>HList</span> <span class='hs-chr'>'</span><span class='hs-keyglyph'>[</span><span class='hs-conid'>Label</span> <span class='hs-varid'>l</span><span class='hs-layout'>,</span> <span class='hs-varid'>v</span><span class='hs-keyglyph'>]</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=&gt;</span>
-<a name="line-562"></a>        <span class='hs-conid'>ApplyAB</span> <span class='hs-conid'>LVPairToKW</span> <span class='hs-varid'>x</span> <span class='hs-varid'>y</span> <span class='hs-keyword'>where</span>
-<a name="line-563"></a>    <span class='hs-varid'>applyAB</span> <span class='hs-keyword'>_</span> <span class='hs-layout'>(</span><span class='hs-conid'>LVPair</span> <span class='hs-varid'>v</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>hBuild</span> <span class='hs-conid'>Label</span> <span class='hs-varid'>v</span>
+<a name="line-527"></a><a name="Kw"></a><span class='hs-comment'>{- |
+<a name="line-528"></a>
+<a name="line-529"></a>@kw@ takes a 'HList' whose first element is a function, and the rest
+<a name="line-530"></a>of the elements are default values.
+<a name="line-531"></a>A useful trick is to have a final argument @()@ which is not
+<a name="line-532"></a>eaten up by a label (A only takes 1 argument). That way when you supply
+<a name="line-533"></a>the () it knows there are no more arguments (?).
+<a name="line-534"></a>
+<a name="line-535"></a>&gt;&gt;&gt; data A = A
+<a name="line-536"></a>&gt;&gt;&gt; instance IsKeyFN (A -&gt; a -&gt; b) True
+<a name="line-537"></a>&gt;&gt;&gt; let f A a () = a + 1
+<a name="line-538"></a>&gt;&gt;&gt; let f' = f .*. A .*. 1 .*. HNil
+<a name="line-539"></a>
+<a name="line-540"></a>&gt;&gt;&gt; kw f' A 0 ()
+<a name="line-541"></a>1
+<a name="line-542"></a>
+<a name="line-543"></a>&gt;&gt;&gt; kw f' ()
+<a name="line-544"></a>2
+<a name="line-545"></a>
+<a name="line-546"></a>-}</span>
+<a name="line-547"></a><a name="Kw"></a><span class='hs-keyword'>class</span> <span class='hs-conid'>Kw</span> <span class='hs-layout'>(</span><span class='hs-varid'>fn</span> <span class='hs-keyglyph'>::</span> <span class='hs-varop'>*</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>arg_def</span> <span class='hs-keyglyph'>::</span> <span class='hs-keyglyph'>[</span><span class='hs-varop'>*</span><span class='hs-keyglyph'>]</span><span class='hs-layout'>)</span> <span class='hs-varid'>r</span> <span class='hs-keyword'>where</span>
+<a name="line-548"></a>    <span class='hs-varid'>kw</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>HList</span> <span class='hs-layout'>(</span><span class='hs-varid'>fn</span> <span class='hs-chr'>'</span><span class='hs-conop'>:</span> <span class='hs-varid'>arg_def</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>r</span>
+<a name="line-549"></a>
+<a name="line-550"></a><a name="instance%20Kw%20fn%20arg_def%20r"></a><span class='hs-keyword'>instance</span>
+<a name="line-551"></a>    <span class='hs-layout'>(</span><span class='hs-conid'>KW'</span> <span class='hs-varid'>rflag</span> <span class='hs-varid'>fn</span> <span class='hs-varid'>akws</span> <span class='hs-varid'>arg_def</span> <span class='hs-varid'>r</span><span class='hs-layout'>,</span>
+<a name="line-552"></a>     <span class='hs-varid'>akws</span> <span class='hs-keyglyph'>~</span> <span class='hs-layout'>(</span><span class='hs-conid'>Arg</span> <span class='hs-layout'>(</span><span class='hs-varid'>kws</span> <span class='hs-keyglyph'>::</span> <span class='hs-keyglyph'>[</span><span class='hs-varop'>*</span><span class='hs-keyglyph'>]</span><span class='hs-layout'>)</span> <span class='hs-chr'>'</span><span class='hs-conid'>[]</span><span class='hs-layout'>)</span><span class='hs-layout'>,</span>
+<a name="line-553"></a>     <span class='hs-conid'>ReflectFK'</span> <span class='hs-varid'>flag</span> <span class='hs-varid'>fn</span> <span class='hs-varid'>kws</span><span class='hs-layout'>,</span> <span class='hs-conid'>IsKeyFN</span> <span class='hs-varid'>r</span> <span class='hs-varid'>rflag</span><span class='hs-layout'>,</span>
+<a name="line-554"></a>     <span class='hs-conid'>IsKeyFN</span> <span class='hs-varid'>fn</span> <span class='hs-layout'>(</span><span class='hs-varid'>flag</span><span class='hs-keyglyph'>::</span><span class='hs-conid'>Bool</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>Kw</span> <span class='hs-varid'>fn</span> <span class='hs-varid'>arg_def</span> <span class='hs-varid'>r</span>
+<a name="line-555"></a>   <span class='hs-keyword'>where</span>
+<a name="line-556"></a>    <span class='hs-varid'>kw</span> <span class='hs-layout'>(</span><span class='hs-conid'>HCons</span> <span class='hs-varid'>f</span> <span class='hs-varid'>arg_def</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>kwdo</span> <span class='hs-varid'>f</span> <span class='hs-varid'>rfk</span> <span class='hs-varid'>arg_def</span> <span class='hs-keyglyph'>::</span> <span class='hs-varid'>r</span>
+<a name="line-557"></a>        <span class='hs-keyword'>where</span> <span class='hs-varid'>rfk</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>reflect_fk</span> <span class='hs-varid'>f</span> <span class='hs-keyglyph'>::</span> <span class='hs-varid'>akws</span>
+<a name="line-558"></a>
+<a name="line-559"></a><a name="TaggedToKW"></a><span class='hs-keyword'>data</span> <span class='hs-conid'>TaggedToKW</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>TaggedToKW</span>
+<a name="line-560"></a><a name="instance%20ApplyAB%20TaggedToKW%20x%20y"></a><span class='hs-keyword'>instance</span> <span class='hs-layout'>(</span><span class='hs-varid'>x</span> <span class='hs-keyglyph'>~</span> <span class='hs-conid'>Tagged</span> <span class='hs-varid'>l</span> <span class='hs-varid'>v</span><span class='hs-layout'>,</span> <span class='hs-varid'>y</span> <span class='hs-keyglyph'>~</span> <span class='hs-conid'>HList</span> <span class='hs-chr'>'</span><span class='hs-keyglyph'>[</span><span class='hs-conid'>Label</span> <span class='hs-varid'>l</span><span class='hs-layout'>,</span> <span class='hs-varid'>v</span><span class='hs-keyglyph'>]</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=&gt;</span>
+<a name="line-561"></a>        <span class='hs-conid'>ApplyAB</span> <span class='hs-conid'>TaggedToKW</span> <span class='hs-varid'>x</span> <span class='hs-varid'>y</span> <span class='hs-keyword'>where</span>
+<a name="line-562"></a>    <span class='hs-varid'>applyAB</span> <span class='hs-keyword'>_</span> <span class='hs-layout'>(</span><span class='hs-conid'>Tagged</span> <span class='hs-varid'>v</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>hBuild</span> <span class='hs-conid'>Label</span> <span class='hs-varid'>v</span>
+<a name="line-563"></a>
 <a name="line-564"></a>
-<a name="line-565"></a>
-<a name="line-566"></a><a name="recToKW"></a><span class='hs-comment'>{- | convert a 'Record' into a list that can supply
-<a name="line-567"></a>default arguments for 'kw'
-<a name="line-568"></a>
-<a name="line-569"></a>A bit of setup:
-<a name="line-570"></a>
-<a name="line-571"></a>&gt;&gt;&gt; :set -XQuasiQuotes
+<a name="line-565"></a><a name="recToKW"></a><span class='hs-comment'>{- | convert a 'Record' into a list that can supply
+<a name="line-566"></a>default arguments for 'kw'
+<a name="line-567"></a>
+<a name="line-568"></a>A bit of setup:
+<a name="line-569"></a>
+<a name="line-570"></a>&gt;&gt;&gt; :set -XQuasiQuotes
+<a name="line-571"></a>&gt;&gt;&gt; import Data.HList.RecordPuns
 <a name="line-572"></a>&gt;&gt;&gt; let f (_ :: Label "a") a (_ :: Label "b") b () = a `div` b
 <a name="line-573"></a>
 <a name="line-574"></a>
@@ -590,10 +590,10 @@
 <a name="line-581"></a>
 <a name="line-582"></a>
 <a name="line-583"></a>-}</span>
-<a name="line-584"></a><span class='hs-definition'>recToKW</span> <span class='hs-keyglyph'>::</span> <span class='hs-keyword'>forall</span> <span class='hs-varid'>a</span> <span class='hs-varid'>b</span><span class='hs-varop'>.</span> <span class='hs-layout'>(</span><span class='hs-conid'>HMapAux</span> <span class='hs-conid'>LVPairToKW</span> <span class='hs-varid'>a</span> <span class='hs-varid'>b</span><span class='hs-layout'>,</span> <span class='hs-conid'>SameLength</span> <span class='hs-varid'>a</span> <span class='hs-varid'>b</span><span class='hs-layout'>,</span>
+<a name="line-584"></a><span class='hs-definition'>recToKW</span> <span class='hs-keyglyph'>::</span> <span class='hs-keyword'>forall</span> <span class='hs-varid'>a</span> <span class='hs-varid'>b</span><span class='hs-varop'>.</span> <span class='hs-layout'>(</span><span class='hs-conid'>HMapAux</span> <span class='hs-conid'>TaggedToKW</span> <span class='hs-varid'>a</span> <span class='hs-varid'>b</span><span class='hs-layout'>,</span> <span class='hs-conid'>SameLength</span> <span class='hs-varid'>a</span> <span class='hs-varid'>b</span><span class='hs-layout'>,</span>
 <a name="line-585"></a>      <span class='hs-conid'>SameLength</span> <span class='hs-varid'>b</span> <span class='hs-varid'>a</span><span class='hs-layout'>,</span> <span class='hs-conid'>HConcat</span> <span class='hs-varid'>b</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=&gt;</span>
 <a name="line-586"></a>     <span class='hs-conid'>Record</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>HList</span> <span class='hs-layout'>(</span><span class='hs-conid'>HConcatR</span> <span class='hs-varid'>b</span><span class='hs-layout'>)</span>
-<a name="line-587"></a><span class='hs-definition'>recToKW</span> <span class='hs-layout'>(</span><span class='hs-conid'>Record</span> <span class='hs-varid'>r</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>hConcat</span> <span class='hs-layout'>(</span><span class='hs-varid'>hMap</span> <span class='hs-conid'>LVPairToKW</span> <span class='hs-varid'>r</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>HList</span> <span class='hs-varid'>b</span><span class='hs-layout'>)</span>
+<a name="line-587"></a><span class='hs-definition'>recToKW</span> <span class='hs-layout'>(</span><span class='hs-conid'>Record</span> <span class='hs-varid'>r</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>hConcat</span> <span class='hs-layout'>(</span><span class='hs-varid'>hMap</span> <span class='hs-conid'>TaggedToKW</span> <span class='hs-varid'>r</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>HList</span> <span class='hs-varid'>b</span><span class='hs-layout'>)</span>
 <a name="line-588"></a>
 <a name="line-589"></a><span class='hs-comment'>{- $originalIntro
 <a name="line-590"></a>

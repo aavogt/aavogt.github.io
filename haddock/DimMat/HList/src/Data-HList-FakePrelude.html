@@ -7,503 +7,505 @@
 <link type='text/css' rel='stylesheet' href='hscolour.css' />
 </head>
 <body>
-<pre><a name="line-1"></a>
-<a name="line-2"></a><span class='hs-comment'>{- |
-<a name="line-3"></a>   The HList library
-<a name="line-4"></a>
-<a name="line-5"></a>   (C) 2004, Oleg Kiselyov, Ralf Laemmel, Keean Schupke
+<pre><a name="line-1"></a><span class='hs-comment'>{-# LANGUAGE OverlappingInstances #-}</span>
+<a name="line-2"></a><span class='hs-comment'>-- just for the proxy</span>
+<a name="line-3"></a>
+<a name="line-4"></a><span class='hs-comment'>{- |
+<a name="line-5"></a>   The HList library
 <a name="line-6"></a>
-<a name="line-7"></a>   Some very basic technology for faking dependent types in Haskell.
-<a name="line-8"></a>-}</span>
-<a name="line-9"></a>
-<a name="line-10"></a><span class='hs-keyword'>module</span> <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>HList</span><span class='hs-varop'>.</span><span class='hs-conid'>FakePrelude</span>
-<a name="line-11"></a>    <span class='hs-layout'>(</span><span class='hs-keyword'>module</span> <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>HList</span><span class='hs-varop'>.</span><span class='hs-conid'>FakePrelude</span><span class='hs-layout'>,</span>
-<a name="line-12"></a>     <span class='hs-keyword'>module</span> <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>HList</span><span class='hs-varop'>.</span><span class='hs-conid'>FakePrelude</span><span class='hs-varop'>.</span><span class='hs-conid'>Proxy</span><span class='hs-layout'>)</span> <span class='hs-keyword'>where</span>
-<a name="line-13"></a>
-<a name="line-14"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>GHC</span><span class='hs-varop'>.</span><span class='hs-conid'>Prim</span> <span class='hs-layout'>(</span><span class='hs-conid'>Constraint</span><span class='hs-layout'>)</span>
-<a name="line-15"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>GHC</span><span class='hs-varop'>.</span><span class='hs-conid'>TypeLits</span>
-<a name="line-16"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>HList</span><span class='hs-varop'>.</span><span class='hs-conid'>FakePrelude</span><span class='hs-varop'>.</span><span class='hs-conid'>Proxy</span>
-<a name="line-17"></a>
-<a name="line-18"></a><span class='hs-comment'>-- --------------------------------------------------------------------------</span>
-<a name="line-19"></a><span class='hs-comment'>-- * A heterogeneous apply operator</span>
-<a name="line-20"></a>
-<a name="line-21"></a><a name="Apply"></a><span class='hs-comment'>-- | simpler/weaker version where type information only propagates forward</span>
-<a name="line-22"></a><a name="Apply"></a><span class='hs-comment'>-- with this one. 'app' defined below, is more complicated / verbose to define,</span>
-<a name="line-23"></a><a name="Apply"></a><span class='hs-comment'>-- but it offers better type inference. Most uses have been converted to</span>
-<a name="line-24"></a><a name="Apply"></a><span class='hs-comment'>-- 'app', so there is not much that can be done with 'Apply'.</span>
-<a name="line-25"></a><a name="Apply"></a><span class='hs-keyword'>class</span> <span class='hs-conid'>Apply</span> <span class='hs-varid'>f</span> <span class='hs-varid'>a</span> <span class='hs-keyword'>where</span>
-<a name="line-26"></a>  <span class='hs-keyword'>type</span> <span class='hs-conid'>ApplyR</span> <span class='hs-varid'>f</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>::</span> <span class='hs-varop'>*</span>
-<a name="line-27"></a>  <span class='hs-varid'>apply</span> <span class='hs-keyglyph'>::</span> <span class='hs-varid'>f</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>ApplyR</span> <span class='hs-varid'>f</span> <span class='hs-varid'>a</span>
-<a name="line-28"></a>  <span class='hs-varid'>apply</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>undefined</span>                     <span class='hs-comment'>-- In case we use Apply for</span>
-<a name="line-29"></a>                                        <span class='hs-comment'>-- type-level computations only</span>
-<a name="line-30"></a>
-<a name="line-31"></a><span class='hs-comment'>{- $note
+<a name="line-7"></a>   (C) 2004, Oleg Kiselyov, Ralf Laemmel, Keean Schupke
+<a name="line-8"></a>
+<a name="line-9"></a>   Some very basic technology for faking dependent types in Haskell.
+<a name="line-10"></a>-}</span>
+<a name="line-11"></a>
+<a name="line-12"></a><span class='hs-keyword'>module</span> <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>HList</span><span class='hs-varop'>.</span><span class='hs-conid'>FakePrelude</span>
+<a name="line-13"></a>    <span class='hs-layout'>(</span><span class='hs-keyword'>module</span> <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>HList</span><span class='hs-varop'>.</span><span class='hs-conid'>FakePrelude</span><span class='hs-layout'>,</span>
+<a name="line-14"></a>     <span class='hs-keyword'>module</span> <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>Proxy</span><span class='hs-layout'>)</span> <span class='hs-keyword'>where</span>
+<a name="line-15"></a>
+<a name="line-16"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>Proxy</span>
+<a name="line-17"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>GHC</span><span class='hs-varop'>.</span><span class='hs-conid'>Prim</span> <span class='hs-layout'>(</span><span class='hs-conid'>Constraint</span><span class='hs-layout'>)</span>
+<a name="line-18"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>GHC</span><span class='hs-varop'>.</span><span class='hs-conid'>TypeLits</span>
+<a name="line-19"></a>
+<a name="line-20"></a><span class='hs-comment'>-- --------------------------------------------------------------------------</span>
+<a name="line-21"></a><span class='hs-comment'>-- * A heterogeneous apply operator</span>
+<a name="line-22"></a>
+<a name="line-23"></a><a name="Apply"></a><span class='hs-comment'>-- | simpler/weaker version where type information only propagates forward</span>
+<a name="line-24"></a><a name="Apply"></a><span class='hs-comment'>-- with this one. 'app' defined below, is more complicated / verbose to define,</span>
+<a name="line-25"></a><a name="Apply"></a><span class='hs-comment'>-- but it offers better type inference. Most uses have been converted to</span>
+<a name="line-26"></a><a name="Apply"></a><span class='hs-comment'>-- 'app', so there is not much that can be done with 'Apply'.</span>
+<a name="line-27"></a><a name="Apply"></a><span class='hs-keyword'>class</span> <span class='hs-conid'>Apply</span> <span class='hs-varid'>f</span> <span class='hs-varid'>a</span> <span class='hs-keyword'>where</span>
+<a name="line-28"></a>  <span class='hs-keyword'>type</span> <span class='hs-conid'>ApplyR</span> <span class='hs-varid'>f</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>::</span> <span class='hs-varop'>*</span>
+<a name="line-29"></a>  <span class='hs-varid'>apply</span> <span class='hs-keyglyph'>::</span> <span class='hs-varid'>f</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>ApplyR</span> <span class='hs-varid'>f</span> <span class='hs-varid'>a</span>
+<a name="line-30"></a>  <span class='hs-varid'>apply</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>undefined</span>                     <span class='hs-comment'>-- In case we use Apply for</span>
+<a name="line-31"></a>                                        <span class='hs-comment'>-- type-level computations only</span>
 <a name="line-32"></a>
-<a name="line-33"></a> Polymorphic functions are not first-class in haskell. One solution is to
-<a name="line-34"></a> write an instance of 'ApplyAB' for a data type that takes the place of
-<a name="line-35"></a> the original function. In other words,
-<a name="line-36"></a>
-<a name="line-37"></a> &gt; data Fn = Fn
-<a name="line-38"></a> &gt; instance ApplyAB Fn a b where applyAB Fn a = actual_fn a
-<a name="line-39"></a>
-<a name="line-40"></a> Normally you would have been able to pass around the definition actual_fn.
+<a name="line-33"></a><span class='hs-comment'>{- $note
+<a name="line-34"></a>
+<a name="line-35"></a> Polymorphic functions are not first-class in haskell. One solution is to
+<a name="line-36"></a> write an instance of 'ApplyAB' for a data type that takes the place of
+<a name="line-37"></a> the original function. In other words,
+<a name="line-38"></a>
+<a name="line-39"></a> &gt; data Fn = Fn
+<a name="line-40"></a> &gt; instance ApplyAB Fn a b where applyAB Fn a = actual_fn a
 <a name="line-41"></a>
-<a name="line-42"></a> [@Type inference / Local functional dependencies@]
+<a name="line-42"></a> Normally you would have been able to pass around the definition actual_fn.
 <a name="line-43"></a>
-<a name="line-44"></a> Note that @class ApplyAB@ has three parameters and no functional dependencies.
-<a name="line-45"></a> Instances should be written in the style:
-<a name="line-46"></a>
-<a name="line-47"></a> &gt; instance (int ~ Int, double ~ Double) =&gt; ApplyAB Fn int double
-<a name="line-48"></a> &gt;  where applyAB _ = fromIntegral
-<a name="line-49"></a>
-<a name="line-50"></a> rather than the more natural
+<a name="line-44"></a> [@Type inference / Local functional dependencies@]
+<a name="line-45"></a>
+<a name="line-46"></a> Note that @class ApplyAB@ has three parameters and no functional dependencies.
+<a name="line-47"></a> Instances should be written in the style:
+<a name="line-48"></a>
+<a name="line-49"></a> &gt; instance (int ~ Int, double ~ Double) =&gt; ApplyAB Fn int double
+<a name="line-50"></a> &gt;  where applyAB _ = fromIntegral
 <a name="line-51"></a>
-<a name="line-52"></a> &gt; instance ApplyAB Fn Int Double
+<a name="line-52"></a> rather than the more natural
 <a name="line-53"></a>
-<a name="line-54"></a> The first instance allows types to be inferred as if we had
-<a name="line-55"></a> @class ApplyAB a b c | a -&gt; b c@, while the second instance
-<a name="line-56"></a> only matches if ghc already knows that it needs
-<a name="line-57"></a> @ApplyAB Fn Int Double@. Additional explanation can be found
-<a name="line-58"></a> in &lt;<a href="http://okmij.org/ftp/Haskell/typecast.html#local-fd">http://okmij.org/ftp/Haskell/typecast.html#local-fd</a> local functional dependencies&gt;
-<a name="line-59"></a>
-<a name="line-60"></a>-}</span>
+<a name="line-54"></a> &gt; instance ApplyAB Fn Int Double
+<a name="line-55"></a>
+<a name="line-56"></a> The first instance allows types to be inferred as if we had
+<a name="line-57"></a> @class ApplyAB a b c | a -&gt; b c@, while the second instance
+<a name="line-58"></a> only matches if ghc already knows that it needs
+<a name="line-59"></a> @ApplyAB Fn Int Double@. Additional explanation can be found
+<a name="line-60"></a> in &lt;<a href="http://okmij.org/ftp/Haskell/typecast.html#local-fd">http://okmij.org/ftp/Haskell/typecast.html#local-fd</a> local functional dependencies&gt;
 <a name="line-61"></a>
-<a name="line-62"></a><a name="ApplyAB"></a><span class='hs-comment'>-- | No constraints on result and argument types</span>
-<a name="line-63"></a><a name="ApplyAB"></a><span class='hs-keyword'>class</span> <span class='hs-conid'>ApplyAB</span> <span class='hs-varid'>f</span> <span class='hs-varid'>a</span> <span class='hs-varid'>b</span> <span class='hs-keyword'>where</span>
-<a name="line-64"></a>  <span class='hs-varid'>applyAB</span> <span class='hs-keyglyph'>::</span> <span class='hs-varid'>f</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>b</span>
-<a name="line-65"></a>  <span class='hs-varid'>applyAB</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>undefined</span> <span class='hs-comment'>-- In case we use Apply for type-level computations only</span>
-<a name="line-66"></a>
-<a name="line-67"></a>
-<a name="line-68"></a><a name="Fun"></a><span class='hs-comment'>{- $fun
+<a name="line-62"></a>-}</span>
+<a name="line-63"></a>
+<a name="line-64"></a><a name="ApplyAB"></a><span class='hs-comment'>-- | No constraints on result and argument types</span>
+<a name="line-65"></a><a name="ApplyAB"></a><span class='hs-keyword'>class</span> <span class='hs-conid'>ApplyAB</span> <span class='hs-varid'>f</span> <span class='hs-varid'>a</span> <span class='hs-varid'>b</span> <span class='hs-keyword'>where</span>
+<a name="line-66"></a>  <span class='hs-varid'>applyAB</span> <span class='hs-keyglyph'>::</span> <span class='hs-varid'>f</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>b</span>
+<a name="line-67"></a>  <span class='hs-varid'>applyAB</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>undefined</span> <span class='hs-comment'>-- In case we use Apply for type-level computations only</span>
+<a name="line-68"></a>
 <a name="line-69"></a>
-<a name="line-70"></a> 'Fun' can be used instead of writing a new instance of
-<a name="line-71"></a> 'ApplyAB'. Refer to the definition/source for the the most
-<a name="line-72"></a> concise explanation. A more wordy explanation is given below:
-<a name="line-73"></a>
-<a name="line-74"></a> A type signature needs to be provided on 'Fun' to make it work.
-<a name="line-75"></a> Depending on the kind of the parameters to 'Fun', a number of
-<a name="line-76"></a> different results happen.
-<a name="line-77"></a>
-<a name="line-78"></a>
-<a name="line-79"></a> [@ex1@]
+<a name="line-70"></a><a name="Fun"></a><span class='hs-comment'>{- $fun
+<a name="line-71"></a>
+<a name="line-72"></a> 'Fun' can be used instead of writing a new instance of
+<a name="line-73"></a> 'ApplyAB'. Refer to the definition/source for the the most
+<a name="line-74"></a> concise explanation. A more wordy explanation is given below:
+<a name="line-75"></a>
+<a name="line-76"></a> A type signature needs to be provided on 'Fun' to make it work.
+<a name="line-77"></a> Depending on the kind of the parameters to 'Fun', a number of
+<a name="line-78"></a> different results happen.
+<a name="line-79"></a>
 <a name="line-80"></a>
-<a name="line-81"></a> A list of kind @[* -&gt; Constraint]@ produces those
-<a name="line-82"></a> constraints on the argument type:
-<a name="line-83"></a>
-<a name="line-84"></a> &gt;&gt;&gt; :set -XDataKinds
-<a name="line-85"></a> &gt;&gt;&gt; let plus1 = Fun (\x -&gt; if x &lt; 5 then x+1 else 5) :: Fun '[Num, Ord] '()
-<a name="line-86"></a> &gt;&gt;&gt; :t applyAB plus1
-<a name="line-87"></a> applyAB plus1 :: (Num a, Ord a) =&gt; a -&gt; a
-<a name="line-88"></a>
-<a name="line-89"></a> Also note the use of @'()@ to signal that the result
-<a name="line-90"></a> type is the same as the argument type.
-<a name="line-91"></a>
-<a name="line-92"></a>
-<a name="line-93"></a> A single constraint can also be supplied:
+<a name="line-81"></a> [@ex1@]
+<a name="line-82"></a>
+<a name="line-83"></a> A list of kind @[* -&gt; Constraint]@ produces those
+<a name="line-84"></a> constraints on the argument type:
+<a name="line-85"></a>
+<a name="line-86"></a> &gt;&gt;&gt; :set -XDataKinds
+<a name="line-87"></a> &gt;&gt;&gt; let plus1 = Fun (\x -&gt; if x &lt; 5 then x+1 else 5) :: Fun '[Num, Ord] '()
+<a name="line-88"></a> &gt;&gt;&gt; :t applyAB plus1
+<a name="line-89"></a> applyAB plus1 :: (Num a, Ord a) =&gt; a -&gt; a
+<a name="line-90"></a>
+<a name="line-91"></a> Also note the use of @'()@ to signal that the result
+<a name="line-92"></a> type is the same as the argument type.
+<a name="line-93"></a>
 <a name="line-94"></a>
-<a name="line-95"></a> &gt;&gt;&gt; let succ1 = Fun succ :: Fun Enum '()
-<a name="line-96"></a> &gt;&gt;&gt; :t applyAB succ1
-<a name="line-97"></a> applyAB succ1 :: Enum a =&gt; a -&gt; a
-<a name="line-98"></a>
-<a name="line-99"></a>
-<a name="line-100"></a> &gt;&gt;&gt; let just = Fun Just :: Fun '[] Maybe
-<a name="line-101"></a> &gt;&gt;&gt; :t applyAB just
-<a name="line-102"></a> applyAB just :: a -&gt; Maybe a
-<a name="line-103"></a>
-<a name="line-104"></a>
-<a name="line-105"></a>-}</span>
-<a name="line-106"></a><a name="Fun"></a><span class='hs-keyword'>data</span> <span class='hs-conid'>Fun</span> <span class='hs-layout'>(</span><span class='hs-varid'>cxt</span> <span class='hs-keyglyph'>::</span> <span class='hs-varid'>k1</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>getb</span> <span class='hs-keyglyph'>::</span> <span class='hs-varid'>k2</span><span class='hs-layout'>)</span>
-<a name="line-107"></a>    <span class='hs-keyglyph'>=</span> <span class='hs-conid'>Fun</span> <span class='hs-layout'>(</span><span class='hs-keyword'>forall</span> <span class='hs-varid'>a</span><span class='hs-varop'>.</span> <span class='hs-conid'>FunCxt</span> <span class='hs-varid'>cxt</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>FunApp</span> <span class='hs-varid'>getb</span> <span class='hs-varid'>a</span><span class='hs-layout'>)</span>
-<a name="line-108"></a>
-<a name="line-109"></a><a name="Fun'"></a><span class='hs-comment'>{- | see 'Fun'. The only difference here is that the argument
-<a name="line-110"></a>type is calculated from the result type.
-<a name="line-111"></a>
-<a name="line-112"></a> &gt;&gt;&gt; let rd = Fun' read :: Fun' Read String
-<a name="line-113"></a> &gt;&gt;&gt; :t applyAB rd
-<a name="line-114"></a> applyAB rd :: Read b =&gt; [Char] -&gt; b
-<a name="line-115"></a>
-<a name="line-116"></a> &gt;&gt;&gt; let fromJust' = Fun' (\(Just a) -&gt; a) :: Fun' '[] Maybe
-<a name="line-117"></a> &gt;&gt;&gt; :t applyAB fromJust'
-<a name="line-118"></a> applyAB fromJust' :: Maybe b -&gt; b
-<a name="line-119"></a>
-<a name="line-120"></a>Note this use of Fun' means we don't have to get the b out of @Maybe b@,
+<a name="line-95"></a> A single constraint can also be supplied:
+<a name="line-96"></a>
+<a name="line-97"></a> &gt;&gt;&gt; let succ1 = Fun succ :: Fun Enum '()
+<a name="line-98"></a> &gt;&gt;&gt; :t applyAB succ1
+<a name="line-99"></a> applyAB succ1 :: Enum a =&gt; a -&gt; a
+<a name="line-100"></a>
+<a name="line-101"></a>
+<a name="line-102"></a> &gt;&gt;&gt; let just = Fun Just :: Fun '[] Maybe
+<a name="line-103"></a> &gt;&gt;&gt; :t applyAB just
+<a name="line-104"></a> applyAB just :: a -&gt; Maybe a
+<a name="line-105"></a>
+<a name="line-106"></a>
+<a name="line-107"></a>-}</span>
+<a name="line-108"></a><a name="Fun"></a><span class='hs-keyword'>data</span> <span class='hs-conid'>Fun</span> <span class='hs-layout'>(</span><span class='hs-varid'>cxt</span> <span class='hs-keyglyph'>::</span> <span class='hs-varid'>k1</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>getb</span> <span class='hs-keyglyph'>::</span> <span class='hs-varid'>k2</span><span class='hs-layout'>)</span>
+<a name="line-109"></a>    <span class='hs-keyglyph'>=</span> <span class='hs-conid'>Fun</span> <span class='hs-layout'>(</span><span class='hs-keyword'>forall</span> <span class='hs-varid'>a</span><span class='hs-varop'>.</span> <span class='hs-conid'>FunCxt</span> <span class='hs-varid'>cxt</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>FunApp</span> <span class='hs-varid'>getb</span> <span class='hs-varid'>a</span><span class='hs-layout'>)</span>
+<a name="line-110"></a>
+<a name="line-111"></a><a name="Fun'"></a><span class='hs-comment'>{- | see 'Fun'. The only difference here is that the argument
+<a name="line-112"></a>type is calculated from the result type.
+<a name="line-113"></a>
+<a name="line-114"></a> &gt;&gt;&gt; let rd = Fun' read :: Fun' Read String
+<a name="line-115"></a> &gt;&gt;&gt; :t applyAB rd
+<a name="line-116"></a> applyAB rd :: Read b =&gt; [Char] -&gt; b
+<a name="line-117"></a>
+<a name="line-118"></a> &gt;&gt;&gt; let fromJust' = Fun' (\(Just a) -&gt; a) :: Fun' '[] Maybe
+<a name="line-119"></a> &gt;&gt;&gt; :t applyAB fromJust'
+<a name="line-120"></a> applyAB fromJust' :: Maybe b -&gt; b
 <a name="line-121"></a>
-<a name="line-122"></a>
-<a name="line-123"></a>-}</span>
-<a name="line-124"></a><a name="Fun'"></a><span class='hs-keyword'>data</span> <span class='hs-conid'>Fun'</span> <span class='hs-layout'>(</span><span class='hs-varid'>cxt</span> <span class='hs-keyglyph'>::</span> <span class='hs-varid'>k1</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>geta</span> <span class='hs-keyglyph'>::</span> <span class='hs-varid'>k2</span><span class='hs-layout'>)</span>
-<a name="line-125"></a>    <span class='hs-keyglyph'>=</span> <span class='hs-conid'>Fun'</span> <span class='hs-layout'>(</span><span class='hs-keyword'>forall</span> <span class='hs-varid'>b</span><span class='hs-varop'>.</span> <span class='hs-conid'>FunCxt</span> <span class='hs-varid'>cxt</span> <span class='hs-varid'>b</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>FunApp</span> <span class='hs-varid'>geta</span> <span class='hs-varid'>b</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>b</span><span class='hs-layout'>)</span>
-<a name="line-126"></a>
-<a name="line-127"></a>
-<a name="line-128"></a><span class='hs-keyword'>type</span> <span class='hs-varid'>family</span> <span class='hs-conid'>FunApp</span> <span class='hs-layout'>(</span><span class='hs-varid'>fns</span> <span class='hs-keyglyph'>::</span> <span class='hs-varid'>k</span><span class='hs-layout'>)</span> <span class='hs-varid'>a</span>
+<a name="line-122"></a>Note this use of Fun' means we don't have to get the b out of @Maybe b@,
+<a name="line-123"></a>
+<a name="line-124"></a>
+<a name="line-125"></a>-}</span>
+<a name="line-126"></a><a name="Fun'"></a><span class='hs-keyword'>data</span> <span class='hs-conid'>Fun'</span> <span class='hs-layout'>(</span><span class='hs-varid'>cxt</span> <span class='hs-keyglyph'>::</span> <span class='hs-varid'>k1</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>geta</span> <span class='hs-keyglyph'>::</span> <span class='hs-varid'>k2</span><span class='hs-layout'>)</span>
+<a name="line-127"></a>    <span class='hs-keyglyph'>=</span> <span class='hs-conid'>Fun'</span> <span class='hs-layout'>(</span><span class='hs-keyword'>forall</span> <span class='hs-varid'>b</span><span class='hs-varop'>.</span> <span class='hs-conid'>FunCxt</span> <span class='hs-varid'>cxt</span> <span class='hs-varid'>b</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>FunApp</span> <span class='hs-varid'>geta</span> <span class='hs-varid'>b</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>b</span><span class='hs-layout'>)</span>
+<a name="line-128"></a>
 <a name="line-129"></a>
-<a name="line-130"></a><span class='hs-keyword'>type</span> <span class='hs-keyword'>instance</span> <span class='hs-conid'>FunApp</span> <span class='hs-layout'>(</span><span class='hs-varid'>fn</span> <span class='hs-keyglyph'>::</span> <span class='hs-varop'>*</span><span class='hs-layout'>)</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>fn</span>
-<a name="line-131"></a><span class='hs-keyword'>type</span> <span class='hs-keyword'>instance</span> <span class='hs-conid'>FunApp</span> <span class='hs-layout'>(</span><span class='hs-varid'>fn</span> <span class='hs-keyglyph'>::</span> <span class='hs-varop'>*</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varop'>*</span><span class='hs-layout'>)</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>fn</span> <span class='hs-varid'>a</span>
-<a name="line-132"></a><span class='hs-keyword'>type</span> <span class='hs-keyword'>instance</span> <span class='hs-conid'>FunApp</span> <span class='hs-layout'>(</span><span class='hs-varid'>fn</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>()</span><span class='hs-layout'>)</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>a</span>
-<a name="line-133"></a>
-<a name="line-134"></a><span class='hs-keyword'>type</span> <span class='hs-varid'>family</span> <span class='hs-conid'>FunCxt</span> <span class='hs-layout'>(</span><span class='hs-varid'>cxts</span> <span class='hs-keyglyph'>::</span> <span class='hs-varid'>k</span><span class='hs-layout'>)</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Constraint</span>
-<a name="line-135"></a><span class='hs-keyword'>type</span> <span class='hs-keyword'>instance</span> <span class='hs-conid'>FunCxt</span> <span class='hs-layout'>(</span><span class='hs-varid'>x</span> <span class='hs-chr'>'</span><span class='hs-conop'>:</span> <span class='hs-varid'>xs</span><span class='hs-layout'>)</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>=</span> <span class='hs-layout'>(</span><span class='hs-varid'>x</span> <span class='hs-varid'>a</span><span class='hs-layout'>,</span> <span class='hs-conid'>FunCxt</span> <span class='hs-varid'>xs</span> <span class='hs-varid'>a</span><span class='hs-layout'>)</span>
-<a name="line-136"></a><span class='hs-keyword'>type</span> <span class='hs-keyword'>instance</span> <span class='hs-conid'>FunCxt</span> <span class='hs-layout'>(</span><span class='hs-varid'>cxt</span> <span class='hs-keyglyph'>::</span> <span class='hs-varop'>*</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Constraint</span><span class='hs-layout'>)</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>cxt</span> <span class='hs-varid'>a</span>
-<a name="line-137"></a><span class='hs-keyword'>type</span> <span class='hs-keyword'>instance</span> <span class='hs-conid'>FunCxt</span> <span class='hs-chr'>'</span><span class='hs-conid'>[]</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>()</span>
-<a name="line-138"></a><span class='hs-comment'>-- | should there be so many ways to write no constraint?</span>
-<a name="line-139"></a><span class='hs-keyword'>type</span> <span class='hs-keyword'>instance</span> <span class='hs-conid'>FunCxt</span> <span class='hs-layout'>(</span><span class='hs-varid'>cxt</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>()</span><span class='hs-layout'>)</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>()</span>
-<a name="line-140"></a><span class='hs-keyword'>type</span> <span class='hs-keyword'>instance</span> <span class='hs-conid'>FunCxt</span> <span class='hs-layout'>(</span><span class='hs-varid'>cxt</span> <span class='hs-keyglyph'>::</span> <span class='hs-varop'>*</span><span class='hs-layout'>)</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>=</span> <span class='hs-layout'>(</span><span class='hs-varid'>cxt</span> <span class='hs-keyglyph'>~</span> <span class='hs-varid'>a</span><span class='hs-layout'>)</span>
-<a name="line-141"></a>
-<a name="line-142"></a><a name="instance%20ApplyAB%20(Fun%20cxt%20getb)%20a%20b"></a><span class='hs-keyword'>instance</span> <span class='hs-layout'>(</span><span class='hs-conid'>FunCxt</span> <span class='hs-varid'>cxt</span> <span class='hs-varid'>a</span><span class='hs-layout'>,</span> <span class='hs-conid'>FunApp</span> <span class='hs-varid'>getb</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>~</span> <span class='hs-varid'>b</span><span class='hs-layout'>)</span>  <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>ApplyAB</span> <span class='hs-layout'>(</span><span class='hs-conid'>Fun</span> <span class='hs-varid'>cxt</span> <span class='hs-varid'>getb</span><span class='hs-layout'>)</span> <span class='hs-varid'>a</span> <span class='hs-varid'>b</span> <span class='hs-keyword'>where</span>
-<a name="line-143"></a>    <span class='hs-varid'>applyAB</span> <span class='hs-layout'>(</span><span class='hs-conid'>Fun</span> <span class='hs-varid'>f</span><span class='hs-layout'>)</span> <span class='hs-varid'>x</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>f</span> <span class='hs-varid'>x</span>
-<a name="line-144"></a>
-<a name="line-145"></a><a name="instance%20ApplyAB%20(Fun'%20cxt%20geta)%20a%20b"></a><span class='hs-keyword'>instance</span> <span class='hs-layout'>(</span><span class='hs-conid'>FunCxt</span> <span class='hs-varid'>cxt</span> <span class='hs-varid'>b</span><span class='hs-layout'>,</span> <span class='hs-conid'>FunApp</span> <span class='hs-varid'>geta</span> <span class='hs-varid'>b</span> <span class='hs-keyglyph'>~</span> <span class='hs-varid'>a</span><span class='hs-layout'>)</span>  <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>ApplyAB</span> <span class='hs-layout'>(</span><span class='hs-conid'>Fun'</span> <span class='hs-varid'>cxt</span> <span class='hs-varid'>geta</span><span class='hs-layout'>)</span> <span class='hs-varid'>a</span> <span class='hs-varid'>b</span> <span class='hs-keyword'>where</span>
-<a name="line-146"></a>    <span class='hs-varid'>applyAB</span> <span class='hs-layout'>(</span><span class='hs-conid'>Fun'</span> <span class='hs-varid'>f</span><span class='hs-layout'>)</span> <span class='hs-varid'>x</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>f</span> <span class='hs-varid'>x</span>
-<a name="line-147"></a>
-<a name="line-148"></a>
+<a name="line-130"></a><span class='hs-keyword'>type</span> <span class='hs-varid'>family</span> <span class='hs-conid'>FunApp</span> <span class='hs-layout'>(</span><span class='hs-varid'>fns</span> <span class='hs-keyglyph'>::</span> <span class='hs-varid'>k</span><span class='hs-layout'>)</span> <span class='hs-varid'>a</span>
+<a name="line-131"></a>
+<a name="line-132"></a><span class='hs-keyword'>type</span> <span class='hs-keyword'>instance</span> <span class='hs-conid'>FunApp</span> <span class='hs-layout'>(</span><span class='hs-varid'>fn</span> <span class='hs-keyglyph'>::</span> <span class='hs-varop'>*</span><span class='hs-layout'>)</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>fn</span>
+<a name="line-133"></a><span class='hs-keyword'>type</span> <span class='hs-keyword'>instance</span> <span class='hs-conid'>FunApp</span> <span class='hs-layout'>(</span><span class='hs-varid'>fn</span> <span class='hs-keyglyph'>::</span> <span class='hs-varop'>*</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varop'>*</span><span class='hs-layout'>)</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>fn</span> <span class='hs-varid'>a</span>
+<a name="line-134"></a><span class='hs-keyword'>type</span> <span class='hs-keyword'>instance</span> <span class='hs-conid'>FunApp</span> <span class='hs-layout'>(</span><span class='hs-varid'>fn</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>()</span><span class='hs-layout'>)</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>a</span>
+<a name="line-135"></a>
+<a name="line-136"></a><span class='hs-keyword'>type</span> <span class='hs-varid'>family</span> <span class='hs-conid'>FunCxt</span> <span class='hs-layout'>(</span><span class='hs-varid'>cxts</span> <span class='hs-keyglyph'>::</span> <span class='hs-varid'>k</span><span class='hs-layout'>)</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Constraint</span>
+<a name="line-137"></a><span class='hs-keyword'>type</span> <span class='hs-keyword'>instance</span> <span class='hs-conid'>FunCxt</span> <span class='hs-layout'>(</span><span class='hs-varid'>x</span> <span class='hs-chr'>'</span><span class='hs-conop'>:</span> <span class='hs-varid'>xs</span><span class='hs-layout'>)</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>=</span> <span class='hs-layout'>(</span><span class='hs-varid'>x</span> <span class='hs-varid'>a</span><span class='hs-layout'>,</span> <span class='hs-conid'>FunCxt</span> <span class='hs-varid'>xs</span> <span class='hs-varid'>a</span><span class='hs-layout'>)</span>
+<a name="line-138"></a><span class='hs-keyword'>type</span> <span class='hs-keyword'>instance</span> <span class='hs-conid'>FunCxt</span> <span class='hs-layout'>(</span><span class='hs-varid'>cxt</span> <span class='hs-keyglyph'>::</span> <span class='hs-varop'>*</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Constraint</span><span class='hs-layout'>)</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>cxt</span> <span class='hs-varid'>a</span>
+<a name="line-139"></a><span class='hs-keyword'>type</span> <span class='hs-keyword'>instance</span> <span class='hs-conid'>FunCxt</span> <span class='hs-chr'>'</span><span class='hs-conid'>[]</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>()</span>
+<a name="line-140"></a><span class='hs-comment'>-- | should there be so many ways to write no constraint?</span>
+<a name="line-141"></a><span class='hs-keyword'>type</span> <span class='hs-keyword'>instance</span> <span class='hs-conid'>FunCxt</span> <span class='hs-layout'>(</span><span class='hs-varid'>cxt</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>()</span><span class='hs-layout'>)</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>()</span>
+<a name="line-142"></a><span class='hs-keyword'>type</span> <span class='hs-keyword'>instance</span> <span class='hs-conid'>FunCxt</span> <span class='hs-layout'>(</span><span class='hs-varid'>cxt</span> <span class='hs-keyglyph'>::</span> <span class='hs-varop'>*</span><span class='hs-layout'>)</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>=</span> <span class='hs-layout'>(</span><span class='hs-varid'>cxt</span> <span class='hs-keyglyph'>~</span> <span class='hs-varid'>a</span><span class='hs-layout'>)</span>
+<a name="line-143"></a>
+<a name="line-144"></a><a name="instance%20ApplyAB%20(Fun%20cxt%20getb)%20a%20b"></a><span class='hs-keyword'>instance</span> <span class='hs-layout'>(</span><span class='hs-conid'>FunCxt</span> <span class='hs-varid'>cxt</span> <span class='hs-varid'>a</span><span class='hs-layout'>,</span> <span class='hs-conid'>FunApp</span> <span class='hs-varid'>getb</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>~</span> <span class='hs-varid'>b</span><span class='hs-layout'>)</span>  <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>ApplyAB</span> <span class='hs-layout'>(</span><span class='hs-conid'>Fun</span> <span class='hs-varid'>cxt</span> <span class='hs-varid'>getb</span><span class='hs-layout'>)</span> <span class='hs-varid'>a</span> <span class='hs-varid'>b</span> <span class='hs-keyword'>where</span>
+<a name="line-145"></a>    <span class='hs-varid'>applyAB</span> <span class='hs-layout'>(</span><span class='hs-conid'>Fun</span> <span class='hs-varid'>f</span><span class='hs-layout'>)</span> <span class='hs-varid'>x</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>f</span> <span class='hs-varid'>x</span>
+<a name="line-146"></a>
+<a name="line-147"></a><a name="instance%20ApplyAB%20(Fun'%20cxt%20geta)%20a%20b"></a><span class='hs-keyword'>instance</span> <span class='hs-layout'>(</span><span class='hs-conid'>FunCxt</span> <span class='hs-varid'>cxt</span> <span class='hs-varid'>b</span><span class='hs-layout'>,</span> <span class='hs-conid'>FunApp</span> <span class='hs-varid'>geta</span> <span class='hs-varid'>b</span> <span class='hs-keyglyph'>~</span> <span class='hs-varid'>a</span><span class='hs-layout'>)</span>  <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>ApplyAB</span> <span class='hs-layout'>(</span><span class='hs-conid'>Fun'</span> <span class='hs-varid'>cxt</span> <span class='hs-varid'>geta</span><span class='hs-layout'>)</span> <span class='hs-varid'>a</span> <span class='hs-varid'>b</span> <span class='hs-keyword'>where</span>
+<a name="line-148"></a>    <span class='hs-varid'>applyAB</span> <span class='hs-layout'>(</span><span class='hs-conid'>Fun'</span> <span class='hs-varid'>f</span><span class='hs-layout'>)</span> <span class='hs-varid'>x</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>f</span> <span class='hs-varid'>x</span>
 <a name="line-149"></a>
 <a name="line-150"></a>
-<a name="line-151"></a><a name="instance%20ApplyAB%20(x'%20-%3e%20y')%20x%20y"></a><span class='hs-comment'>-- ** Simple useful instances of Apply</span>
-<a name="line-152"></a><a name="instance%20ApplyAB%20(x'%20-%3e%20y')%20x%20y"></a><span class='hs-comment'>-- | note this function will only be available at a single type</span>
-<a name="line-153"></a><a name="instance%20ApplyAB%20(x'%20-%3e%20y')%20x%20y"></a><span class='hs-comment'>-- (that is, @hMap succ@ will only work on 'HList' that contain</span>
-<a name="line-154"></a><a name="instance%20ApplyAB%20(x'%20-%3e%20y')%20x%20y"></a><span class='hs-comment'>-- only one type)</span>
-<a name="line-155"></a><a name="instance%20ApplyAB%20(x'%20-%3e%20y')%20x%20y"></a><span class='hs-keyword'>instance</span> <span class='hs-layout'>(</span><span class='hs-varid'>x'</span> <span class='hs-keyglyph'>~</span> <span class='hs-varid'>x</span><span class='hs-layout'>,</span> <span class='hs-varid'>y'</span> <span class='hs-keyglyph'>~</span> <span class='hs-varid'>y</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>ApplyAB</span> <span class='hs-layout'>(</span><span class='hs-varid'>x'</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>y'</span><span class='hs-layout'>)</span> <span class='hs-varid'>x</span> <span class='hs-varid'>y</span> <span class='hs-keyword'>where</span>
-<a name="line-156"></a>  <span class='hs-varid'>applyAB</span> <span class='hs-varid'>f</span> <span class='hs-varid'>x</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>f</span> <span class='hs-varid'>x</span>
-<a name="line-157"></a>
-<a name="line-158"></a>
+<a name="line-151"></a>
+<a name="line-152"></a>
+<a name="line-153"></a><a name="instance%20ApplyAB%20(x'%20-%3e%20y')%20x%20y"></a><span class='hs-comment'>-- ** Simple useful instances of Apply</span>
+<a name="line-154"></a><a name="instance%20ApplyAB%20(x'%20-%3e%20y')%20x%20y"></a><span class='hs-comment'>-- | note this function will only be available at a single type</span>
+<a name="line-155"></a><a name="instance%20ApplyAB%20(x'%20-%3e%20y')%20x%20y"></a><span class='hs-comment'>-- (that is, @hMap succ@ will only work on 'HList' that contain</span>
+<a name="line-156"></a><a name="instance%20ApplyAB%20(x'%20-%3e%20y')%20x%20y"></a><span class='hs-comment'>-- only one type)</span>
+<a name="line-157"></a><a name="instance%20ApplyAB%20(x'%20-%3e%20y')%20x%20y"></a><span class='hs-keyword'>instance</span> <span class='hs-layout'>(</span><span class='hs-varid'>x'</span> <span class='hs-keyglyph'>~</span> <span class='hs-varid'>x</span><span class='hs-layout'>,</span> <span class='hs-varid'>y'</span> <span class='hs-keyglyph'>~</span> <span class='hs-varid'>y</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>ApplyAB</span> <span class='hs-layout'>(</span><span class='hs-varid'>x'</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>y'</span><span class='hs-layout'>)</span> <span class='hs-varid'>x</span> <span class='hs-varid'>y</span> <span class='hs-keyword'>where</span>
+<a name="line-158"></a>  <span class='hs-varid'>applyAB</span> <span class='hs-varid'>f</span> <span class='hs-varid'>x</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>f</span> <span class='hs-varid'>x</span>
 <a name="line-159"></a>
-<a name="line-160"></a><a name="HPrint"></a><span class='hs-comment'>{- | print. An alternative implementation could be:
+<a name="line-160"></a>
 <a name="line-161"></a>
-<a name="line-162"></a>&gt;&gt;&gt; let hPrint = Fun print :: Fun Show (IO ())
+<a name="line-162"></a><a name="HPrint"></a><span class='hs-comment'>{- | print. An alternative implementation could be:
 <a name="line-163"></a>
-<a name="line-164"></a>This produces:
+<a name="line-164"></a>&gt;&gt;&gt; let hPrint = Fun print :: Fun Show (IO ())
 <a name="line-165"></a>
-<a name="line-166"></a>&gt;&gt;&gt; :t applyAB hPrint
-<a name="line-167"></a>applyAB hPrint :: Show a =&gt; a -&gt; IO ()
-<a name="line-168"></a>
-<a name="line-169"></a>-}</span>
-<a name="line-170"></a><a name="HPrint"></a><span class='hs-keyword'>data</span> <span class='hs-conid'>HPrint</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>HPrint</span>
-<a name="line-171"></a>
-<a name="line-172"></a><a name="instance%20ApplyAB%20HPrint%20x%20io"></a><span class='hs-keyword'>instance</span> <span class='hs-layout'>(</span><span class='hs-varid'>io</span> <span class='hs-keyglyph'>~</span> <span class='hs-conid'>IO</span> <span class='hs-conid'>()</span><span class='hs-layout'>,</span> <span class='hs-conid'>Show</span> <span class='hs-varid'>x</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>ApplyAB</span> <span class='hs-conid'>HPrint</span> <span class='hs-varid'>x</span> <span class='hs-varid'>io</span> <span class='hs-keyword'>where</span>
-<a name="line-173"></a>  <span class='hs-varid'>applyAB</span> <span class='hs-keyword'>_</span> <span class='hs-varid'>x</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>print</span> <span class='hs-varid'>x</span>
-<a name="line-174"></a>
-<a name="line-175"></a>
+<a name="line-166"></a>This produces:
+<a name="line-167"></a>
+<a name="line-168"></a>&gt;&gt;&gt; :t applyAB hPrint
+<a name="line-169"></a>applyAB hPrint :: Show a =&gt; a -&gt; IO ()
+<a name="line-170"></a>
+<a name="line-171"></a>-}</span>
+<a name="line-172"></a><a name="HPrint"></a><span class='hs-keyword'>data</span> <span class='hs-conid'>HPrint</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>HPrint</span>
+<a name="line-173"></a>
+<a name="line-174"></a><a name="instance%20ApplyAB%20HPrint%20x%20io"></a><span class='hs-keyword'>instance</span> <span class='hs-layout'>(</span><span class='hs-varid'>io</span> <span class='hs-keyglyph'>~</span> <span class='hs-conid'>IO</span> <span class='hs-conid'>()</span><span class='hs-layout'>,</span> <span class='hs-conid'>Show</span> <span class='hs-varid'>x</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>ApplyAB</span> <span class='hs-conid'>HPrint</span> <span class='hs-varid'>x</span> <span class='hs-varid'>io</span> <span class='hs-keyword'>where</span>
+<a name="line-175"></a>  <span class='hs-varid'>applyAB</span> <span class='hs-keyword'>_</span> <span class='hs-varid'>x</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>print</span> <span class='hs-varid'>x</span>
 <a name="line-176"></a>
-<a name="line-177"></a><a name="HRead"></a><span class='hs-comment'>{- | read
+<a name="line-177"></a>
 <a name="line-178"></a>
-<a name="line-179"></a>&gt;&gt;&gt; applyAB HRead "5.0" :: Double
-<a name="line-180"></a>5.0
-<a name="line-181"></a>
-<a name="line-182"></a>-}</span>
-<a name="line-183"></a><a name="HRead"></a><span class='hs-keyword'>data</span> <span class='hs-conid'>HRead</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>HRead</span>
-<a name="line-184"></a><a name="instance%20ApplyAB%20HRead%20string%20a"></a><span class='hs-keyword'>instance</span> <span class='hs-layout'>(</span><span class='hs-conid'>String</span> <span class='hs-keyglyph'>~</span> <span class='hs-varid'>string</span><span class='hs-layout'>,</span> <span class='hs-conid'>Read</span> <span class='hs-varid'>a</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>ApplyAB</span> <span class='hs-conid'>HRead</span> <span class='hs-varid'>string</span> <span class='hs-varid'>a</span> <span class='hs-keyword'>where</span>
-<a name="line-185"></a>    <span class='hs-varid'>applyAB</span> <span class='hs-keyword'>_</span> <span class='hs-varid'>x</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>read</span> <span class='hs-varid'>x</span>
-<a name="line-186"></a>
-<a name="line-187"></a><a name="HShow"></a><span class='hs-comment'>-- | show</span>
-<a name="line-188"></a><a name="HShow"></a><span class='hs-keyword'>data</span> <span class='hs-conid'>HShow</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>HShow</span>
-<a name="line-189"></a><a name="instance%20ApplyAB%20HShow%20a%20string"></a><span class='hs-keyword'>instance</span> <span class='hs-layout'>(</span><span class='hs-conid'>String</span> <span class='hs-keyglyph'>~</span> <span class='hs-varid'>string</span><span class='hs-layout'>,</span> <span class='hs-conid'>Show</span> <span class='hs-varid'>a</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>ApplyAB</span> <span class='hs-conid'>HShow</span> <span class='hs-varid'>a</span> <span class='hs-varid'>string</span> <span class='hs-keyword'>where</span>
-<a name="line-190"></a>    <span class='hs-varid'>applyAB</span> <span class='hs-keyword'>_</span> <span class='hs-varid'>x</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>show</span> <span class='hs-varid'>x</span>
-<a name="line-191"></a>
-<a name="line-192"></a>
+<a name="line-179"></a><a name="HRead"></a><span class='hs-comment'>{- | read
+<a name="line-180"></a>
+<a name="line-181"></a>&gt;&gt;&gt; applyAB HRead "5.0" :: Double
+<a name="line-182"></a>5.0
+<a name="line-183"></a>
+<a name="line-184"></a>-}</span>
+<a name="line-185"></a><a name="HRead"></a><span class='hs-keyword'>data</span> <span class='hs-conid'>HRead</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>HRead</span>
+<a name="line-186"></a><a name="instance%20ApplyAB%20HRead%20string%20a"></a><span class='hs-keyword'>instance</span> <span class='hs-layout'>(</span><span class='hs-conid'>String</span> <span class='hs-keyglyph'>~</span> <span class='hs-varid'>string</span><span class='hs-layout'>,</span> <span class='hs-conid'>Read</span> <span class='hs-varid'>a</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>ApplyAB</span> <span class='hs-conid'>HRead</span> <span class='hs-varid'>string</span> <span class='hs-varid'>a</span> <span class='hs-keyword'>where</span>
+<a name="line-187"></a>    <span class='hs-varid'>applyAB</span> <span class='hs-keyword'>_</span> <span class='hs-varid'>x</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>read</span> <span class='hs-varid'>x</span>
+<a name="line-188"></a>
+<a name="line-189"></a><a name="HShow"></a><span class='hs-comment'>-- | show</span>
+<a name="line-190"></a><a name="HShow"></a><span class='hs-keyword'>data</span> <span class='hs-conid'>HShow</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>HShow</span>
+<a name="line-191"></a><a name="instance%20ApplyAB%20HShow%20a%20string"></a><span class='hs-keyword'>instance</span> <span class='hs-layout'>(</span><span class='hs-conid'>String</span> <span class='hs-keyglyph'>~</span> <span class='hs-varid'>string</span><span class='hs-layout'>,</span> <span class='hs-conid'>Show</span> <span class='hs-varid'>a</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>ApplyAB</span> <span class='hs-conid'>HShow</span> <span class='hs-varid'>a</span> <span class='hs-varid'>string</span> <span class='hs-keyword'>where</span>
+<a name="line-192"></a>    <span class='hs-varid'>applyAB</span> <span class='hs-keyword'>_</span> <span class='hs-varid'>x</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>show</span> <span class='hs-varid'>x</span>
 <a name="line-193"></a>
 <a name="line-194"></a>
 <a name="line-195"></a>
-<a name="line-196"></a><a name="HComp"></a><span class='hs-comment'>{- | Compose two instances of 'ApplyAB'
+<a name="line-196"></a>
 <a name="line-197"></a>
-<a name="line-198"></a>&gt;&gt;&gt; applyAB (HComp HRead HShow) (5::Double) :: Double
-<a name="line-199"></a>5.0
-<a name="line-200"></a>
-<a name="line-201"></a>-}</span>
-<a name="line-202"></a><a name="HComp"></a><span class='hs-keyword'>data</span> <span class='hs-conid'>HComp</span> <span class='hs-varid'>g</span> <span class='hs-varid'>f</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>HComp</span> <span class='hs-varid'>g</span> <span class='hs-varid'>f</span> <span class='hs-comment'>-- ^ @g . f@</span>
-<a name="line-203"></a>
-<a name="line-204"></a><a name="instance%20ApplyAB%20(HComp%20g%20f)%20a%20c"></a><span class='hs-keyword'>instance</span> <span class='hs-keyword'>forall</span> <span class='hs-varid'>f</span> <span class='hs-varid'>g</span> <span class='hs-varid'>a</span> <span class='hs-varid'>b</span> <span class='hs-varid'>c</span><span class='hs-varop'>.</span> <span class='hs-layout'>(</span><span class='hs-conid'>ApplyAB</span> <span class='hs-varid'>f</span> <span class='hs-varid'>a</span> <span class='hs-varid'>b</span><span class='hs-layout'>,</span> <span class='hs-conid'>ApplyAB</span> <span class='hs-varid'>g</span> <span class='hs-varid'>b</span> <span class='hs-varid'>c</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>ApplyAB</span> <span class='hs-layout'>(</span><span class='hs-conid'>HComp</span> <span class='hs-varid'>g</span> <span class='hs-varid'>f</span><span class='hs-layout'>)</span> <span class='hs-varid'>a</span> <span class='hs-varid'>c</span> <span class='hs-keyword'>where</span>
-<a name="line-205"></a>    <span class='hs-varid'>applyAB</span> <span class='hs-keyglyph'>~</span><span class='hs-layout'>(</span><span class='hs-conid'>HComp</span> <span class='hs-varid'>g</span> <span class='hs-varid'>f</span><span class='hs-layout'>)</span> <span class='hs-varid'>x</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>applyAB</span> <span class='hs-varid'>g</span> <span class='hs-layout'>(</span><span class='hs-varid'>applyAB</span> <span class='hs-varid'>f</span> <span class='hs-varid'>x</span> <span class='hs-keyglyph'>::</span> <span class='hs-varid'>b</span><span class='hs-layout'>)</span>
-<a name="line-206"></a>
-<a name="line-207"></a>
-<a name="line-208"></a><a name="Comp"></a><span class='hs-comment'>{- | @app Comp (f,g) = g . f@. Works like:
+<a name="line-198"></a><a name="HComp"></a><span class='hs-comment'>{- | Compose two instances of 'ApplyAB'
+<a name="line-199"></a>
+<a name="line-200"></a>&gt;&gt;&gt; applyAB (HComp HRead HShow) (5::Double) :: Double
+<a name="line-201"></a>5.0
+<a name="line-202"></a>
+<a name="line-203"></a>-}</span>
+<a name="line-204"></a><a name="HComp"></a><span class='hs-keyword'>data</span> <span class='hs-conid'>HComp</span> <span class='hs-varid'>g</span> <span class='hs-varid'>f</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>HComp</span> <span class='hs-varid'>g</span> <span class='hs-varid'>f</span> <span class='hs-comment'>-- ^ @g . f@</span>
+<a name="line-205"></a>
+<a name="line-206"></a><a name="instance%20ApplyAB%20(HComp%20g%20f)%20a%20c"></a><span class='hs-keyword'>instance</span> <span class='hs-keyword'>forall</span> <span class='hs-varid'>f</span> <span class='hs-varid'>g</span> <span class='hs-varid'>a</span> <span class='hs-varid'>b</span> <span class='hs-varid'>c</span><span class='hs-varop'>.</span> <span class='hs-layout'>(</span><span class='hs-conid'>ApplyAB</span> <span class='hs-varid'>f</span> <span class='hs-varid'>a</span> <span class='hs-varid'>b</span><span class='hs-layout'>,</span> <span class='hs-conid'>ApplyAB</span> <span class='hs-varid'>g</span> <span class='hs-varid'>b</span> <span class='hs-varid'>c</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>ApplyAB</span> <span class='hs-layout'>(</span><span class='hs-conid'>HComp</span> <span class='hs-varid'>g</span> <span class='hs-varid'>f</span><span class='hs-layout'>)</span> <span class='hs-varid'>a</span> <span class='hs-varid'>c</span> <span class='hs-keyword'>where</span>
+<a name="line-207"></a>    <span class='hs-varid'>applyAB</span> <span class='hs-keyglyph'>~</span><span class='hs-layout'>(</span><span class='hs-conid'>HComp</span> <span class='hs-varid'>g</span> <span class='hs-varid'>f</span><span class='hs-layout'>)</span> <span class='hs-varid'>x</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>applyAB</span> <span class='hs-varid'>g</span> <span class='hs-layout'>(</span><span class='hs-varid'>applyAB</span> <span class='hs-varid'>f</span> <span class='hs-varid'>x</span> <span class='hs-keyglyph'>::</span> <span class='hs-varid'>b</span><span class='hs-layout'>)</span>
+<a name="line-208"></a>
 <a name="line-209"></a>
-<a name="line-210"></a>&gt;&gt;&gt; applyAB Comp (succ, pred) 'a'
-<a name="line-211"></a>'a'
-<a name="line-212"></a>
-<a name="line-213"></a>&gt;&gt;&gt; applyAB Comp (toEnum :: Int -&gt; Char, fromEnum) 10
-<a name="line-214"></a>10
-<a name="line-215"></a>
-<a name="line-216"></a>Note that defaulting will sometimes give you the wrong thing
+<a name="line-210"></a><a name="Comp"></a><span class='hs-comment'>{- | @app Comp (f,g) = g . f@. Works like:
+<a name="line-211"></a>
+<a name="line-212"></a>&gt;&gt;&gt; applyAB Comp (succ, pred) 'a'
+<a name="line-213"></a>'a'
+<a name="line-214"></a>
+<a name="line-215"></a>&gt;&gt;&gt; applyAB Comp (toEnum :: Int -&gt; Char, fromEnum) 10
+<a name="line-216"></a>10
 <a name="line-217"></a>
-<a name="line-218"></a>&gt; used to work (with associated types calculating result/argument types)
-<a name="line-219"></a>&gt; &gt;&gt;&gt; applyAB Comp (fromEnum, toEnum) 'a'
-<a name="line-220"></a>&gt; *** Exception: Prelude.Enum.().toEnum: bad argument
-<a name="line-221"></a>
-<a name="line-222"></a>-}</span>
-<a name="line-223"></a><a name="Comp"></a><span class='hs-keyword'>data</span> <span class='hs-conid'>Comp</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>Comp</span>
-<a name="line-224"></a>
-<a name="line-225"></a><a name="instance%20ApplyAB%20Comp%20fg%20r"></a><span class='hs-keyword'>instance</span> <span class='hs-layout'>(</span><span class='hs-varid'>y</span> <span class='hs-keyglyph'>~</span> <span class='hs-varid'>y'</span><span class='hs-layout'>,</span> <span class='hs-varid'>fg</span> <span class='hs-keyglyph'>~</span> <span class='hs-layout'>(</span><span class='hs-varid'>x</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>y</span><span class='hs-layout'>,</span> <span class='hs-varid'>y'</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>z</span><span class='hs-layout'>)</span><span class='hs-layout'>,</span> <span class='hs-varid'>r</span> <span class='hs-keyglyph'>~</span> <span class='hs-layout'>(</span><span class='hs-varid'>x</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>z</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>ApplyAB</span> <span class='hs-conid'>Comp</span> <span class='hs-varid'>fg</span>  <span class='hs-varid'>r</span>
-<a name="line-226"></a> <span class='hs-keyword'>where</span>
-<a name="line-227"></a>  <span class='hs-varid'>applyAB</span> <span class='hs-keyword'>_</span> <span class='hs-layout'>(</span><span class='hs-varid'>f</span><span class='hs-layout'>,</span><span class='hs-varid'>g</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>g</span> <span class='hs-varop'>.</span> <span class='hs-varid'>f</span>
-<a name="line-228"></a>
-<a name="line-229"></a><a name="HSeq"></a><span class='hs-comment'>-- | (\(a,b) -&gt; f a &gt;&gt; b)</span>
-<a name="line-230"></a><a name="HSeq"></a><span class='hs-keyword'>newtype</span> <span class='hs-conid'>HSeq</span> <span class='hs-varid'>x</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>HSeq</span> <span class='hs-varid'>x</span>
-<a name="line-231"></a><a name="instance%20ApplyAB%20(HSeq%20f)%20pair%20fx"></a><span class='hs-keyword'>instance</span> <span class='hs-layout'>(</span><span class='hs-conid'>Monad</span> <span class='hs-varid'>m</span><span class='hs-layout'>,</span> <span class='hs-conid'>ApplyAB</span> <span class='hs-varid'>f</span> <span class='hs-varid'>x</span> <span class='hs-varid'>fx</span><span class='hs-layout'>,</span> <span class='hs-varid'>fx</span> <span class='hs-keyglyph'>~</span> <span class='hs-varid'>m</span> <span class='hs-conid'>()</span><span class='hs-layout'>,</span> <span class='hs-varid'>pair</span> <span class='hs-keyglyph'>~</span> <span class='hs-layout'>(</span><span class='hs-varid'>x</span><span class='hs-layout'>,</span><span class='hs-varid'>m</span> <span class='hs-conid'>()</span><span class='hs-layout'>)</span><span class='hs-layout'>,</span> 
-<a name="line-232"></a>          <span class='hs-conid'>ApplyAB</span> <span class='hs-varid'>f</span> <span class='hs-varid'>x</span> <span class='hs-layout'>(</span><span class='hs-varid'>m</span> <span class='hs-conid'>()</span><span class='hs-layout'>)</span> <span class='hs-layout'>)</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>ApplyAB</span> <span class='hs-layout'>(</span><span class='hs-conid'>HSeq</span> <span class='hs-varid'>f</span><span class='hs-layout'>)</span> <span class='hs-varid'>pair</span> <span class='hs-varid'>fx</span> <span class='hs-keyword'>where</span>
-<a name="line-233"></a>  <span class='hs-varid'>applyAB</span> <span class='hs-layout'>(</span><span class='hs-conid'>HSeq</span> <span class='hs-varid'>f</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>x</span><span class='hs-layout'>,</span><span class='hs-varid'>c</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyword'>do</span> <span class='hs-varid'>asVoid</span> <span class='hs-layout'>(</span><span class='hs-varid'>applyAB</span> <span class='hs-varid'>f</span> <span class='hs-varid'>x</span><span class='hs-layout'>)</span><span class='hs-layout'>;</span> <span class='hs-varid'>c</span>
-<a name="line-234"></a>    <span class='hs-keyword'>where</span> <span class='hs-varid'>asVoid</span> <span class='hs-keyglyph'>::</span> <span class='hs-varid'>m</span> <span class='hs-conid'>()</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>m</span> <span class='hs-conid'>()</span>
-<a name="line-235"></a>          <span class='hs-varid'>asVoid</span> <span class='hs-varid'>t</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>t</span>
-<a name="line-236"></a>
-<a name="line-237"></a>
+<a name="line-218"></a>Note that defaulting will sometimes give you the wrong thing
+<a name="line-219"></a>
+<a name="line-220"></a>&gt; used to work (with associated types calculating result/argument types)
+<a name="line-221"></a>&gt; &gt;&gt;&gt; applyAB Comp (fromEnum, toEnum) 'a'
+<a name="line-222"></a>&gt; *** Exception: Prelude.Enum.().toEnum: bad argument
+<a name="line-223"></a>
+<a name="line-224"></a>-}</span>
+<a name="line-225"></a><a name="Comp"></a><span class='hs-keyword'>data</span> <span class='hs-conid'>Comp</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>Comp</span>
+<a name="line-226"></a>
+<a name="line-227"></a><a name="instance%20ApplyAB%20Comp%20fg%20r"></a><span class='hs-keyword'>instance</span> <span class='hs-layout'>(</span><span class='hs-varid'>y</span> <span class='hs-keyglyph'>~</span> <span class='hs-varid'>y'</span><span class='hs-layout'>,</span> <span class='hs-varid'>fg</span> <span class='hs-keyglyph'>~</span> <span class='hs-layout'>(</span><span class='hs-varid'>x</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>y</span><span class='hs-layout'>,</span> <span class='hs-varid'>y'</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>z</span><span class='hs-layout'>)</span><span class='hs-layout'>,</span> <span class='hs-varid'>r</span> <span class='hs-keyglyph'>~</span> <span class='hs-layout'>(</span><span class='hs-varid'>x</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>z</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>ApplyAB</span> <span class='hs-conid'>Comp</span> <span class='hs-varid'>fg</span>  <span class='hs-varid'>r</span>
+<a name="line-228"></a> <span class='hs-keyword'>where</span>
+<a name="line-229"></a>  <span class='hs-varid'>applyAB</span> <span class='hs-keyword'>_</span> <span class='hs-layout'>(</span><span class='hs-varid'>f</span><span class='hs-layout'>,</span><span class='hs-varid'>g</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>g</span> <span class='hs-varop'>.</span> <span class='hs-varid'>f</span>
+<a name="line-230"></a>
+<a name="line-231"></a><a name="HSeq"></a><span class='hs-comment'>-- | (\(a,b) -&gt; f a &gt;&gt; b)</span>
+<a name="line-232"></a><a name="HSeq"></a><span class='hs-keyword'>newtype</span> <span class='hs-conid'>HSeq</span> <span class='hs-varid'>x</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>HSeq</span> <span class='hs-varid'>x</span>
+<a name="line-233"></a><a name="instance%20ApplyAB%20(HSeq%20f)%20pair%20fx"></a><span class='hs-keyword'>instance</span> <span class='hs-layout'>(</span><span class='hs-conid'>Monad</span> <span class='hs-varid'>m</span><span class='hs-layout'>,</span> <span class='hs-conid'>ApplyAB</span> <span class='hs-varid'>f</span> <span class='hs-varid'>x</span> <span class='hs-varid'>fx</span><span class='hs-layout'>,</span> <span class='hs-varid'>fx</span> <span class='hs-keyglyph'>~</span> <span class='hs-varid'>m</span> <span class='hs-conid'>()</span><span class='hs-layout'>,</span> <span class='hs-varid'>pair</span> <span class='hs-keyglyph'>~</span> <span class='hs-layout'>(</span><span class='hs-varid'>x</span><span class='hs-layout'>,</span><span class='hs-varid'>m</span> <span class='hs-conid'>()</span><span class='hs-layout'>)</span><span class='hs-layout'>,</span> 
+<a name="line-234"></a>          <span class='hs-conid'>ApplyAB</span> <span class='hs-varid'>f</span> <span class='hs-varid'>x</span> <span class='hs-layout'>(</span><span class='hs-varid'>m</span> <span class='hs-conid'>()</span><span class='hs-layout'>)</span> <span class='hs-layout'>)</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>ApplyAB</span> <span class='hs-layout'>(</span><span class='hs-conid'>HSeq</span> <span class='hs-varid'>f</span><span class='hs-layout'>)</span> <span class='hs-varid'>pair</span> <span class='hs-varid'>fx</span> <span class='hs-keyword'>where</span>
+<a name="line-235"></a>  <span class='hs-varid'>applyAB</span> <span class='hs-layout'>(</span><span class='hs-conid'>HSeq</span> <span class='hs-varid'>f</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>x</span><span class='hs-layout'>,</span><span class='hs-varid'>c</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyword'>do</span> <span class='hs-varid'>asVoid</span> <span class='hs-layout'>(</span><span class='hs-varid'>applyAB</span> <span class='hs-varid'>f</span> <span class='hs-varid'>x</span><span class='hs-layout'>)</span><span class='hs-layout'>;</span> <span class='hs-varid'>c</span>
+<a name="line-236"></a>    <span class='hs-keyword'>where</span> <span class='hs-varid'>asVoid</span> <span class='hs-keyglyph'>::</span> <span class='hs-varid'>m</span> <span class='hs-conid'>()</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>m</span> <span class='hs-conid'>()</span>
+<a name="line-237"></a>          <span class='hs-varid'>asVoid</span> <span class='hs-varid'>t</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>t</span>
 <a name="line-238"></a>
-<a name="line-239"></a><a name="instance%20ApplyAB%20(HJust%20t)%20a%20hJustA"></a><span class='hs-comment'>-- | @HJust ()@ is a placeholder for a function that applies the 'HJust' constructor</span>
-<a name="line-240"></a><a name="instance%20ApplyAB%20(HJust%20t)%20a%20hJustA"></a><span class='hs-keyword'>instance</span> <span class='hs-varid'>hJustA</span> <span class='hs-keyglyph'>~</span> <span class='hs-conid'>HJust</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>ApplyAB</span> <span class='hs-layout'>(</span><span class='hs-conid'>HJust</span> <span class='hs-varid'>t</span><span class='hs-layout'>)</span> <span class='hs-varid'>a</span> <span class='hs-varid'>hJustA</span> <span class='hs-keyword'>where</span>
-<a name="line-241"></a>    <span class='hs-varid'>applyAB</span> <span class='hs-keyword'>_</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>HJust</span> <span class='hs-varid'>a</span>
-<a name="line-242"></a>
-<a name="line-243"></a>
-<a name="line-244"></a><a name="HFlip"></a><span class='hs-comment'>-- | 'flip'</span>
-<a name="line-245"></a><a name="HFlip"></a><span class='hs-keyword'>data</span> <span class='hs-conid'>HFlip</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>HFlip</span>
-<a name="line-246"></a>
-<a name="line-247"></a><a name="instance%20ApplyAB%20HFlip%20f1%20f2"></a><span class='hs-keyword'>instance</span> <span class='hs-layout'>(</span><span class='hs-varid'>f1</span> <span class='hs-keyglyph'>~</span> <span class='hs-layout'>(</span><span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>b</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>c</span><span class='hs-layout'>)</span><span class='hs-layout'>,</span> <span class='hs-varid'>f2</span> <span class='hs-keyglyph'>~</span> <span class='hs-layout'>(</span><span class='hs-varid'>b</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>c</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span>  <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>ApplyAB</span> <span class='hs-conid'>HFlip</span> <span class='hs-varid'>f1</span> <span class='hs-varid'>f2</span> <span class='hs-keyword'>where</span>
-<a name="line-248"></a>    <span class='hs-varid'>applyAB</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>flip</span>
-<a name="line-249"></a>
-<a name="line-250"></a><span class='hs-comment'>-- --------------------------------------------------------------------------</span>
-<a name="line-251"></a><span class='hs-comment'>-- * Proxy</span>
-<a name="line-252"></a><span class='hs-comment'>--</span>
-<a name="line-253"></a>
-<a name="line-254"></a><span class='hs-comment'>-- $note see "Data.HList.Proxy"</span>
+<a name="line-239"></a>
+<a name="line-240"></a>
+<a name="line-241"></a><a name="instance%20ApplyAB%20(HJust%20t)%20a%20hJustA"></a><span class='hs-comment'>-- | @HJust ()@ is a placeholder for a function that applies the 'HJust' constructor</span>
+<a name="line-242"></a><a name="instance%20ApplyAB%20(HJust%20t)%20a%20hJustA"></a><span class='hs-keyword'>instance</span> <span class='hs-varid'>hJustA</span> <span class='hs-keyglyph'>~</span> <span class='hs-conid'>HJust</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>ApplyAB</span> <span class='hs-layout'>(</span><span class='hs-conid'>HJust</span> <span class='hs-varid'>t</span><span class='hs-layout'>)</span> <span class='hs-varid'>a</span> <span class='hs-varid'>hJustA</span> <span class='hs-keyword'>where</span>
+<a name="line-243"></a>    <span class='hs-varid'>applyAB</span> <span class='hs-keyword'>_</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>HJust</span> <span class='hs-varid'>a</span>
+<a name="line-244"></a>
+<a name="line-245"></a>
+<a name="line-246"></a><a name="HFlip"></a><span class='hs-comment'>-- | 'flip'</span>
+<a name="line-247"></a><a name="HFlip"></a><span class='hs-keyword'>data</span> <span class='hs-conid'>HFlip</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>HFlip</span>
+<a name="line-248"></a>
+<a name="line-249"></a><a name="instance%20ApplyAB%20HFlip%20f1%20f2"></a><span class='hs-keyword'>instance</span> <span class='hs-layout'>(</span><span class='hs-varid'>f1</span> <span class='hs-keyglyph'>~</span> <span class='hs-layout'>(</span><span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>b</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>c</span><span class='hs-layout'>)</span><span class='hs-layout'>,</span> <span class='hs-varid'>f2</span> <span class='hs-keyglyph'>~</span> <span class='hs-layout'>(</span><span class='hs-varid'>b</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>c</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span>  <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>ApplyAB</span> <span class='hs-conid'>HFlip</span> <span class='hs-varid'>f1</span> <span class='hs-varid'>f2</span> <span class='hs-keyword'>where</span>
+<a name="line-250"></a>    <span class='hs-varid'>applyAB</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>flip</span>
+<a name="line-251"></a>
+<a name="line-252"></a><span class='hs-comment'>-- --------------------------------------------------------------------------</span>
+<a name="line-253"></a><span class='hs-comment'>-- * Proxy</span>
+<a name="line-254"></a><span class='hs-comment'>--</span>
 <a name="line-255"></a>
-<a name="line-256"></a><a name="Label"></a><span class='hs-comment'>-- | A special 'Proxy' for record labels, polykinded</span>
-<a name="line-257"></a><a name="Label"></a><span class='hs-keyword'>data</span> <span class='hs-conid'>Label</span> <span class='hs-varid'>l</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>Label</span>
-<a name="line-258"></a>
-<a name="line-259"></a><a name="labelToProxy"></a><span class='hs-definition'>labelToProxy</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Label</span> <span class='hs-varid'>l</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Proxy</span> <span class='hs-varid'>l</span>
-<a name="line-260"></a><span class='hs-definition'>labelToProxy</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>undefined</span>
-<a name="line-261"></a>
-<a name="line-262"></a><a name="ShowLabel"></a><span class='hs-keyword'>class</span> <span class='hs-conid'>ShowLabel</span> <span class='hs-varid'>l</span> <span class='hs-keyword'>where</span>
-<a name="line-263"></a>  <span class='hs-varid'>showLabel</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Label</span> <span class='hs-varid'>l</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>String</span>
-<a name="line-264"></a>
-<a name="line-265"></a>
-<a name="line-266"></a><span class='hs-comment'>-- --------------------------------------------------------------------------</span>
+<a name="line-256"></a><span class='hs-comment'>-- $note see "Data.HList.Proxy"</span>
+<a name="line-257"></a>
+<a name="line-258"></a><a name="Label"></a><span class='hs-comment'>-- | A special 'Proxy' for record labels, polykinded</span>
+<a name="line-259"></a><a name="Label"></a><span class='hs-keyword'>data</span> <span class='hs-conid'>Label</span> <span class='hs-varid'>l</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>Label</span>
+<a name="line-260"></a>
+<a name="line-261"></a><a name="labelToProxy"></a><span class='hs-definition'>labelToProxy</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Label</span> <span class='hs-varid'>l</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Proxy</span> <span class='hs-varid'>l</span>
+<a name="line-262"></a><span class='hs-definition'>labelToProxy</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>undefined</span>
+<a name="line-263"></a>
+<a name="line-264"></a><a name="ShowLabel"></a><span class='hs-keyword'>class</span> <span class='hs-conid'>ShowLabel</span> <span class='hs-varid'>l</span> <span class='hs-keyword'>where</span>
+<a name="line-265"></a>  <span class='hs-varid'>showLabel</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Label</span> <span class='hs-varid'>l</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>String</span>
+<a name="line-266"></a>
 <a name="line-267"></a>
-<a name="line-268"></a><span class='hs-comment'>-- * Booleans</span>
+<a name="line-268"></a><span class='hs-comment'>-- --------------------------------------------------------------------------</span>
 <a name="line-269"></a>
-<a name="line-270"></a><span class='hs-comment'>{- $boolNote
+<a name="line-270"></a><span class='hs-comment'>-- * Booleans</span>
 <a name="line-271"></a>
-<a name="line-272"></a>GHC already lifts booleans, defined as
+<a name="line-272"></a><span class='hs-comment'>{- $boolNote
 <a name="line-273"></a>
-<a name="line-274"></a>&gt; data Bool = True | False
+<a name="line-274"></a>GHC already lifts booleans, defined as
 <a name="line-275"></a>
-<a name="line-276"></a>to types: Bool becomes kind and True and False (also denoted by
-<a name="line-277"></a>'True and 'False) become nullary type constructors.
-<a name="line-278"></a>
-<a name="line-279"></a>The above line is equivalent to
+<a name="line-276"></a>&gt; data Bool = True | False
+<a name="line-277"></a>
+<a name="line-278"></a>to types: Bool becomes kind and True and False (also denoted by
+<a name="line-279"></a>'True and 'False) become nullary type constructors.
 <a name="line-280"></a>
-<a name="line-281"></a>&gt; data HTrue
-<a name="line-282"></a>&gt; data HFalse
-<a name="line-283"></a>
-<a name="line-284"></a>&gt; class HBool x
-<a name="line-285"></a>&gt; instance HBool HTrue
-<a name="line-286"></a>&gt; instance HBool HFalse
-<a name="line-287"></a>
-<a name="line-288"></a>-}</span>
+<a name="line-281"></a>The above line is equivalent to
+<a name="line-282"></a>
+<a name="line-283"></a>&gt; data HTrue
+<a name="line-284"></a>&gt; data HFalse
+<a name="line-285"></a>
+<a name="line-286"></a>&gt; class HBool x
+<a name="line-287"></a>&gt; instance HBool HTrue
+<a name="line-288"></a>&gt; instance HBool HFalse
 <a name="line-289"></a>
-<a name="line-290"></a><a name="hTrue"></a><span class='hs-comment'>-- ** Value-level proxies</span>
-<a name="line-291"></a><span class='hs-definition'>hTrue</span>  <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Proxy</span> <span class='hs-conid'>True</span> <span class='hs-layout'>;</span> <span class='hs-varid'>hTrue</span>  <span class='hs-keyglyph'>=</span> <span class='hs-varid'>undefined</span>
-<a name="line-292"></a><a name="hFalse"></a><span class='hs-definition'>hFalse</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Proxy</span> <span class='hs-conid'>False</span><span class='hs-layout'>;</span> <span class='hs-varid'>hFalse</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>undefined</span>
-<a name="line-293"></a>
-<a name="line-294"></a><a name="instance%20Show%20(Proxy%20True)"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>Show</span> <span class='hs-layout'>(</span><span class='hs-conid'>Proxy</span> <span class='hs-conid'>True</span><span class='hs-layout'>)</span>  <span class='hs-keyword'>where</span> <span class='hs-varid'>show</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-str'>"HTrue"</span>
-<a name="line-295"></a><a name="instance%20Show%20(Proxy%20False)"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>Show</span> <span class='hs-layout'>(</span><span class='hs-conid'>Proxy</span> <span class='hs-conid'>False</span><span class='hs-layout'>)</span> <span class='hs-keyword'>where</span> <span class='hs-varid'>show</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-str'>"HFalse"</span>
-<a name="line-296"></a>
-<a name="line-297"></a>
-<a name="line-298"></a><span class='hs-comment'>-- **  Conjunction</span>
+<a name="line-290"></a>-}</span>
+<a name="line-291"></a>
+<a name="line-292"></a><a name="hTrue"></a><span class='hs-comment'>-- ** Value-level proxies</span>
+<a name="line-293"></a><span class='hs-definition'>hTrue</span>  <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Proxy</span> <span class='hs-conid'>True</span> <span class='hs-layout'>;</span> <span class='hs-varid'>hTrue</span>  <span class='hs-keyglyph'>=</span> <span class='hs-varid'>undefined</span>
+<a name="line-294"></a><a name="hFalse"></a><span class='hs-definition'>hFalse</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Proxy</span> <span class='hs-conid'>False</span><span class='hs-layout'>;</span> <span class='hs-varid'>hFalse</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>undefined</span>
+<a name="line-295"></a>
+<a name="line-296"></a><a name="instance%20Show%20(Proxy%20True)"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>Show</span> <span class='hs-layout'>(</span><span class='hs-conid'>Proxy</span> <span class='hs-conid'>True</span><span class='hs-layout'>)</span>  <span class='hs-keyword'>where</span> <span class='hs-varid'>show</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-str'>"HTrue"</span>
+<a name="line-297"></a><a name="instance%20Show%20(Proxy%20False)"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>Show</span> <span class='hs-layout'>(</span><span class='hs-conid'>Proxy</span> <span class='hs-conid'>False</span><span class='hs-layout'>)</span> <span class='hs-keyword'>where</span> <span class='hs-varid'>show</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-str'>"HFalse"</span>
+<a name="line-298"></a>
 <a name="line-299"></a>
-<a name="line-300"></a><span class='hs-keyword'>type</span> <span class='hs-varid'>family</span> <span class='hs-conid'>HAnd</span> <span class='hs-layout'>(</span><span class='hs-varid'>t1</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Bool</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>t2</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Bool</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Bool</span>
-<a name="line-301"></a><span class='hs-keyword'>type</span> <span class='hs-keyword'>instance</span> <span class='hs-conid'>HAnd</span> <span class='hs-conid'>False</span> <span class='hs-varid'>t</span>  <span class='hs-keyglyph'>=</span> <span class='hs-conid'>False</span>
-<a name="line-302"></a><span class='hs-keyword'>type</span> <span class='hs-keyword'>instance</span> <span class='hs-conid'>HAnd</span> <span class='hs-conid'>True</span>  <span class='hs-varid'>t</span>  <span class='hs-keyglyph'>=</span> <span class='hs-varid'>t</span>
-<a name="line-303"></a>
-<a name="line-304"></a><a name="hAnd"></a><span class='hs-comment'>-- | `demote' to values</span>
-<a name="line-305"></a><span class='hs-definition'>hAnd</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Proxy</span> <span class='hs-varid'>t1</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Proxy</span> <span class='hs-varid'>t2</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Proxy</span> <span class='hs-layout'>(</span><span class='hs-conid'>HAnd</span> <span class='hs-varid'>t1</span> <span class='hs-varid'>t2</span><span class='hs-layout'>)</span>
-<a name="line-306"></a><span class='hs-definition'>hAnd</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>undefined</span>
-<a name="line-307"></a>
-<a name="line-308"></a>
-<a name="line-309"></a><span class='hs-comment'>-- ** Disjunction</span>
+<a name="line-300"></a><span class='hs-comment'>-- **  Conjunction</span>
+<a name="line-301"></a>
+<a name="line-302"></a><span class='hs-keyword'>type</span> <span class='hs-varid'>family</span> <span class='hs-conid'>HAnd</span> <span class='hs-layout'>(</span><span class='hs-varid'>t1</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Bool</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>t2</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Bool</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Bool</span>
+<a name="line-303"></a><span class='hs-keyword'>type</span> <span class='hs-keyword'>instance</span> <span class='hs-conid'>HAnd</span> <span class='hs-conid'>False</span> <span class='hs-varid'>t</span>  <span class='hs-keyglyph'>=</span> <span class='hs-conid'>False</span>
+<a name="line-304"></a><span class='hs-keyword'>type</span> <span class='hs-keyword'>instance</span> <span class='hs-conid'>HAnd</span> <span class='hs-conid'>True</span>  <span class='hs-varid'>t</span>  <span class='hs-keyglyph'>=</span> <span class='hs-varid'>t</span>
+<a name="line-305"></a>
+<a name="line-306"></a><a name="hAnd"></a><span class='hs-comment'>-- | `demote' to values</span>
+<a name="line-307"></a><span class='hs-definition'>hAnd</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Proxy</span> <span class='hs-varid'>t1</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Proxy</span> <span class='hs-varid'>t2</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Proxy</span> <span class='hs-layout'>(</span><span class='hs-conid'>HAnd</span> <span class='hs-varid'>t1</span> <span class='hs-varid'>t2</span><span class='hs-layout'>)</span>
+<a name="line-308"></a><span class='hs-definition'>hAnd</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>undefined</span>
+<a name="line-309"></a>
 <a name="line-310"></a>
-<a name="line-311"></a><span class='hs-keyword'>type</span> <span class='hs-varid'>family</span> <span class='hs-conid'>HOr</span> <span class='hs-layout'>(</span><span class='hs-varid'>t1</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Bool</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>t2</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Bool</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Bool</span>
-<a name="line-312"></a><span class='hs-keyword'>type</span> <span class='hs-keyword'>instance</span> <span class='hs-conid'>HOr</span> <span class='hs-conid'>False</span> <span class='hs-varid'>t</span>    <span class='hs-keyglyph'>=</span> <span class='hs-varid'>t</span>
-<a name="line-313"></a><span class='hs-keyword'>type</span> <span class='hs-keyword'>instance</span> <span class='hs-conid'>HOr</span> <span class='hs-conid'>True</span> <span class='hs-varid'>t</span>     <span class='hs-keyglyph'>=</span> <span class='hs-conid'>True</span>
-<a name="line-314"></a>
-<a name="line-315"></a><a name="hOr"></a><span class='hs-comment'>-- | `demote' to values</span>
-<a name="line-316"></a><span class='hs-definition'>hOr</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Proxy</span> <span class='hs-varid'>t1</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Proxy</span> <span class='hs-varid'>t2</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Proxy</span> <span class='hs-layout'>(</span><span class='hs-conid'>HOr</span> <span class='hs-varid'>t1</span> <span class='hs-varid'>t2</span><span class='hs-layout'>)</span>
-<a name="line-317"></a><span class='hs-definition'>hOr</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>undefined</span>
-<a name="line-318"></a>
-<a name="line-319"></a><span class='hs-comment'>{- $boolHistoricalNote
+<a name="line-311"></a><span class='hs-comment'>-- ** Disjunction</span>
+<a name="line-312"></a>
+<a name="line-313"></a><span class='hs-keyword'>type</span> <span class='hs-varid'>family</span> <span class='hs-conid'>HOr</span> <span class='hs-layout'>(</span><span class='hs-varid'>t1</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Bool</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>t2</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Bool</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Bool</span>
+<a name="line-314"></a><span class='hs-keyword'>type</span> <span class='hs-keyword'>instance</span> <span class='hs-conid'>HOr</span> <span class='hs-conid'>False</span> <span class='hs-varid'>t</span>    <span class='hs-keyglyph'>=</span> <span class='hs-varid'>t</span>
+<a name="line-315"></a><span class='hs-keyword'>type</span> <span class='hs-keyword'>instance</span> <span class='hs-conid'>HOr</span> <span class='hs-conid'>True</span> <span class='hs-varid'>t</span>     <span class='hs-keyglyph'>=</span> <span class='hs-conid'>True</span>
+<a name="line-316"></a>
+<a name="line-317"></a><a name="hOr"></a><span class='hs-comment'>-- | `demote' to values</span>
+<a name="line-318"></a><span class='hs-definition'>hOr</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Proxy</span> <span class='hs-varid'>t1</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Proxy</span> <span class='hs-varid'>t2</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Proxy</span> <span class='hs-layout'>(</span><span class='hs-conid'>HOr</span> <span class='hs-varid'>t1</span> <span class='hs-varid'>t2</span><span class='hs-layout'>)</span>
+<a name="line-319"></a><span class='hs-definition'>hOr</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>undefined</span>
 <a name="line-320"></a>
-<a name="line-321"></a>Compare with the original code based on functional dependencies:
+<a name="line-321"></a><span class='hs-comment'>{- $boolHistoricalNote
 <a name="line-322"></a>
-<a name="line-323"></a>&gt; class (HBool t, HBool t', HBool t'') =&gt; HOr t t' t'' | t t' -&gt; t''
-<a name="line-324"></a>&gt;  where
-<a name="line-325"></a>&gt;   hOr :: t -&gt; t' -&gt; t''
-<a name="line-326"></a>
-<a name="line-327"></a>&gt; instance HOr HFalse HFalse HFalse
-<a name="line-328"></a>&gt;  where
-<a name="line-329"></a>&gt;   hOr _ _ = hFalse
-<a name="line-330"></a>
-<a name="line-331"></a>&gt; instance HOr HTrue HFalse HTrue
-<a name="line-332"></a>&gt;  where
-<a name="line-333"></a>&gt;   hOr _ _ = hTrue
-<a name="line-334"></a>
-<a name="line-335"></a>&gt; instance HOr HFalse HTrue HTrue
-<a name="line-336"></a>&gt;  where
-<a name="line-337"></a>&gt;   hOr _ _ = hTrue
-<a name="line-338"></a>
-<a name="line-339"></a>&gt; instance HOr HTrue HTrue HTrue
-<a name="line-340"></a>&gt;  where
-<a name="line-341"></a>&gt;   hOr _ _ = hTrue
-<a name="line-342"></a>-}</span>
-<a name="line-343"></a>
-<a name="line-344"></a>
-<a name="line-345"></a><a name="HCond"></a><span class='hs-keyword'>class</span> <span class='hs-conid'>HCond</span> <span class='hs-layout'>(</span><span class='hs-varid'>t</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Bool</span><span class='hs-layout'>)</span> <span class='hs-varid'>x</span> <span class='hs-varid'>y</span> <span class='hs-varid'>z</span> <span class='hs-keyglyph'>|</span> <span class='hs-varid'>t</span> <span class='hs-varid'>x</span> <span class='hs-varid'>y</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>z</span>
-<a name="line-346"></a> <span class='hs-keyword'>where</span>
-<a name="line-347"></a>  <span class='hs-varid'>hCond</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Proxy</span> <span class='hs-varid'>t</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>x</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>y</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>z</span>
-<a name="line-348"></a>
-<a name="line-349"></a><a name="instance%20HCond%20False%20x%20y%20y"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>HCond</span> <span class='hs-conid'>False</span> <span class='hs-varid'>x</span> <span class='hs-varid'>y</span> <span class='hs-varid'>y</span>
-<a name="line-350"></a> <span class='hs-keyword'>where</span>
-<a name="line-351"></a>  <span class='hs-varid'>hCond</span> <span class='hs-keyword'>_</span> <span class='hs-keyword'>_</span> <span class='hs-varid'>y</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>y</span>
-<a name="line-352"></a>
-<a name="line-353"></a><a name="instance%20HCond%20True%20x%20y%20x"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>HCond</span> <span class='hs-conid'>True</span> <span class='hs-varid'>x</span> <span class='hs-varid'>y</span> <span class='hs-varid'>x</span>
-<a name="line-354"></a> <span class='hs-keyword'>where</span>
-<a name="line-355"></a>  <span class='hs-varid'>hCond</span> <span class='hs-keyword'>_</span> <span class='hs-varid'>x</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>x</span>
-<a name="line-356"></a>
-<a name="line-357"></a>
-<a name="line-358"></a><span class='hs-comment'>-- ** Boolean equivalence</span>
+<a name="line-323"></a>Compare with the original code based on functional dependencies:
+<a name="line-324"></a>
+<a name="line-325"></a>&gt; class (HBool t, HBool t', HBool t'') =&gt; HOr t t' t'' | t t' -&gt; t''
+<a name="line-326"></a>&gt;  where
+<a name="line-327"></a>&gt;   hOr :: t -&gt; t' -&gt; t''
+<a name="line-328"></a>
+<a name="line-329"></a>&gt; instance HOr HFalse HFalse HFalse
+<a name="line-330"></a>&gt;  where
+<a name="line-331"></a>&gt;   hOr _ _ = hFalse
+<a name="line-332"></a>
+<a name="line-333"></a>&gt; instance HOr HTrue HFalse HTrue
+<a name="line-334"></a>&gt;  where
+<a name="line-335"></a>&gt;   hOr _ _ = hTrue
+<a name="line-336"></a>
+<a name="line-337"></a>&gt; instance HOr HFalse HTrue HTrue
+<a name="line-338"></a>&gt;  where
+<a name="line-339"></a>&gt;   hOr _ _ = hTrue
+<a name="line-340"></a>
+<a name="line-341"></a>&gt; instance HOr HTrue HTrue HTrue
+<a name="line-342"></a>&gt;  where
+<a name="line-343"></a>&gt;   hOr _ _ = hTrue
+<a name="line-344"></a>-}</span>
+<a name="line-345"></a>
+<a name="line-346"></a>
+<a name="line-347"></a><a name="HCond"></a><span class='hs-keyword'>class</span> <span class='hs-conid'>HCond</span> <span class='hs-layout'>(</span><span class='hs-varid'>t</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Bool</span><span class='hs-layout'>)</span> <span class='hs-varid'>x</span> <span class='hs-varid'>y</span> <span class='hs-varid'>z</span> <span class='hs-keyglyph'>|</span> <span class='hs-varid'>t</span> <span class='hs-varid'>x</span> <span class='hs-varid'>y</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>z</span>
+<a name="line-348"></a> <span class='hs-keyword'>where</span>
+<a name="line-349"></a>  <span class='hs-varid'>hCond</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Proxy</span> <span class='hs-varid'>t</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>x</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>y</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>z</span>
+<a name="line-350"></a>
+<a name="line-351"></a><a name="instance%20HCond%20False%20x%20y%20y"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>HCond</span> <span class='hs-conid'>False</span> <span class='hs-varid'>x</span> <span class='hs-varid'>y</span> <span class='hs-varid'>y</span>
+<a name="line-352"></a> <span class='hs-keyword'>where</span>
+<a name="line-353"></a>  <span class='hs-varid'>hCond</span> <span class='hs-keyword'>_</span> <span class='hs-keyword'>_</span> <span class='hs-varid'>y</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>y</span>
+<a name="line-354"></a>
+<a name="line-355"></a><a name="instance%20HCond%20True%20x%20y%20x"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>HCond</span> <span class='hs-conid'>True</span> <span class='hs-varid'>x</span> <span class='hs-varid'>y</span> <span class='hs-varid'>x</span>
+<a name="line-356"></a> <span class='hs-keyword'>where</span>
+<a name="line-357"></a>  <span class='hs-varid'>hCond</span> <span class='hs-keyword'>_</span> <span class='hs-varid'>x</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>x</span>
+<a name="line-358"></a>
 <a name="line-359"></a>
-<a name="line-360"></a><span class='hs-keyword'>type</span> <span class='hs-varid'>family</span> <span class='hs-conid'>HBoolEQ</span> <span class='hs-layout'>(</span><span class='hs-varid'>t1</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Bool</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>t2</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Bool</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Bool</span>
-<a name="line-361"></a><span class='hs-keyword'>type</span> <span class='hs-keyword'>instance</span> <span class='hs-conid'>HBoolEQ</span> <span class='hs-conid'>False</span> <span class='hs-conid'>False</span>    <span class='hs-keyglyph'>=</span> <span class='hs-conid'>True</span>
-<a name="line-362"></a><span class='hs-keyword'>type</span> <span class='hs-keyword'>instance</span> <span class='hs-conid'>HBoolEQ</span> <span class='hs-conid'>False</span> <span class='hs-conid'>True</span>     <span class='hs-keyglyph'>=</span> <span class='hs-conid'>False</span>
-<a name="line-363"></a><span class='hs-keyword'>type</span> <span class='hs-keyword'>instance</span> <span class='hs-conid'>HBoolEQ</span> <span class='hs-conid'>True</span>  <span class='hs-conid'>False</span>    <span class='hs-keyglyph'>=</span> <span class='hs-conid'>False</span>
-<a name="line-364"></a><span class='hs-keyword'>type</span> <span class='hs-keyword'>instance</span> <span class='hs-conid'>HBoolEQ</span> <span class='hs-conid'>True</span>  <span class='hs-conid'>True</span>     <span class='hs-keyglyph'>=</span> <span class='hs-conid'>True</span>
-<a name="line-365"></a>
-<a name="line-366"></a><span class='hs-comment'>-- We could define all kinds of further Boolean operations.</span>
-<a name="line-367"></a><span class='hs-comment'>-- We omit everything what's not needed for the code in the paper.</span>
-<a name="line-368"></a>
-<a name="line-369"></a><span class='hs-comment'>-- --------------------------------------------------------------------------</span>
+<a name="line-360"></a><span class='hs-comment'>-- ** Boolean equivalence</span>
+<a name="line-361"></a>
+<a name="line-362"></a><span class='hs-keyword'>type</span> <span class='hs-varid'>family</span> <span class='hs-conid'>HBoolEQ</span> <span class='hs-layout'>(</span><span class='hs-varid'>t1</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Bool</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>t2</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Bool</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Bool</span>
+<a name="line-363"></a><span class='hs-keyword'>type</span> <span class='hs-keyword'>instance</span> <span class='hs-conid'>HBoolEQ</span> <span class='hs-conid'>False</span> <span class='hs-conid'>False</span>    <span class='hs-keyglyph'>=</span> <span class='hs-conid'>True</span>
+<a name="line-364"></a><span class='hs-keyword'>type</span> <span class='hs-keyword'>instance</span> <span class='hs-conid'>HBoolEQ</span> <span class='hs-conid'>False</span> <span class='hs-conid'>True</span>     <span class='hs-keyglyph'>=</span> <span class='hs-conid'>False</span>
+<a name="line-365"></a><span class='hs-keyword'>type</span> <span class='hs-keyword'>instance</span> <span class='hs-conid'>HBoolEQ</span> <span class='hs-conid'>True</span>  <span class='hs-conid'>False</span>    <span class='hs-keyglyph'>=</span> <span class='hs-conid'>False</span>
+<a name="line-366"></a><span class='hs-keyword'>type</span> <span class='hs-keyword'>instance</span> <span class='hs-conid'>HBoolEQ</span> <span class='hs-conid'>True</span>  <span class='hs-conid'>True</span>     <span class='hs-keyglyph'>=</span> <span class='hs-conid'>True</span>
+<a name="line-367"></a>
+<a name="line-368"></a><span class='hs-comment'>-- We could define all kinds of further Boolean operations.</span>
+<a name="line-369"></a><span class='hs-comment'>-- We omit everything what's not needed for the code in the paper.</span>
 <a name="line-370"></a>
-<a name="line-371"></a><span class='hs-comment'>-- * Naturals</span>
+<a name="line-371"></a><span class='hs-comment'>-- --------------------------------------------------------------------------</span>
 <a name="line-372"></a>
-<a name="line-373"></a><a name="HNat"></a><span class='hs-comment'>-- | The data type to be lifted to the type level</span>
-<a name="line-374"></a><a name="HNat"></a><span class='hs-keyword'>data</span> <span class='hs-conid'>HNat</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>HZero</span> <span class='hs-keyglyph'>|</span> <span class='hs-conid'>HSucc</span> <span class='hs-conid'>HNat</span>
-<a name="line-375"></a>
-<a name="line-376"></a>
-<a name="line-377"></a><a name="hZero"></a><span class='hs-definition'>hZero</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Proxy</span> <span class='hs-conid'>HZero</span><span class='hs-layout'>;</span> <span class='hs-varid'>hZero</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>undefined</span>
-<a name="line-378"></a><a name="hSucc"></a><span class='hs-definition'>hSucc</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Proxy</span> <span class='hs-layout'>(</span><span class='hs-varid'>n</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>HNat</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Proxy</span> <span class='hs-layout'>(</span><span class='hs-conid'>HSucc</span> <span class='hs-varid'>n</span><span class='hs-layout'>)</span><span class='hs-layout'>;</span> <span class='hs-varid'>hSucc</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>undefined</span>
-<a name="line-379"></a><a name="hPred"></a><span class='hs-definition'>hPred</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Proxy</span> <span class='hs-layout'>(</span><span class='hs-conid'>HSucc</span> <span class='hs-varid'>n</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Proxy</span> <span class='hs-varid'>n</span><span class='hs-layout'>;</span> <span class='hs-varid'>hPred</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>undefined</span>
-<a name="line-380"></a>
-<a name="line-381"></a><a name="Proxy"></a><span class='hs-keyword'>class</span> <span class='hs-conid'>HNat2Integral</span> <span class='hs-layout'>(</span><span class='hs-varid'>n</span><span class='hs-keyglyph'>::</span><span class='hs-conid'>HNat</span><span class='hs-layout'>)</span> <span class='hs-keyword'>where</span>
-<a name="line-382"></a>    <span class='hs-varid'>hNat2Integral</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Integral</span> <span class='hs-varid'>i</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>Proxy</span> <span class='hs-varid'>n</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>i</span>
-<a name="line-383"></a>
-<a name="line-384"></a><a name="instance%20HNat2Integral%20HZero"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>HNat2Integral</span> <span class='hs-conid'>HZero</span> <span class='hs-keyword'>where</span>
-<a name="line-385"></a>    <span class='hs-varid'>hNat2Integral</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-num'>0</span>
-<a name="line-386"></a>
-<a name="line-387"></a><a name="instance%20HNat2Integral%20(HSucc%20n)"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>HNat2Integral</span> <span class='hs-varid'>n</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>HNat2Integral</span> <span class='hs-layout'>(</span><span class='hs-conid'>HSucc</span> <span class='hs-varid'>n</span><span class='hs-layout'>)</span> <span class='hs-keyword'>where</span>
-<a name="line-388"></a>    <span class='hs-varid'>hNat2Integral</span> <span class='hs-varid'>n</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>hNat2Integral</span> <span class='hs-layout'>(</span><span class='hs-varid'>hPred</span> <span class='hs-varid'>n</span><span class='hs-layout'>)</span> <span class='hs-varop'>+</span> <span class='hs-num'>1</span>
-<a name="line-389"></a>
-<a name="line-390"></a><a name="instance%20Show%20(Proxy%20(n%20::%20HNat))"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>HNat2Integral</span> <span class='hs-varid'>n</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>Show</span> <span class='hs-layout'>(</span><span class='hs-conid'>Proxy</span> <span class='hs-layout'>(</span><span class='hs-varid'>n</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>HNat</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span> <span class='hs-keyword'>where</span> 
-<a name="line-391"></a>    <span class='hs-varid'>show</span> <span class='hs-varid'>n</span> <span class='hs-keyglyph'>=</span> <span class='hs-str'>"H"</span> <span class='hs-varop'>++</span> <span class='hs-varid'>show</span> <span class='hs-layout'>(</span><span class='hs-varid'>hNat2Integral</span> <span class='hs-varid'>n</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Integer</span><span class='hs-layout'>)</span>
-<a name="line-392"></a>
-<a name="line-393"></a>
-<a name="line-394"></a><span class='hs-comment'>-- | Equality on natural numbers</span>
-<a name="line-395"></a><span class='hs-comment'>-- (eventually to be subsumed by the universal polykinded HEq)</span>
-<a name="line-396"></a><span class='hs-keyword'>type</span> <span class='hs-varid'>family</span> <span class='hs-conid'>HNatEq</span> <span class='hs-layout'>(</span><span class='hs-varid'>t1</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>HNat</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>t2</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>HNat</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Bool</span>
-<a name="line-397"></a><span class='hs-keyword'>type</span> <span class='hs-keyword'>instance</span> <span class='hs-conid'>HNatEq</span> <span class='hs-conid'>HZero</span> <span class='hs-conid'>HZero</span>          <span class='hs-keyglyph'>=</span> <span class='hs-conid'>True</span>
-<a name="line-398"></a><span class='hs-keyword'>type</span> <span class='hs-keyword'>instance</span> <span class='hs-conid'>HNatEq</span> <span class='hs-conid'>HZero</span> <span class='hs-layout'>(</span><span class='hs-conid'>HSucc</span> <span class='hs-varid'>n</span><span class='hs-layout'>)</span>      <span class='hs-keyglyph'>=</span> <span class='hs-conid'>False</span>
-<a name="line-399"></a><span class='hs-keyword'>type</span> <span class='hs-keyword'>instance</span> <span class='hs-conid'>HNatEq</span> <span class='hs-layout'>(</span><span class='hs-conid'>HSucc</span> <span class='hs-varid'>n</span><span class='hs-layout'>)</span> <span class='hs-conid'>HZero</span>      <span class='hs-keyglyph'>=</span> <span class='hs-conid'>False</span>
-<a name="line-400"></a><span class='hs-keyword'>type</span> <span class='hs-keyword'>instance</span> <span class='hs-conid'>HNatEq</span> <span class='hs-layout'>(</span><span class='hs-conid'>HSucc</span> <span class='hs-varid'>n</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-conid'>HSucc</span> <span class='hs-varid'>n'</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>HNatEq</span>  <span class='hs-varid'>n</span> <span class='hs-varid'>n'</span>
-<a name="line-401"></a>
-<a name="line-402"></a>
-<a name="line-403"></a><span class='hs-comment'>-- | Less than</span>
+<a name="line-373"></a><span class='hs-comment'>-- * Naturals</span>
+<a name="line-374"></a>
+<a name="line-375"></a><a name="HNat"></a><span class='hs-comment'>-- | The data type to be lifted to the type level</span>
+<a name="line-376"></a><a name="HNat"></a><span class='hs-keyword'>data</span> <span class='hs-conid'>HNat</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>HZero</span> <span class='hs-keyglyph'>|</span> <span class='hs-conid'>HSucc</span> <span class='hs-conid'>HNat</span>
+<a name="line-377"></a>
+<a name="line-378"></a>
+<a name="line-379"></a><a name="hZero"></a><span class='hs-definition'>hZero</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Proxy</span> <span class='hs-conid'>HZero</span><span class='hs-layout'>;</span> <span class='hs-varid'>hZero</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>undefined</span>
+<a name="line-380"></a><a name="hSucc"></a><span class='hs-definition'>hSucc</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Proxy</span> <span class='hs-layout'>(</span><span class='hs-varid'>n</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>HNat</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Proxy</span> <span class='hs-layout'>(</span><span class='hs-conid'>HSucc</span> <span class='hs-varid'>n</span><span class='hs-layout'>)</span><span class='hs-layout'>;</span> <span class='hs-varid'>hSucc</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>undefined</span>
+<a name="line-381"></a><a name="hPred"></a><span class='hs-definition'>hPred</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Proxy</span> <span class='hs-layout'>(</span><span class='hs-conid'>HSucc</span> <span class='hs-varid'>n</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Proxy</span> <span class='hs-varid'>n</span><span class='hs-layout'>;</span> <span class='hs-varid'>hPred</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>undefined</span>
+<a name="line-382"></a>
+<a name="line-383"></a><a name="Proxy"></a><span class='hs-keyword'>class</span> <span class='hs-conid'>HNat2Integral</span> <span class='hs-layout'>(</span><span class='hs-varid'>n</span><span class='hs-keyglyph'>::</span><span class='hs-conid'>HNat</span><span class='hs-layout'>)</span> <span class='hs-keyword'>where</span>
+<a name="line-384"></a>    <span class='hs-varid'>hNat2Integral</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Integral</span> <span class='hs-varid'>i</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>Proxy</span> <span class='hs-varid'>n</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>i</span>
+<a name="line-385"></a>
+<a name="line-386"></a><a name="instance%20HNat2Integral%20HZero"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>HNat2Integral</span> <span class='hs-conid'>HZero</span> <span class='hs-keyword'>where</span>
+<a name="line-387"></a>    <span class='hs-varid'>hNat2Integral</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-num'>0</span>
+<a name="line-388"></a>
+<a name="line-389"></a><a name="instance%20HNat2Integral%20(HSucc%20n)"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>HNat2Integral</span> <span class='hs-varid'>n</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>HNat2Integral</span> <span class='hs-layout'>(</span><span class='hs-conid'>HSucc</span> <span class='hs-varid'>n</span><span class='hs-layout'>)</span> <span class='hs-keyword'>where</span>
+<a name="line-390"></a>    <span class='hs-varid'>hNat2Integral</span> <span class='hs-varid'>n</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>hNat2Integral</span> <span class='hs-layout'>(</span><span class='hs-varid'>hPred</span> <span class='hs-varid'>n</span><span class='hs-layout'>)</span> <span class='hs-varop'>+</span> <span class='hs-num'>1</span>
+<a name="line-391"></a>
+<a name="line-392"></a><a name="instance%20Show%20(Proxy%20(n%20::%20HNat))"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>HNat2Integral</span> <span class='hs-varid'>n</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>Show</span> <span class='hs-layout'>(</span><span class='hs-conid'>Proxy</span> <span class='hs-layout'>(</span><span class='hs-varid'>n</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>HNat</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span> <span class='hs-keyword'>where</span> 
+<a name="line-393"></a>    <span class='hs-varid'>show</span> <span class='hs-varid'>n</span> <span class='hs-keyglyph'>=</span> <span class='hs-str'>"H"</span> <span class='hs-varop'>++</span> <span class='hs-varid'>show</span> <span class='hs-layout'>(</span><span class='hs-varid'>hNat2Integral</span> <span class='hs-varid'>n</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Integer</span><span class='hs-layout'>)</span>
+<a name="line-394"></a>
+<a name="line-395"></a>
+<a name="line-396"></a><span class='hs-comment'>-- | Equality on natural numbers</span>
+<a name="line-397"></a><span class='hs-comment'>-- (eventually to be subsumed by the universal polykinded HEq)</span>
+<a name="line-398"></a><span class='hs-keyword'>type</span> <span class='hs-varid'>family</span> <span class='hs-conid'>HNatEq</span> <span class='hs-layout'>(</span><span class='hs-varid'>t1</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>HNat</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>t2</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>HNat</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Bool</span>
+<a name="line-399"></a><span class='hs-keyword'>type</span> <span class='hs-keyword'>instance</span> <span class='hs-conid'>HNatEq</span> <span class='hs-conid'>HZero</span> <span class='hs-conid'>HZero</span>          <span class='hs-keyglyph'>=</span> <span class='hs-conid'>True</span>
+<a name="line-400"></a><span class='hs-keyword'>type</span> <span class='hs-keyword'>instance</span> <span class='hs-conid'>HNatEq</span> <span class='hs-conid'>HZero</span> <span class='hs-layout'>(</span><span class='hs-conid'>HSucc</span> <span class='hs-varid'>n</span><span class='hs-layout'>)</span>      <span class='hs-keyglyph'>=</span> <span class='hs-conid'>False</span>
+<a name="line-401"></a><span class='hs-keyword'>type</span> <span class='hs-keyword'>instance</span> <span class='hs-conid'>HNatEq</span> <span class='hs-layout'>(</span><span class='hs-conid'>HSucc</span> <span class='hs-varid'>n</span><span class='hs-layout'>)</span> <span class='hs-conid'>HZero</span>      <span class='hs-keyglyph'>=</span> <span class='hs-conid'>False</span>
+<a name="line-402"></a><span class='hs-keyword'>type</span> <span class='hs-keyword'>instance</span> <span class='hs-conid'>HNatEq</span> <span class='hs-layout'>(</span><span class='hs-conid'>HSucc</span> <span class='hs-varid'>n</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-conid'>HSucc</span> <span class='hs-varid'>n'</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>HNatEq</span>  <span class='hs-varid'>n</span> <span class='hs-varid'>n'</span>
+<a name="line-403"></a>
 <a name="line-404"></a>
-<a name="line-405"></a><span class='hs-keyword'>type</span> <span class='hs-varid'>family</span> <span class='hs-conid'>HLt</span> <span class='hs-layout'>(</span><span class='hs-varid'>x</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>HNat</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>y</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>HNat</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Bool</span>
+<a name="line-405"></a><span class='hs-comment'>-- | Less than</span>
 <a name="line-406"></a>
-<a name="line-407"></a><span class='hs-keyword'>type</span> <span class='hs-keyword'>instance</span> <span class='hs-conid'>HLt</span> <span class='hs-conid'>HZero</span> <span class='hs-conid'>HZero</span>          <span class='hs-keyglyph'>=</span> <span class='hs-conid'>False</span>
-<a name="line-408"></a><span class='hs-keyword'>type</span> <span class='hs-keyword'>instance</span> <span class='hs-conid'>HLt</span> <span class='hs-conid'>HZero</span> <span class='hs-layout'>(</span><span class='hs-conid'>HSucc</span> <span class='hs-varid'>n</span><span class='hs-layout'>)</span>      <span class='hs-keyglyph'>=</span> <span class='hs-conid'>True</span>
-<a name="line-409"></a><span class='hs-keyword'>type</span> <span class='hs-keyword'>instance</span> <span class='hs-conid'>HLt</span> <span class='hs-layout'>(</span><span class='hs-conid'>HSucc</span> <span class='hs-varid'>n</span><span class='hs-layout'>)</span> <span class='hs-conid'>HZero</span>      <span class='hs-keyglyph'>=</span> <span class='hs-conid'>False</span>
-<a name="line-410"></a><span class='hs-keyword'>type</span> <span class='hs-keyword'>instance</span> <span class='hs-conid'>HLt</span> <span class='hs-layout'>(</span><span class='hs-conid'>HSucc</span> <span class='hs-varid'>n</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-conid'>HSucc</span> <span class='hs-varid'>n'</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>HLt</span>  <span class='hs-varid'>n</span> <span class='hs-varid'>n'</span>
-<a name="line-411"></a>
-<a name="line-412"></a><a name="hLt"></a><span class='hs-definition'>hLt</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Proxy</span> <span class='hs-varid'>x</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Proxy</span> <span class='hs-varid'>y</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Proxy</span> <span class='hs-layout'>(</span><span class='hs-conid'>HLt</span> <span class='hs-varid'>x</span> <span class='hs-varid'>y</span><span class='hs-layout'>)</span>
-<a name="line-413"></a><span class='hs-definition'>hLt</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>undefined</span>
-<a name="line-414"></a>
-<a name="line-415"></a>
-<a name="line-416"></a><span class='hs-comment'>-- --------------------------------------------------------------------------</span>
-<a name="line-417"></a><span class='hs-comment'>-- * Maybies</span>
-<a name="line-418"></a><span class='hs-comment'>-- $maybiesNote We cannot use lifted Maybe since the latter are not populated</span>
-<a name="line-419"></a>
-<a name="line-420"></a><a name="HNothing"></a><span class='hs-keyword'>data</span>    <span class='hs-conid'>HNothing</span>  <span class='hs-keyglyph'>=</span> <span class='hs-conid'>HNothing</span>  <span class='hs-keyword'>deriving</span> <span class='hs-conid'>Show</span>
-<a name="line-421"></a><a name="HJust"></a><span class='hs-keyword'>newtype</span> <span class='hs-conid'>HJust</span> <span class='hs-varid'>x</span>   <span class='hs-keyglyph'>=</span> <span class='hs-conid'>HJust</span> <span class='hs-varid'>x</span>   <span class='hs-keyword'>deriving</span> <span class='hs-conid'>Show</span>
-<a name="line-422"></a>
-<a name="line-423"></a>
-<a name="line-424"></a><span class='hs-comment'>-- --------------------------------------------------------------------------</span>
+<a name="line-407"></a><span class='hs-keyword'>type</span> <span class='hs-varid'>family</span> <span class='hs-conid'>HLt</span> <span class='hs-layout'>(</span><span class='hs-varid'>x</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>HNat</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>y</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>HNat</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Bool</span>
+<a name="line-408"></a>
+<a name="line-409"></a><span class='hs-keyword'>type</span> <span class='hs-keyword'>instance</span> <span class='hs-conid'>HLt</span> <span class='hs-conid'>HZero</span> <span class='hs-conid'>HZero</span>          <span class='hs-keyglyph'>=</span> <span class='hs-conid'>False</span>
+<a name="line-410"></a><span class='hs-keyword'>type</span> <span class='hs-keyword'>instance</span> <span class='hs-conid'>HLt</span> <span class='hs-conid'>HZero</span> <span class='hs-layout'>(</span><span class='hs-conid'>HSucc</span> <span class='hs-varid'>n</span><span class='hs-layout'>)</span>      <span class='hs-keyglyph'>=</span> <span class='hs-conid'>True</span>
+<a name="line-411"></a><span class='hs-keyword'>type</span> <span class='hs-keyword'>instance</span> <span class='hs-conid'>HLt</span> <span class='hs-layout'>(</span><span class='hs-conid'>HSucc</span> <span class='hs-varid'>n</span><span class='hs-layout'>)</span> <span class='hs-conid'>HZero</span>      <span class='hs-keyglyph'>=</span> <span class='hs-conid'>False</span>
+<a name="line-412"></a><span class='hs-keyword'>type</span> <span class='hs-keyword'>instance</span> <span class='hs-conid'>HLt</span> <span class='hs-layout'>(</span><span class='hs-conid'>HSucc</span> <span class='hs-varid'>n</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-conid'>HSucc</span> <span class='hs-varid'>n'</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>HLt</span>  <span class='hs-varid'>n</span> <span class='hs-varid'>n'</span>
+<a name="line-413"></a>
+<a name="line-414"></a><a name="hLt"></a><span class='hs-definition'>hLt</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Proxy</span> <span class='hs-varid'>x</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Proxy</span> <span class='hs-varid'>y</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Proxy</span> <span class='hs-layout'>(</span><span class='hs-conid'>HLt</span> <span class='hs-varid'>x</span> <span class='hs-varid'>y</span><span class='hs-layout'>)</span>
+<a name="line-415"></a><span class='hs-definition'>hLt</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>undefined</span>
+<a name="line-416"></a>
+<a name="line-417"></a>
+<a name="line-418"></a><span class='hs-comment'>-- --------------------------------------------------------------------------</span>
+<a name="line-419"></a><span class='hs-comment'>-- * Maybies</span>
+<a name="line-420"></a><span class='hs-comment'>-- $maybiesNote We cannot use lifted Maybe since the latter are not populated</span>
+<a name="line-421"></a>
+<a name="line-422"></a><a name="HNothing"></a><span class='hs-keyword'>data</span>    <span class='hs-conid'>HNothing</span>  <span class='hs-keyglyph'>=</span> <span class='hs-conid'>HNothing</span>  <span class='hs-keyword'>deriving</span> <span class='hs-conid'>Show</span>
+<a name="line-423"></a><a name="HJust"></a><span class='hs-keyword'>newtype</span> <span class='hs-conid'>HJust</span> <span class='hs-varid'>x</span>   <span class='hs-keyglyph'>=</span> <span class='hs-conid'>HJust</span> <span class='hs-varid'>x</span>   <span class='hs-keyword'>deriving</span> <span class='hs-conid'>Show</span>
+<a name="line-424"></a>
 <a name="line-425"></a>
-<a name="line-426"></a><a name="HEq"></a><span class='hs-comment'>-- * Polykinded Equality for types</span>
-<a name="line-427"></a><a name="HEq"></a><span class='hs-comment'>-- | We have to use Functional dependencies for now,</span>
-<a name="line-428"></a><a name="HEq"></a><span class='hs-comment'>-- for the sake of the generic equality.</span>
-<a name="line-429"></a><a name="HEq"></a><span class='hs-keyword'>class</span> <span class='hs-conid'>HEq</span> <span class='hs-layout'>(</span><span class='hs-varid'>x</span> <span class='hs-keyglyph'>::</span> <span class='hs-varid'>k</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>y</span> <span class='hs-keyglyph'>::</span> <span class='hs-varid'>k</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>b</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Bool</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>|</span> <span class='hs-varid'>x</span> <span class='hs-varid'>y</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>b</span>
-<a name="line-430"></a>
-<a name="line-431"></a><span class='hs-comment'>-- Equality instances for naturals</span>
+<a name="line-426"></a><span class='hs-comment'>-- --------------------------------------------------------------------------</span>
+<a name="line-427"></a>
+<a name="line-428"></a><a name="HEq"></a><span class='hs-comment'>-- * Polykinded Equality for types</span>
+<a name="line-429"></a><a name="HEq"></a><span class='hs-comment'>-- | We have to use Functional dependencies for now,</span>
+<a name="line-430"></a><a name="HEq"></a><span class='hs-comment'>-- for the sake of the generic equality.</span>
+<a name="line-431"></a><a name="HEq"></a><span class='hs-keyword'>class</span> <span class='hs-conid'>HEq</span> <span class='hs-layout'>(</span><span class='hs-varid'>x</span> <span class='hs-keyglyph'>::</span> <span class='hs-varid'>k</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>y</span> <span class='hs-keyglyph'>::</span> <span class='hs-varid'>k</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>b</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Bool</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>|</span> <span class='hs-varid'>x</span> <span class='hs-varid'>y</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>b</span>
 <a name="line-432"></a>
-<a name="line-433"></a><a name="instance%20HEq%20(HSucc%20n)%20(HSucc%20n')%20b%20hEq%20::%20HEq%20x%20y%20b%20=%3e%20x%20-%3e%20y%20-%3e%20Proxy%20b%20hEq%20=%20undefined%20--%20--------------------------------------------------------------------------%20--%20*%20Staged%20equality%20--%20%7c%20--%20--%20*%20Establish%20type%20equality%20statically%20--%20--%20*%20Establish%20remaining%20value-level%20equality%20dynamically%20--%20--%20removed:%20use%20typeable%20%7b-%20class%20HStagedEq%20x%20y%20where%20hStagedEq%20::%20x%20-%3e%20y%20-%3e%20Bool%20-%7d%20%7b-%20--%20--------------------------------------------------------------------------%20--%20%7c%20A%20predicate%20for%20type%20equality%20--%20--%20There%20are%20different%20implementations:%20see%20TypeEq*.hs%20class%20HBool%20b%20=%3e%20TypeEq%20x%20y%20b%20%7c%20x%20y%20-%3e%20b%20--%20Rely%20on%20lazy%20show%20for%20type-level%20Booleans%20typeEq%20::%20TypeEq%20t%20t'%20b%20=%3e%20t%20-%3e%20t'%20-%3e%20b%20typeEq%20=%20undefined%20--%20A%20more%20disciplined%20version:%20based%20on%20proxies%20proxyEq%20::%20TypeEq%20t%20t'%20b%20=%3e%20Proxy%20t%20-%3e%20Proxy%20t'%20-%3e%20b%20proxyEq%20_%20_%20=%20undefined%20-%7d%20--%20--------------------------------------------------------------------------%20--%20*%20Type-safe%20cast%20--%20no%20longer%20need.%20We%20use%20a%20a%20~%20b%20%7b-%20class%20TypeCast%20x%20y%20%7c%20x%20-%3e%20y,%20y%20-%3e%20x%20where%20typeCast%20::%20x%20-%3e%20y%20-%7d%20--%20--------------------------------------------------------------------------%20--%20*%20Error%20messages%20--%20%7c%20A%20class%20without%20instances%20for%20explicit%20failure%20class%20Fail%20x"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>HEq</span> <span class='hs-conid'>HZero</span> <span class='hs-conid'>HZero</span>     <span class='hs-conid'>True</span>
-<a name="line-434"></a><a name="instance%20HEq%20(HSucc%20n)%20(HSucc%20n')%20b%20hEq%20::%20HEq%20x%20y%20b%20=%3e%20x%20-%3e%20y%20-%3e%20Proxy%20b%20hEq%20=%20undefined%20--%20--------------------------------------------------------------------------%20--%20*%20Staged%20equality%20--%20%7c%20--%20--%20*%20Establish%20type%20equality%20statically%20--%20--%20*%20Establish%20remaining%20value-level%20equality%20dynamically%20--%20--%20removed:%20use%20typeable%20%7b-%20class%20HStagedEq%20x%20y%20where%20hStagedEq%20::%20x%20-%3e%20y%20-%3e%20Bool%20-%7d%20%7b-%20--%20--------------------------------------------------------------------------%20--%20%7c%20A%20predicate%20for%20type%20equality%20--%20--%20There%20are%20different%20implementations:%20see%20TypeEq*.hs%20class%20HBool%20b%20=%3e%20TypeEq%20x%20y%20b%20%7c%20x%20y%20-%3e%20b%20--%20Rely%20on%20lazy%20show%20for%20type-level%20Booleans%20typeEq%20::%20TypeEq%20t%20t'%20b%20=%3e%20t%20-%3e%20t'%20-%3e%20b%20typeEq%20=%20undefined%20--%20A%20more%20disciplined%20version:%20based%20on%20proxies%20proxyEq%20::%20TypeEq%20t%20t'%20b%20=%3e%20Proxy%20t%20-%3e%20Proxy%20t'%20-%3e%20b%20proxyEq%20_%20_%20=%20undefined%20-%7d%20--%20--------------------------------------------------------------------------%20--%20*%20Type-safe%20cast%20--%20no%20longer%20need.%20We%20use%20a%20a%20~%20b%20%7b-%20class%20TypeCast%20x%20y%20%7c%20x%20-%3e%20y,%20y%20-%3e%20x%20where%20typeCast%20::%20x%20-%3e%20y%20-%7d%20--%20--------------------------------------------------------------------------%20--%20*%20Error%20messages%20--%20%7c%20A%20class%20without%20instances%20for%20explicit%20failure%20class%20Fail%20x"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>HEq</span> <span class='hs-conid'>HZero</span> <span class='hs-layout'>(</span><span class='hs-conid'>HSucc</span> <span class='hs-varid'>n</span><span class='hs-layout'>)</span> <span class='hs-conid'>False</span>
-<a name="line-435"></a><a name="instance%20HEq%20(HSucc%20n)%20(HSucc%20n')%20b%20hEq%20::%20HEq%20x%20y%20b%20=%3e%20x%20-%3e%20y%20-%3e%20Proxy%20b%20hEq%20=%20undefined%20--%20--------------------------------------------------------------------------%20--%20*%20Staged%20equality%20--%20%7c%20--%20--%20*%20Establish%20type%20equality%20statically%20--%20--%20*%20Establish%20remaining%20value-level%20equality%20dynamically%20--%20--%20removed:%20use%20typeable%20%7b-%20class%20HStagedEq%20x%20y%20where%20hStagedEq%20::%20x%20-%3e%20y%20-%3e%20Bool%20-%7d%20%7b-%20--%20--------------------------------------------------------------------------%20--%20%7c%20A%20predicate%20for%20type%20equality%20--%20--%20There%20are%20different%20implementations:%20see%20TypeEq*.hs%20class%20HBool%20b%20=%3e%20TypeEq%20x%20y%20b%20%7c%20x%20y%20-%3e%20b%20--%20Rely%20on%20lazy%20show%20for%20type-level%20Booleans%20typeEq%20::%20TypeEq%20t%20t'%20b%20=%3e%20t%20-%3e%20t'%20-%3e%20b%20typeEq%20=%20undefined%20--%20A%20more%20disciplined%20version:%20based%20on%20proxies%20proxyEq%20::%20TypeEq%20t%20t'%20b%20=%3e%20Proxy%20t%20-%3e%20Proxy%20t'%20-%3e%20b%20proxyEq%20_%20_%20=%20undefined%20-%7d%20--%20--------------------------------------------------------------------------%20--%20*%20Type-safe%20cast%20--%20no%20longer%20need.%20We%20use%20a%20a%20~%20b%20%7b-%20class%20TypeCast%20x%20y%20%7c%20x%20-%3e%20y,%20y%20-%3e%20x%20where%20typeCast%20::%20x%20-%3e%20y%20-%7d%20--%20--------------------------------------------------------------------------%20--%20*%20Error%20messages%20--%20%7c%20A%20class%20without%20instances%20for%20explicit%20failure%20class%20Fail%20x"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>HEq</span> <span class='hs-layout'>(</span><span class='hs-conid'>HSucc</span> <span class='hs-varid'>n</span><span class='hs-layout'>)</span> <span class='hs-conid'>HZero</span> <span class='hs-conid'>False</span>
-<a name="line-436"></a><a name="instance%20HEq%20(HSucc%20n)%20(HSucc%20n')%20b%20hEq%20::%20HEq%20x%20y%20b%20=%3e%20x%20-%3e%20y%20-%3e%20Proxy%20b%20hEq%20=%20undefined%20--%20--------------------------------------------------------------------------%20--%20*%20Staged%20equality%20--%20%7c%20--%20--%20*%20Establish%20type%20equality%20statically%20--%20--%20*%20Establish%20remaining%20value-level%20equality%20dynamically%20--%20--%20removed:%20use%20typeable%20%7b-%20class%20HStagedEq%20x%20y%20where%20hStagedEq%20::%20x%20-%3e%20y%20-%3e%20Bool%20-%7d%20%7b-%20--%20--------------------------------------------------------------------------%20--%20%7c%20A%20predicate%20for%20type%20equality%20--%20--%20There%20are%20different%20implementations:%20see%20TypeEq*.hs%20class%20HBool%20b%20=%3e%20TypeEq%20x%20y%20b%20%7c%20x%20y%20-%3e%20b%20--%20Rely%20on%20lazy%20show%20for%20type-level%20Booleans%20typeEq%20::%20TypeEq%20t%20t'%20b%20=%3e%20t%20-%3e%20t'%20-%3e%20b%20typeEq%20=%20undefined%20--%20A%20more%20disciplined%20version:%20based%20on%20proxies%20proxyEq%20::%20TypeEq%20t%20t'%20b%20=%3e%20Proxy%20t%20-%3e%20Proxy%20t'%20-%3e%20b%20proxyEq%20_%20_%20=%20undefined%20-%7d%20--%20--------------------------------------------------------------------------%20--%20*%20Type-safe%20cast%20--%20no%20longer%20need.%20We%20use%20a%20a%20~%20b%20%7b-%20class%20TypeCast%20x%20y%20%7c%20x%20-%3e%20y,%20y%20-%3e%20x%20where%20typeCast%20::%20x%20-%3e%20y%20-%7d%20--%20--------------------------------------------------------------------------%20--%20*%20Error%20messages%20--%20%7c%20A%20class%20without%20instances%20for%20explicit%20failure%20class%20Fail%20x"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>HEq</span>  <span class='hs-varid'>n</span> <span class='hs-varid'>n'</span> <span class='hs-varid'>b</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>HEq</span> <span class='hs-layout'>(</span><span class='hs-conid'>HSucc</span> <span class='hs-varid'>n</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-conid'>HSucc</span> <span class='hs-varid'>n'</span><span class='hs-layout'>)</span> <span class='hs-varid'>b</span>
-<a name="line-437"></a>
-<a name="line-438"></a><a name="hEq"></a><span class='hs-definition'>hEq</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>HEq</span> <span class='hs-varid'>x</span> <span class='hs-varid'>y</span> <span class='hs-varid'>b</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-varid'>x</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>y</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Proxy</span> <span class='hs-varid'>b</span>
-<a name="line-439"></a><span class='hs-definition'>hEq</span> <span class='hs-keyglyph'>=</span>  <span class='hs-varid'>undefined</span>
-<a name="line-440"></a>
-<a name="line-441"></a>
-<a name="line-442"></a><span class='hs-comment'>-- --------------------------------------------------------------------------</span>
+<a name="line-433"></a><span class='hs-comment'>-- Equality instances for naturals</span>
+<a name="line-434"></a>
+<a name="line-435"></a><a name="instance%20HEq%20(HSucc%20n)%20(HSucc%20n')%20b%20hEq%20::%20HEq%20x%20y%20b%20=%3e%20x%20-%3e%20y%20-%3e%20Proxy%20b%20hEq%20=%20undefined%20--%20--------------------------------------------------------------------------%20--%20*%20Staged%20equality%20--%20%7c%20--%20--%20*%20Establish%20type%20equality%20statically%20--%20--%20*%20Establish%20remaining%20value-level%20equality%20dynamically%20--%20--%20removed:%20use%20typeable%20%7b-%20class%20HStagedEq%20x%20y%20where%20hStagedEq%20::%20x%20-%3e%20y%20-%3e%20Bool%20-%7d%20%7b-%20--%20--------------------------------------------------------------------------%20--%20%7c%20A%20predicate%20for%20type%20equality%20--%20--%20There%20are%20different%20implementations:%20see%20TypeEq*.hs%20class%20HBool%20b%20=%3e%20TypeEq%20x%20y%20b%20%7c%20x%20y%20-%3e%20b%20--%20Rely%20on%20lazy%20show%20for%20type-level%20Booleans%20typeEq%20::%20TypeEq%20t%20t'%20b%20=%3e%20t%20-%3e%20t'%20-%3e%20b%20typeEq%20=%20undefined%20--%20A%20more%20disciplined%20version:%20based%20on%20proxies%20proxyEq%20::%20TypeEq%20t%20t'%20b%20=%3e%20Proxy%20t%20-%3e%20Proxy%20t'%20-%3e%20b%20proxyEq%20_%20_%20=%20undefined%20-%7d%20--%20--------------------------------------------------------------------------%20--%20*%20Type-safe%20cast%20--%20no%20longer%20need.%20We%20use%20a%20a%20~%20b%20%7b-%20class%20TypeCast%20x%20y%20%7c%20x%20-%3e%20y,%20y%20-%3e%20x%20where%20typeCast%20::%20x%20-%3e%20y%20-%7d%20--%20--------------------------------------------------------------------------%20--%20*%20Error%20messages%20--%20%7c%20A%20class%20without%20instances%20for%20explicit%20failure%20class%20Fail%20x"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>HEq</span> <span class='hs-conid'>HZero</span> <span class='hs-conid'>HZero</span>     <span class='hs-conid'>True</span>
+<a name="line-436"></a><a name="instance%20HEq%20(HSucc%20n)%20(HSucc%20n')%20b%20hEq%20::%20HEq%20x%20y%20b%20=%3e%20x%20-%3e%20y%20-%3e%20Proxy%20b%20hEq%20=%20undefined%20--%20--------------------------------------------------------------------------%20--%20*%20Staged%20equality%20--%20%7c%20--%20--%20*%20Establish%20type%20equality%20statically%20--%20--%20*%20Establish%20remaining%20value-level%20equality%20dynamically%20--%20--%20removed:%20use%20typeable%20%7b-%20class%20HStagedEq%20x%20y%20where%20hStagedEq%20::%20x%20-%3e%20y%20-%3e%20Bool%20-%7d%20%7b-%20--%20--------------------------------------------------------------------------%20--%20%7c%20A%20predicate%20for%20type%20equality%20--%20--%20There%20are%20different%20implementations:%20see%20TypeEq*.hs%20class%20HBool%20b%20=%3e%20TypeEq%20x%20y%20b%20%7c%20x%20y%20-%3e%20b%20--%20Rely%20on%20lazy%20show%20for%20type-level%20Booleans%20typeEq%20::%20TypeEq%20t%20t'%20b%20=%3e%20t%20-%3e%20t'%20-%3e%20b%20typeEq%20=%20undefined%20--%20A%20more%20disciplined%20version:%20based%20on%20proxies%20proxyEq%20::%20TypeEq%20t%20t'%20b%20=%3e%20Proxy%20t%20-%3e%20Proxy%20t'%20-%3e%20b%20proxyEq%20_%20_%20=%20undefined%20-%7d%20--%20--------------------------------------------------------------------------%20--%20*%20Type-safe%20cast%20--%20no%20longer%20need.%20We%20use%20a%20a%20~%20b%20%7b-%20class%20TypeCast%20x%20y%20%7c%20x%20-%3e%20y,%20y%20-%3e%20x%20where%20typeCast%20::%20x%20-%3e%20y%20-%7d%20--%20--------------------------------------------------------------------------%20--%20*%20Error%20messages%20--%20%7c%20A%20class%20without%20instances%20for%20explicit%20failure%20class%20Fail%20x"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>HEq</span> <span class='hs-conid'>HZero</span> <span class='hs-layout'>(</span><span class='hs-conid'>HSucc</span> <span class='hs-varid'>n</span><span class='hs-layout'>)</span> <span class='hs-conid'>False</span>
+<a name="line-437"></a><a name="instance%20HEq%20(HSucc%20n)%20(HSucc%20n')%20b%20hEq%20::%20HEq%20x%20y%20b%20=%3e%20x%20-%3e%20y%20-%3e%20Proxy%20b%20hEq%20=%20undefined%20--%20--------------------------------------------------------------------------%20--%20*%20Staged%20equality%20--%20%7c%20--%20--%20*%20Establish%20type%20equality%20statically%20--%20--%20*%20Establish%20remaining%20value-level%20equality%20dynamically%20--%20--%20removed:%20use%20typeable%20%7b-%20class%20HStagedEq%20x%20y%20where%20hStagedEq%20::%20x%20-%3e%20y%20-%3e%20Bool%20-%7d%20%7b-%20--%20--------------------------------------------------------------------------%20--%20%7c%20A%20predicate%20for%20type%20equality%20--%20--%20There%20are%20different%20implementations:%20see%20TypeEq*.hs%20class%20HBool%20b%20=%3e%20TypeEq%20x%20y%20b%20%7c%20x%20y%20-%3e%20b%20--%20Rely%20on%20lazy%20show%20for%20type-level%20Booleans%20typeEq%20::%20TypeEq%20t%20t'%20b%20=%3e%20t%20-%3e%20t'%20-%3e%20b%20typeEq%20=%20undefined%20--%20A%20more%20disciplined%20version:%20based%20on%20proxies%20proxyEq%20::%20TypeEq%20t%20t'%20b%20=%3e%20Proxy%20t%20-%3e%20Proxy%20t'%20-%3e%20b%20proxyEq%20_%20_%20=%20undefined%20-%7d%20--%20--------------------------------------------------------------------------%20--%20*%20Type-safe%20cast%20--%20no%20longer%20need.%20We%20use%20a%20a%20~%20b%20%7b-%20class%20TypeCast%20x%20y%20%7c%20x%20-%3e%20y,%20y%20-%3e%20x%20where%20typeCast%20::%20x%20-%3e%20y%20-%7d%20--%20--------------------------------------------------------------------------%20--%20*%20Error%20messages%20--%20%7c%20A%20class%20without%20instances%20for%20explicit%20failure%20class%20Fail%20x"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>HEq</span> <span class='hs-layout'>(</span><span class='hs-conid'>HSucc</span> <span class='hs-varid'>n</span><span class='hs-layout'>)</span> <span class='hs-conid'>HZero</span> <span class='hs-conid'>False</span>
+<a name="line-438"></a><a name="instance%20HEq%20(HSucc%20n)%20(HSucc%20n')%20b%20hEq%20::%20HEq%20x%20y%20b%20=%3e%20x%20-%3e%20y%20-%3e%20Proxy%20b%20hEq%20=%20undefined%20--%20--------------------------------------------------------------------------%20--%20*%20Staged%20equality%20--%20%7c%20--%20--%20*%20Establish%20type%20equality%20statically%20--%20--%20*%20Establish%20remaining%20value-level%20equality%20dynamically%20--%20--%20removed:%20use%20typeable%20%7b-%20class%20HStagedEq%20x%20y%20where%20hStagedEq%20::%20x%20-%3e%20y%20-%3e%20Bool%20-%7d%20%7b-%20--%20--------------------------------------------------------------------------%20--%20%7c%20A%20predicate%20for%20type%20equality%20--%20--%20There%20are%20different%20implementations:%20see%20TypeEq*.hs%20class%20HBool%20b%20=%3e%20TypeEq%20x%20y%20b%20%7c%20x%20y%20-%3e%20b%20--%20Rely%20on%20lazy%20show%20for%20type-level%20Booleans%20typeEq%20::%20TypeEq%20t%20t'%20b%20=%3e%20t%20-%3e%20t'%20-%3e%20b%20typeEq%20=%20undefined%20--%20A%20more%20disciplined%20version:%20based%20on%20proxies%20proxyEq%20::%20TypeEq%20t%20t'%20b%20=%3e%20Proxy%20t%20-%3e%20Proxy%20t'%20-%3e%20b%20proxyEq%20_%20_%20=%20undefined%20-%7d%20--%20--------------------------------------------------------------------------%20--%20*%20Type-safe%20cast%20--%20no%20longer%20need.%20We%20use%20a%20a%20~%20b%20%7b-%20class%20TypeCast%20x%20y%20%7c%20x%20-%3e%20y,%20y%20-%3e%20x%20where%20typeCast%20::%20x%20-%3e%20y%20-%7d%20--%20--------------------------------------------------------------------------%20--%20*%20Error%20messages%20--%20%7c%20A%20class%20without%20instances%20for%20explicit%20failure%20class%20Fail%20x"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>HEq</span>  <span class='hs-varid'>n</span> <span class='hs-varid'>n'</span> <span class='hs-varid'>b</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>HEq</span> <span class='hs-layout'>(</span><span class='hs-conid'>HSucc</span> <span class='hs-varid'>n</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-conid'>HSucc</span> <span class='hs-varid'>n'</span><span class='hs-layout'>)</span> <span class='hs-varid'>b</span>
+<a name="line-439"></a>
+<a name="line-440"></a><a name="hEq"></a><span class='hs-definition'>hEq</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>HEq</span> <span class='hs-varid'>x</span> <span class='hs-varid'>y</span> <span class='hs-varid'>b</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-varid'>x</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>y</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Proxy</span> <span class='hs-varid'>b</span>
+<a name="line-441"></a><span class='hs-definition'>hEq</span> <span class='hs-keyglyph'>=</span>  <span class='hs-varid'>undefined</span>
+<a name="line-442"></a>
 <a name="line-443"></a>
-<a name="line-444"></a><span class='hs-comment'>-- * Staged equality</span>
-<a name="line-445"></a><span class='hs-comment'>-- |</span>
-<a name="line-446"></a><span class='hs-comment'>--</span>
-<a name="line-447"></a><span class='hs-comment'>--  * Establish type equality statically</span>
+<a name="line-444"></a><span class='hs-comment'>-- --------------------------------------------------------------------------</span>
+<a name="line-445"></a>
+<a name="line-446"></a><span class='hs-comment'>-- * Staged equality</span>
+<a name="line-447"></a><span class='hs-comment'>-- |</span>
 <a name="line-448"></a><span class='hs-comment'>--</span>
-<a name="line-449"></a><span class='hs-comment'>--  * Establish remaining value-level equality dynamically</span>
+<a name="line-449"></a><span class='hs-comment'>--  * Establish type equality statically</span>
 <a name="line-450"></a><span class='hs-comment'>--</span>
-<a name="line-451"></a><span class='hs-comment'>-- removed: use typeable</span>
-<a name="line-452"></a><span class='hs-comment'>{-
-<a name="line-453"></a>
-<a name="line-454"></a>class HStagedEq x y
-<a name="line-455"></a> where
-<a name="line-456"></a>  hStagedEq :: x -&gt; y -&gt; Bool
-<a name="line-457"></a>-}</span>
-<a name="line-458"></a>
-<a name="line-459"></a>
-<a name="line-460"></a><span class='hs-comment'>{-
-<a name="line-461"></a>-- --------------------------------------------------------------------------
-<a name="line-462"></a>
-<a name="line-463"></a>-- | A predicate for type equality
-<a name="line-464"></a>--
-<a name="line-465"></a>-- There are different implementations: see TypeEq*.hs
-<a name="line-466"></a>
-<a name="line-467"></a>class HBool b =&gt; TypeEq x y b | x y -&gt; b
+<a name="line-451"></a><span class='hs-comment'>--  * Establish remaining value-level equality dynamically</span>
+<a name="line-452"></a><span class='hs-comment'>--</span>
+<a name="line-453"></a><span class='hs-comment'>-- removed: use typeable</span>
+<a name="line-454"></a><span class='hs-comment'>{-
+<a name="line-455"></a>
+<a name="line-456"></a>class HStagedEq x y
+<a name="line-457"></a> where
+<a name="line-458"></a>  hStagedEq :: x -&gt; y -&gt; Bool
+<a name="line-459"></a>-}</span>
+<a name="line-460"></a>
+<a name="line-461"></a>
+<a name="line-462"></a><span class='hs-comment'>{-
+<a name="line-463"></a>-- --------------------------------------------------------------------------
+<a name="line-464"></a>
+<a name="line-465"></a>-- | A predicate for type equality
+<a name="line-466"></a>--
+<a name="line-467"></a>-- There are different implementations: see TypeEq*.hs
 <a name="line-468"></a>
-<a name="line-469"></a>
-<a name="line-470"></a>-- Rely on lazy show for type-level Booleans
-<a name="line-471"></a>typeEq :: TypeEq t t' b =&gt; t -&gt; t' -&gt; b
-<a name="line-472"></a>typeEq = undefined
-<a name="line-473"></a>
-<a name="line-474"></a>
-<a name="line-475"></a>-- A more disciplined version: based on proxies
-<a name="line-476"></a>proxyEq :: TypeEq t t' b =&gt; Proxy t -&gt; Proxy t' -&gt; b
-<a name="line-477"></a>proxyEq _ _ = undefined
-<a name="line-478"></a>
-<a name="line-479"></a>-}</span>
+<a name="line-469"></a>class HBool b =&gt; TypeEq x y b | x y -&gt; b
+<a name="line-470"></a>
+<a name="line-471"></a>
+<a name="line-472"></a>-- Rely on lazy show for type-level Booleans
+<a name="line-473"></a>typeEq :: TypeEq t t' b =&gt; t -&gt; t' -&gt; b
+<a name="line-474"></a>typeEq = undefined
+<a name="line-475"></a>
+<a name="line-476"></a>
+<a name="line-477"></a>-- A more disciplined version: based on proxies
+<a name="line-478"></a>proxyEq :: TypeEq t t' b =&gt; Proxy t -&gt; Proxy t' -&gt; b
+<a name="line-479"></a>proxyEq _ _ = undefined
 <a name="line-480"></a>
-<a name="line-481"></a><span class='hs-comment'>-- --------------------------------------------------------------------------</span>
-<a name="line-482"></a><span class='hs-comment'>-- * Type-safe cast -- no longer need. We use a a ~ b</span>
-<a name="line-483"></a>
-<a name="line-484"></a><span class='hs-comment'>{-
-<a name="line-485"></a>class TypeCast x y | x -&gt; y, y -&gt; x
-<a name="line-486"></a> where
-<a name="line-487"></a>  typeCast :: x -&gt; y
-<a name="line-488"></a>-}</span>
-<a name="line-489"></a>
-<a name="line-490"></a>
-<a name="line-491"></a><span class='hs-comment'>-- --------------------------------------------------------------------------</span>
+<a name="line-481"></a>-}</span>
+<a name="line-482"></a>
+<a name="line-483"></a><span class='hs-comment'>-- --------------------------------------------------------------------------</span>
+<a name="line-484"></a><span class='hs-comment'>-- * Type-safe cast -- no longer need. We use a a ~ b</span>
+<a name="line-485"></a>
+<a name="line-486"></a><span class='hs-comment'>{-
+<a name="line-487"></a>class TypeCast x y | x -&gt; y, y -&gt; x
+<a name="line-488"></a> where
+<a name="line-489"></a>  typeCast :: x -&gt; y
+<a name="line-490"></a>-}</span>
+<a name="line-491"></a>
 <a name="line-492"></a>
-<a name="line-493"></a><span class='hs-comment'>-- * Error messages</span>
+<a name="line-493"></a><span class='hs-comment'>-- --------------------------------------------------------------------------</span>
 <a name="line-494"></a>
-<a name="line-495"></a><span class='hs-comment'>-- | A class without instances for explicit failure</span>
-<a name="line-496"></a><span class='hs-keyword'>class</span> <span class='hs-conid'>Fail</span> <span class='hs-varid'>x</span>
-<a name="line-497"></a>
-<a name="line-498"></a>
+<a name="line-495"></a><span class='hs-comment'>-- * Error messages</span>
+<a name="line-496"></a>
+<a name="line-497"></a><span class='hs-comment'>-- | A class without instances for explicit failure</span>
+<a name="line-498"></a><span class='hs-keyword'>class</span> <span class='hs-conid'>Fail</span> <span class='hs-varid'>x</span>
+<a name="line-499"></a>
+<a name="line-500"></a>
 </pre></body>
 </html>

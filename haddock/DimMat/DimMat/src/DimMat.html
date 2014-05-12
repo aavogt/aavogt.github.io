@@ -9,20 +9,145 @@
 <body>
 <pre><a name="line-1"></a><span class='hs-comment'>-- | see examples/</span>
 <a name="line-2"></a><span class='hs-keyword'>module</span> <span class='hs-conid'>DimMat</span> <span class='hs-layout'>(</span>
-<a name="line-3"></a>    <span class='hs-keyword'>module</span> <span class='hs-conid'>DimMat</span><span class='hs-varop'>.</span><span class='hs-conid'>Internal</span><span class='hs-layout'>,</span>
-<a name="line-4"></a>    <span class='hs-keyword'>module</span> <span class='hs-conid'>DimMat</span><span class='hs-varop'>.</span><span class='hs-conid'>QQ</span><span class='hs-layout'>,</span>
-<a name="line-5"></a>    <span class='hs-keyword'>module</span> <span class='hs-conid'>Numeric</span><span class='hs-varop'>.</span><span class='hs-conid'>Units</span><span class='hs-varop'>.</span><span class='hs-conid'>Dimensional</span><span class='hs-varop'>.</span><span class='hs-conid'>TF</span><span class='hs-varop'>.</span><span class='hs-conid'>Prelude</span><span class='hs-layout'>,</span>
-<a name="line-6"></a>    <span class='hs-keyword'>module</span> <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>HList</span><span class='hs-varop'>.</span><span class='hs-conid'>CommonMain</span><span class='hs-layout'>,</span>
-<a name="line-7"></a>    <span class='hs-comment'>-- * to keep types looking ok</span>
-<a name="line-8"></a>    <span class='hs-conid'>Z</span><span class='hs-layout'>,</span><span class='hs-conid'>S</span><span class='hs-layout'>,</span><span class='hs-conid'>N</span><span class='hs-layout'>,</span><span class='hs-conid'>Zero</span><span class='hs-layout'>,</span>
-<a name="line-9"></a>    <span class='hs-conid'>Complex</span><span class='hs-layout'>,</span>
-<a name="line-10"></a>    <span class='hs-layout'>)</span> <span class='hs-keyword'>where</span>
-<a name="line-11"></a>    
-<a name="line-12"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>DimMat</span><span class='hs-varop'>.</span><span class='hs-conid'>Internal</span>
-<a name="line-13"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>DimMat</span><span class='hs-varop'>.</span><span class='hs-conid'>QQ</span>
-<a name="line-14"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Numeric</span><span class='hs-varop'>.</span><span class='hs-conid'>Units</span><span class='hs-varop'>.</span><span class='hs-conid'>Dimensional</span><span class='hs-varop'>.</span><span class='hs-conid'>TF</span><span class='hs-varop'>.</span><span class='hs-conid'>Prelude</span>
-<a name="line-15"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Numeric</span><span class='hs-varop'>.</span><span class='hs-conid'>NumType</span><span class='hs-varop'>.</span><span class='hs-conid'>TF</span>
-<a name="line-16"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>HList</span><span class='hs-varop'>.</span><span class='hs-conid'>CommonMain</span>
-<a name="line-17"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>Complex</span>
+<a name="line-3"></a>
+<a name="line-4"></a>   <span class='hs-comment'>-- * Quasiquotes</span>
+<a name="line-5"></a>   <span class='hs-varid'>matD</span><span class='hs-layout'>,</span>
+<a name="line-6"></a>   <span class='hs-varid'>blockD</span><span class='hs-layout'>,</span>
+<a name="line-7"></a> 
+<a name="line-8"></a>
+<a name="line-9"></a>   <span class='hs-comment'>-- * Data.Packed.Vector</span>
+<a name="line-10"></a>   <span class='hs-layout'>(</span><span class='hs-varop'>@&gt;</span><span class='hs-layout'>)</span><span class='hs-layout'>,</span>
+<a name="line-11"></a>   <span class='hs-comment'>-- * Data.Packed.Matrix</span>
+<a name="line-12"></a>   <span class='hs-comment'>-- ** dimension</span>
+<a name="line-13"></a>   <span class='hs-varid'>cols</span><span class='hs-layout'>,</span> <span class='hs-varid'>rows</span><span class='hs-layout'>,</span>
+<a name="line-14"></a>   <span class='hs-varid'>colsNT</span><span class='hs-layout'>,</span> <span class='hs-varid'>rowsNT</span><span class='hs-layout'>,</span>
+<a name="line-15"></a>   <span class='hs-varid'>hasRows</span><span class='hs-layout'>,</span> <span class='hs-varid'>hasCols</span><span class='hs-layout'>,</span>
+<a name="line-16"></a>   <span class='hs-comment'>-- (&gt;&lt;),</span>
+<a name="line-17"></a>   <span class='hs-varid'>trans</span><span class='hs-layout'>,</span>
+<a name="line-18"></a>   <span class='hs-comment'>-- reshape, flatten, fromLists, toLists, buildMatrix,</span>
+<a name="line-19"></a>   <span class='hs-comment'>-- broken</span>
+<a name="line-20"></a>   <span class='hs-conid'>ToHLists</span><span class='hs-layout'>(</span><span class='hs-varid'>toHLists</span><span class='hs-layout'>)</span><span class='hs-layout'>,</span> <span class='hs-varid'>toHList</span><span class='hs-layout'>,</span> <span class='hs-conid'>FromHLists</span><span class='hs-layout'>(</span><span class='hs-varid'>fromHLists</span><span class='hs-layout'>)</span><span class='hs-layout'>,</span> <span class='hs-varid'>fromHList</span><span class='hs-layout'>,</span>
+<a name="line-21"></a>   <span class='hs-layout'>(</span><span class='hs-varop'>@@&gt;</span><span class='hs-layout'>)</span><span class='hs-layout'>,</span>
+<a name="line-22"></a>
+<a name="line-23"></a>   <span class='hs-comment'>-- asRow, asColumn, fromRows, toRows, fromColumns, toColumns</span>
+<a name="line-24"></a>   <span class='hs-comment'>-- fromBlocks</span>
+<a name="line-25"></a><span class='hs-cpp'>#if MIN_VERSION_hmatrix(0,15,0)</span>
+<a name="line-26"></a>   <span class='hs-varid'>diagBlock</span><span class='hs-layout'>,</span>
+<a name="line-27"></a><span class='hs-cpp'>#endif</span>
+<a name="line-28"></a>   <span class='hs-comment'>-- toBlocks, toBlocksEvery, repmat, flipud, fliprl</span>
+<a name="line-29"></a>   <span class='hs-comment'>-- subMatrix, takeRows, dropRows, takeColumns, dropColumns,</span>
+<a name="line-30"></a>   <span class='hs-comment'>-- extractRows, diagRect, takeDiag, mapMatrix,</span>
+<a name="line-31"></a>   <span class='hs-comment'>-- mapMatrixWithIndexM, mapMatrixWithIndexM_, liftMatrix,</span>
+<a name="line-32"></a>   <span class='hs-comment'>-- liftMatrix2, liftMatrix2Auto, fromArray2D,</span>
+<a name="line-33"></a>
+<a name="line-34"></a>   <span class='hs-varid'>ident</span><span class='hs-layout'>,</span> <span class='hs-comment'>-- where to put this?</span>
+<a name="line-35"></a>   <span class='hs-comment'>-- * Numeric.Container</span>
+<a name="line-36"></a>   <span class='hs-comment'>-- constant, linspace,</span>
+<a name="line-37"></a>   <span class='hs-varid'>diag</span><span class='hs-layout'>,</span>
+<a name="line-38"></a>   <span class='hs-varid'>ctrans</span><span class='hs-layout'>,</span>
+<a name="line-39"></a>   <span class='hs-comment'>-- ** Container class</span>
+<a name="line-40"></a>   <span class='hs-varid'>scalar</span><span class='hs-layout'>,</span>
+<a name="line-41"></a>   <span class='hs-varid'>conj</span><span class='hs-layout'>,</span>
+<a name="line-42"></a>   <span class='hs-varid'>scale</span><span class='hs-layout'>,</span> <span class='hs-varid'>scaleRecip</span><span class='hs-layout'>,</span>
+<a name="line-43"></a>   <span class='hs-varid'>recipMat</span><span class='hs-layout'>,</span>
+<a name="line-44"></a>   <span class='hs-varid'>addConstant</span><span class='hs-layout'>,</span>
+<a name="line-45"></a>   <span class='hs-varid'>add</span><span class='hs-layout'>,</span>
+<a name="line-46"></a>   <span class='hs-varid'>sub</span><span class='hs-layout'>,</span>
+<a name="line-47"></a>   <span class='hs-varid'>mulMat</span><span class='hs-layout'>,</span> <span class='hs-varid'>mulVec</span><span class='hs-layout'>,</span>
+<a name="line-48"></a>   <span class='hs-varid'>divideMat</span><span class='hs-layout'>,</span> <span class='hs-varid'>divideVec</span><span class='hs-layout'>,</span>
+<a name="line-49"></a>   <span class='hs-varid'>equal</span><span class='hs-layout'>,</span>
+<a name="line-50"></a>   <span class='hs-varid'>arctan2</span><span class='hs-layout'>,</span>
+<a name="line-51"></a>   <span class='hs-varid'>hconcat</span><span class='hs-layout'>,</span>
+<a name="line-52"></a>   <span class='hs-varid'>vconcat</span><span class='hs-layout'>,</span>
+<a name="line-53"></a>   <span class='hs-varid'>cmap</span><span class='hs-layout'>,</span>
+<a name="line-54"></a>   <span class='hs-varid'>konst</span><span class='hs-layout'>,</span>
+<a name="line-55"></a>   <span class='hs-varid'>zeroes</span><span class='hs-layout'>,</span>
+<a name="line-56"></a>   <span class='hs-comment'>-- build, atIndex, minIndex, maxIndex, minElement, maxElement,</span>
+<a name="line-57"></a>   <span class='hs-comment'>-- sumElements, prodElements, step, cond, find, assoc, accum,</span>
+<a name="line-58"></a>   <span class='hs-comment'>-- Convert</span>
+<a name="line-59"></a>   <span class='hs-comment'>-- ** Product class</span>
+<a name="line-60"></a>   <span class='hs-conid'>DimMat</span><span class='hs-varop'>.</span><span class='hs-conid'>Internal</span><span class='hs-varop'>.</span><span class='hs-varid'>dot</span><span class='hs-layout'>,</span>
+<a name="line-61"></a>   <span class='hs-comment'>-- absSum, norm1, norm2, normInf,</span>
+<a name="line-62"></a>   <span class='hs-comment'>-- norm1, normInf,</span>
+<a name="line-63"></a>   <span class='hs-varid'>pnorm</span><span class='hs-layout'>,</span>
+<a name="line-64"></a>   <span class='hs-comment'>-- optimiseMult, mXm, mXv, vXm, (&lt;.&gt;),</span>
+<a name="line-65"></a>   <span class='hs-comment'>-- (&lt;&gt;), (&lt;\&gt;), outer, kronecker,</span>
+<a name="line-66"></a>   <span class='hs-comment'>-- ** Random numbers</span>
+<a name="line-67"></a>   <span class='hs-comment'>-- ** Element conversion</span>
+<a name="line-68"></a>   <span class='hs-comment'>-- ** Input/Output</span>
+<a name="line-69"></a>   <span class='hs-comment'>-- ** Experimental</span>
+<a name="line-70"></a>
+<a name="line-71"></a>   <span class='hs-comment'>-- * Numeric.LinearAlgebra.Algorithms</span>
+<a name="line-72"></a>   <span class='hs-comment'>-- | incomplete wrapper for "Numeric.LinearAlgebra.Algorithms"</span>
+<a name="line-73"></a>
+<a name="line-74"></a>   <span class='hs-comment'>-- ** Linear Systems</span>
+<a name="line-75"></a>   <span class='hs-comment'>-- linearSolve, luSolve, cholSolve, linearSolveLS, linearSolveSVD,</span>
+<a name="line-76"></a>   <span class='hs-varid'>inv</span><span class='hs-layout'>,</span>
+<a name="line-77"></a>   <span class='hs-conid'>PInv</span><span class='hs-layout'>(</span><span class='hs-varid'>pinv</span><span class='hs-layout'>)</span><span class='hs-layout'>,</span> 
+<a name="line-78"></a>   <span class='hs-varid'>pinvTol</span><span class='hs-layout'>,</span>
+<a name="line-79"></a>   <span class='hs-varid'>det</span><span class='hs-layout'>,</span>
+<a name="line-80"></a>   <span class='hs-comment'>-- invlndet,</span>
+<a name="line-81"></a>   <span class='hs-varid'>rank</span><span class='hs-layout'>,</span>
+<a name="line-82"></a>   <span class='hs-comment'>-- rcond,</span>
+<a name="line-83"></a>   <span class='hs-comment'>-- ** Matrix factorizations</span>
+<a name="line-84"></a>
+<a name="line-85"></a>   <span class='hs-comment'>-- *** Singular value decomposition</span>
+<a name="line-86"></a>   <span class='hs-comment'>-- *** Eigensystems</span>
+<a name="line-87"></a>   <span class='hs-comment'>-- eigs</span>
+<a name="line-88"></a>   <span class='hs-comment'>{-
+<a name="line-89"></a>   wrapEig, wrapEigOnly,
+<a name="line-90"></a>   EigV, EigE,
+<a name="line-91"></a>   -- **** eigenvalues and eigenvectors
+<a name="line-92"></a>   eig,
+<a name="line-93"></a>   eigC,
+<a name="line-94"></a>   eigH,
+<a name="line-95"></a>   eigH',
+<a name="line-96"></a>   eigR,
+<a name="line-97"></a>   eigS,
+<a name="line-98"></a>   eigS',
+<a name="line-99"></a>   eigSH,
+<a name="line-100"></a>   eigSH',
+<a name="line-101"></a>
+<a name="line-102"></a>   -- **** eigenvalues
+<a name="line-103"></a>   eigOnlyC,
+<a name="line-104"></a>   eigOnlyH,
+<a name="line-105"></a>   eigOnlyR,
+<a name="line-106"></a>   eigOnlyS,
+<a name="line-107"></a>   eigenvalues,
+<a name="line-108"></a>   eigenvaluesSH,
+<a name="line-109"></a>   eigenvaluesSH',
+<a name="line-110"></a>   -}</span>
+<a name="line-111"></a>
+<a name="line-112"></a>   <span class='hs-comment'>-- *** QR</span>
+<a name="line-113"></a>   <span class='hs-comment'>-- *** Cholesky</span>
+<a name="line-114"></a>   <span class='hs-comment'>-- *** Hessenberg</span>
+<a name="line-115"></a>   <span class='hs-comment'>-- *** Schur</span>
+<a name="line-116"></a>   <span class='hs-comment'>-- *** LU </span>
+<a name="line-117"></a>
+<a name="line-118"></a>   <span class='hs-comment'>-- ** Matrix functions</span>
+<a name="line-119"></a>   <span class='hs-comment'>-- sqrtm, matFunc</span>
+<a name="line-120"></a>   <span class='hs-varid'>expm</span><span class='hs-layout'>,</span>
+<a name="line-121"></a>
+<a name="line-122"></a>   <span class='hs-comment'>-- ** Nullspace</span>
+<a name="line-123"></a>   <span class='hs-comment'>-- ** Norms</span>
+<a name="line-124"></a>   <span class='hs-comment'>-- ** Misc</span>
+<a name="line-125"></a>   <span class='hs-comment'>-- ** Util </span>
+<a name="line-126"></a>
+<a name="line-127"></a>   <span class='hs-comment'>-- * Automatic Differentiation</span>
+<a name="line-128"></a>   <span class='hs-comment'>-- ad</span>
+<a name="line-129"></a><span class='hs-cpp'>#ifdef WITH_Ad</span>
+<a name="line-130"></a>   <span class='hs-varid'>diff</span><span class='hs-layout'>,</span>
+<a name="line-131"></a><span class='hs-cpp'>#endif</span>
+<a name="line-132"></a>
+<a name="line-133"></a>
+<a name="line-134"></a>    <span class='hs-comment'>-- * to keep types looking ok</span>
+<a name="line-135"></a>    <span class='hs-keyword'>module</span> <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>HList</span><span class='hs-varop'>.</span><span class='hs-conid'>CommonMain</span><span class='hs-layout'>,</span>
+<a name="line-136"></a>    <span class='hs-conid'>Complex</span><span class='hs-layout'>,</span> 
+<a name="line-137"></a>    <span class='hs-layout'>)</span> <span class='hs-keyword'>where</span>
+<a name="line-138"></a>    
+<a name="line-139"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>DimMat</span><span class='hs-varop'>.</span><span class='hs-conid'>Internal</span>
+<a name="line-140"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>DimMat</span><span class='hs-varop'>.</span><span class='hs-conid'>QQ</span>
+<a name="line-141"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>HList</span><span class='hs-varop'>.</span><span class='hs-conid'>CommonMain</span>
+<a name="line-142"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>Complex</span>
 </pre></body>
 </html>
