@@ -1,0 +1,51 @@
+
+```{r echo=F}
+## alternative J
+
+# equation 39, slight manipulation should avoid 0*inf
+J3 <- function(x,y) {
+    int <- integrate(function(tau) exp(2*sqrt(y*tau) -(y+tau))*
+                    besselI(2*sqrt(tau*y), 0,expon.scaled=T),
+                    0, x)
+    if (int$message != "OK") warning(int$message)    
+    1 - int$value
+}
+# equation 43
+J2 <- function(x,y, m=10, take=m) {
+    require(Bessel)
+    eta <- sqrt(y/x)
+    xi <- 2*sqrt(x)*sqrt(y)
+
+    if (eta < 2)
+    exp( - (x+y) + xi) * cumsum( eta^(0:(m-1)) * BesselI(xi, 0, nSeq=m, expon.scaled=T))[take]
+    else if (eta  < 0.5)
+    1 - exp( - (x+y) + xi) * cumsum( eta^(- (0:(m-1))) * BesselI(xi, 0, nSeq=m, expon.scaled=T))[take]
+    else J1(x,y)
+}
+
+# equation 55
+# b is beta defined right above eq. 31
+F <- function(x,y,r,u0) {
+    b <- (1-r)*u0 + r
+    J((r*x)/b,b*y)*exp((b-1)*y+(1/b-1)*r*x)+(1-J(x,r*y))*exp((1-r)*(x-y))
+}
+N <- function(x,y,r,u0) {
+    b <- (1-r)*u0 + r
+    u0*J((r*x)/b,b*y)*exp((b-1)*y-(1/b-1)*r*x)
+}
+M <- function(x,y,r,u0) {
+    b <- (1-r)*u0 + r
+    (u0*exp((b-1)*y+(1/b-1)*r*x)*(1-J(b*y,(r*x)/b)))/b
+}
+
+# equation 16
+u <- function(...) N(...) / F(...)
+v <- function(...) M(...) / F(...)
+
+loaded <- function(L, t, p=p)
+    integrate(Vectorize(function(z) {
+              evalq(
+                { x <- k*Q*z/R * (1-alpha)/alpha
+                  y <- k/r/K*(t - z/R)
+                  v(x=x, y=y, r=r, u0=1) }, p) }), 0, L)
+```

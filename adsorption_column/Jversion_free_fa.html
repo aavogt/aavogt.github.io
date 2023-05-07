@@ -1,0 +1,600 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title></title>
+  <script src="https://d3eoax9i5htok0.cloudfront.net/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+</head>
+<body>
+<h1 id="free-fa-only-summary">Free FA only: Summary</h1>
+<p>The following graphs are calculated with a feed FA concentration 50 times less than the bound case. No other changes were made. Hence explanations below may not be consistent with the graphs.</p>
+<p>Two models are set-up and analyzed for the adsorption column. Only the loading step is considered. The first model could apply to any situation, but neglects dispersion. The second applies only to the situation where concentration profiles have a tendency to sharpen, but has the benefit of also considering dispersion.</p>
+<p>An optimization is done with the second yielding decisions for the column length and cross-sectional area, cycle time and resin particle size.</p>
+<p>Several sensitivity analyses are done. Results tentatively suggest that a cooler upstream of the column may be unnecessary, or at least that it is unnecessary for it to be large enough to cool the feed all the way down to 20 °C. A second analysis suggests that the particle diameter is not very important so long as it is within rather wide bounds.</p>
+<table>
+<caption>Nomenclature</caption>
+<col width="27%" />
+<col width="10%" />
+<col width="62%" />
+<thead>
+<tr class="header">
+<th align="left">Variable</th>
+<th align="left">unit</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">\(a = 6(1-\alpha)/D_p\)</td>
+<td align="left">1/m</td>
+<td align="left">particle surface area per unit volume</td>
+</tr>
+<tr class="even">
+<td align="left">\(c\)</td>
+<td align="left">kg / m3</td>
+<td align="left">ferulic acid concentration in the liquid phase</td>
+</tr>
+<tr class="odd">
+<td align="left">\(c_0\)</td>
+<td align="left">kg / m3</td>
+<td align="left">ferulic acid concentration in the feed liquid</td>
+</tr>
+<tr class="even">
+<td align="left">\(f(c) = K&#39;Qc/(1 + K&#39;c)\)</td>
+<td align="left">kg/m3</td>
+<td align="left">ferulic acid concentration in the solid at equilibrium with a liquid at \(c\)</td>
+</tr>
+<tr class="odd">
+<td align="left">\(k_La\)</td>
+<td align="left">1/s</td>
+<td align="left">mass transfer coefficient (including surface area per volume term)</td>
+</tr>
+<tr class="even">
+<td align="left">\(k&#39; = K&#39;k_La\)</td>
+<td align="left">m3 / kg / s</td>
+<td align="left">mass transfer coefficient</td>
+</tr>
+<tr class="odd">
+<td align="left">\(q\)</td>
+<td align="left">kg / m3</td>
+<td align="left">ferulic acid concentration in the solid</td>
+</tr>
+<tr class="even">
+<td align="left">\(r\)</td>
+<td align="left">1</td>
+<td align="left">deviation from isotherm (see eq 9 below)</td>
+</tr>
+<tr class="odd">
+<td align="left">\(t\)</td>
+<td align="left">s</td>
+<td align="left">time</td>
+</tr>
+<tr class="even">
+<td align="left">\(u_s = R / \alpha\)</td>
+<td align="left">m/s</td>
+<td align="left">superficial velocity</td>
+</tr>
+<tr class="odd">
+<td align="left">\(x\)</td>
+<td align="left">1</td>
+<td align="left">dimensionless bed length (see equation (9) below)</td>
+</tr>
+<tr class="even">
+<td align="left">\(z = X/L\)</td>
+<td align="left">1</td>
+<td align="left">dimensionless bed length (from 0 to 1)</td>
+</tr>
+<tr class="odd">
+<td align="left">\(A_c\)</td>
+<td align="left">m^2</td>
+<td align="left">empty bed cross section</td>
+</tr>
+<tr class="even">
+<td align="left">\(D\)</td>
+<td align="left">m^2/s</td>
+<td align="left">mass diffusivity (of FA in water)</td>
+</tr>
+<tr class="odd">
+<td align="left">\(D_p\)</td>
+<td align="left">m</td>
+<td align="left">particle diameter</td>
+</tr>
+<tr class="even">
+<td align="left">\(E\)</td>
+<td align="left">m2/s</td>
+<td align="left">dispersion</td>
+</tr>
+<tr class="odd">
+<td align="left">\(K&#39;\)</td>
+<td align="left">m3 / kg</td>
+<td align="left">adsorption isotherm parameter</td>
+</tr>
+<tr class="even">
+<td align="left">\(L\)</td>
+<td align="left">m</td>
+<td align="left">bed length (maximum X)</td>
+</tr>
+<tr class="odd">
+<td align="left">\(L_0\)</td>
+<td align="left">m</td>
+<td align="left">reference length (currently the minimum bed length)</td>
+</tr>
+<tr class="even">
+<td align="left">\(Q\)</td>
+<td align="left">kg / m3</td>
+<td align="left">adsorbent maximum capacity</td>
+</tr>
+<tr class="odd">
+<td align="left">\(\mathbf{Pe} = RL_0/E\alpha\)</td>
+<td align="left">1</td>
+<td align="left">Peclet number</td>
+</tr>
+<tr class="even">
+<td align="left">\(R\)</td>
+<td align="left">m/s</td>
+<td align="left">interstitial velocity</td>
+</tr>
+<tr class="odd">
+<td align="left">\(\mathbf{Re} = D_p u_s / \nu\)</td>
+<td align="left">1</td>
+<td align="left">Reynolds number</td>
+</tr>
+<tr class="even">
+<td align="left">\(\mathbf{Sc} = \eta / D\)</td>
+<td align="left">1</td>
+<td align="left">Schmidt number (external)</td>
+</tr>
+<tr class="odd">
+<td align="left">\(\mathbf{St} = k_La L_0\alpha/R\)</td>
+<td align="left">1</td>
+<td align="left">Stanton number</td>
+</tr>
+<tr class="even">
+<td align="left">\(\mathbf{Sh} = k_L D_p / D\)</td>
+<td align="left">1</td>
+<td align="left">Sherwood number (external mass transfer resistance)</td>
+</tr>
+<tr class="odd">
+<td align="left">\(X\)</td>
+<td align="left">m</td>
+<td align="left">distance from bed feed end</td>
+</tr>
+<tr class="even">
+<td align="left">\(1/\lambda=1+\nu f(c_0)/c_0\)</td>
+<td align="left">1</td>
+<td align="left">dimensionless speed of the shock Rhee equation (7.10.12)</td>
+</tr>
+<tr class="odd">
+<td align="left">\(\alpha\)</td>
+<td align="left">1</td>
+<td align="left">ratio of liquid volume in the bed to total volume</td>
+</tr>
+<tr class="even">
+<td align="left">\(\eta\)</td>
+<td align="left">m^2/s</td>
+<td align="left">kinematic viscosity of water</td>
+</tr>
+<tr class="odd">
+<td align="left">\(\theta\)</td>
+<td align="left">1</td>
+<td align="left">variable added to convert a 2nd order ODE into a system of two 1st order ODEs</td>
+</tr>
+<tr class="even">
+<td align="left">\(\nu = (1-\alpha)/\alpha\)</td>
+<td align="left">1</td>
+<td align="left">ratio of solid volume to liquid volume in the column</td>
+</tr>
+<tr class="odd">
+<td align="left">\(\xi = z - \lambda\tau\)</td>
+<td align="left">1</td>
+<td align="left">coordinate moving at the same speed as the shock wave</td>
+</tr>
+<tr class="even">
+<td align="left">\(\tau = Rt/\alpha L\)</td>
+<td align="left">1</td>
+<td align="left">dimensionless time</td>
+</tr>
+</tbody>
+</table>
+<h1 id="model-1">Model 1</h1>
+<h2 id="governing-equations">Governing Equations</h2>
+<p>Equations are based on S. Goldstein &quot;On the mathematics of exchange processes in fixed columns 1. Mathematical solutions and asymptotic expansions&quot;. Equations present with numbers like (x) are copied from the paper.</p>
+<p>Conservation of mass in a packed bed considering accumulation in solid and liquid phases as well as transport by the liquid moving with velocity \(R\) is given by the equation below. Note that this equation neglects dispersion either due to a velocity profile in the bed or axial mixing.</p>
+<div class="figure">
+<img src="img/eq5_goldstein.png" /><p class="caption"></p>
+</div>
+<p>The boundary conditions selected are those for loading an initially clean column with a constant feed concentration:</p>
+<p>\(c|_{X &gt; 0, t=0} = 0\)</p>
+<p>\(q|_{X &gt; 0, t=0} = 0\)</p>
+<p>\(c|_{X=0, t} = c_0\)</p>
+<p>The rate of transport between phases where the adsorption follows a Langmuir isotherm \(q_e / Q = c K&#39; / (1 + K&#39; c)\), and has a mass transfer coefficient \(k&#39;\) which is related to the \(k_La\) which has units of \(1/s\) by the equation \(k&#39; = K&#39;k_La\).</p>
+<div class="figure">
+<img src="img/eq7_goldstein.png" /><p class="caption"></p>
+</div>
+<p>The following dimensionless variables will be substituted to simplify the above equations:</p>
+<div class="figure">
+<img src="img/eq9_goldstein.png" /><p class="caption"></p>
+</div>
+<p>The dimensionless version of equation 5 is: \(\frac{\partial u}{\partial x} + \frac{\partial v}{\partial y} = 0\), while equation 7 becomes: \(\frac{\partial v}{\partial y} = u - rv + (r-1)uv\).</p>
+<p>After a lengthly derivation, which can be found in the reference, the concentrations in the solid and liquid can be recovered from the following equations. Note that these are vaild for a constant \(u_0\). Substituting \(u_0=1\), which is the natural dimensionless inlet concentration, allows some simplifications but these have not been done below.</p>
+<p>\(J(x,y) = \int_0^x I_0(2\sqrt{\tau y}) e^{-(y+\tau)} d\tau\), where \(I_0\) is a modified Bessel function (Abramowitz &amp; Stegun section 9.6)</p>
+<div class="figure">
+<img src="img/beta.png" /><p class="caption"></p>
+</div>
+<div class="figure">
+<img src="img/MNF.png" /><p class="caption"></p>
+</div>
+<p>\(u = N/F\)</p>
+<p>\(v = M/F\)</p>
+<p>The actual concentrations of FA in the solid \(q(X, t)\) and liquid \(c(X, t)\) are recovered by substituting the values of \(u\) and \(v\) into equation 9 above. Numerical integration, both for the \(J\) as well as calculating the total mass of solute to leave the column \(R \alpha A_c \int_0^t c(X, t) dt\) is done in <a href="Jfun.f90.html">Jfun.f90</a>. That fortran code is called from some <a href="Jversion.R.html">R code</a> which does the rest of the analysis.</p>
+<h2 id="correlations-for-parameters">Correlations for parameters</h2>
+<h3 id="diffusivity">Diffusivity</h3>
+<p>From RE Treybal &quot;Mass transfer operations&quot; 1980, the Wilke-Chang correlation is given using</p>
+<div class="figure">
+<img src="img/wilke_chang1.png" /><p class="caption"></p>
+</div>
+<div class="figure">
+<img src="img/wilke_chang2.png" /><p class="caption"></p>
+</div>
+<p>This leads to value of around \(2\times 10^{-9}\) m\(^2\)/s. Note that the units for atomic volume are assumed to be m3 / kmol atoms × 1000, not a volume per 1000 atoms as listed, since this makes the two columns a comparable order of magnitude.</p>
+<h3 id="mass-transfer-coefficient">Mass transfer coefficient</h3>
+<p>From N Wakao and S Kaguei &quot;Heat and mass transfer in packed beds&quot; 1982, a correlation for a mass transfer coefficient \(k\) which considers a wide range of experimental data is reported below</p>
+<div class="figure">
+<img src="img/transferB.png" /><p class="caption"></p>
+</div>
+<pre><code>## Loading required package: foreach</code></pre>
+<pre><code>## foreach: simple, scalable parallel programming from Revolution Analytics
+## Use Revolution R for scalability, fault tolerance and more.
+## http://www.revolutionanalytics.com</code></pre>
+<pre><code>## Loading required package: iterators</code></pre>
+<pre><code>## Loading required package: parallel</code></pre>
+<h2 id="model">Model</h2>
+<div class="figure">
+<img src="figure_free/unnamed-chunk-5.svg" alt="The longer column (green) takes longer to be saturated as expected." /><p class="caption">The longer column (green) takes longer to be saturated as expected.</p>
+</div>
+<div class="figure">
+<img src="figure_free/unnamed-chunk-6.svg" alt="breakthrough times" /><p class="caption">breakthrough times</p>
+</div>
+<pre><code>## Error: 0 (non-NA) cases</code></pre>
+<pre><code>##    user  system elapsed 
+##   2.724   0.092   3.405</code></pre>
+<div class="figure">
+<img src="figure_free/unnamed-chunk-8.svg" alt="For a fixed time at which to claim the resin is used up, there is a certain optimal design. The design with the lowest cost is the cycle time (1.5 days) that saturates a minimum length column (L = 0.1 m)" /><p class="caption">For a fixed time at which to claim the resin is used up, there is a certain optimal design. The design with the lowest cost is the cycle time (1.5 days) that saturates a minimum length column (L = 0.1 m)</p>
+</div>
+<table>
+<col width="26%" />
+<col width="54%" />
+<thead>
+<tr class="header">
+<th align="left">panel</th>
+<th align="left">description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">C.total</td>
+<td align="left">the total cost of the unit, less revenues in k$</td>
+</tr>
+<tr class="even">
+<td align="left">C.valve</td>
+<td align="left">the cost of replacing valves (k$) which have an assumed cost and number of cycles before they need to be replaced. Longer cycle times reduce this cost, but it is small compared with other prices.</td>
+</tr>
+<tr class="odd">
+<td align="left">C.resin</td>
+<td align="left">this cost is independent of the cycle time, except when a constraint on the minimum bed length forces the bed to be oversized</td>
+</tr>
+<tr class="even">
+<td align="left">fraction.recovery</td>
+<td align="left">in most cases nearly 99% of the inlet FA is to be adsorbed on the resin. This might not be practical for real operation, where a detector for breakthrough may not be sensitive enough. For example, absorbance at 280 nm which is expected to occur from the aromatic ring in FA may not be reliabily measured in the plant environment, since other minor components, such as protein, will also absorb at such a wavelength.</td>
+</tr>
+<tr class="odd">
+<td align="left">capacity.frac</td>
+<td align="left">fraction of the total capacity used. In most situations this is around 99.2%</td>
+</tr>
+<tr class="even">
+<td align="left">L</td>
+<td align="left">bed length. This is directly proportional to the cycle time.</td>
+</tr>
+</tbody>
+</table>
+<p>Resin is also assumed to have a finite number of cycles before it must be replaced. This cost does not vary much with the cycle time since the longer cycle times which lead to a longer resin lifetime is offset by the requirement for more resin. Loss of resin capacity due to irreversible adsorption might be a mechanism that follows the above method, if the poisons are present in low quantities and completely removed by the resin. On the other hand, some mechanisms might involve reactants (oxidisers for example) which are not reactive enough that a short bed will completly remove it from the stream. In that situation, it would appear that it would be better to have a smaller bed, since the total rate of resin deactivation will be faster when more resin is present.</p>
+<div class="figure">
+<img src="figure_free/unnamed-chunk-10.svg" alt="operating at higher temperatures improves kinetics, but reduces the equilibrium capacity of the resin. Overall higher temperatures are worse, but not by much." /><p class="caption">operating at higher temperatures improves kinetics, but reduces the equilibrium capacity of the resin. Overall higher temperatures are worse, but not by much.</p>
+</div>
+<table>
+<col width="26%" />
+<col width="54%" />
+<thead>
+<tr class="header">
+<th align="left">panel</th>
+<th align="left">description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">C.total</td>
+<td align="left">total present value including revenue (1000 $)</td>
+</tr>
+<tr class="even">
+<td align="left">C.resin</td>
+<td align="left">contribution to C.total by resin replacement (1000 $)</td>
+</tr>
+<tr class="odd">
+<td align="left">C.valve</td>
+<td align="left">contribution to C.total by valve replacement (1000 $)</td>
+</tr>
+<tr class="even">
+<td align="left">Qsat/Q</td>
+<td align="left">equilibrium loading on the resin (kg/m^3) given the feed temperature and concentration divided by the value at infinite feed concentration</td>
+</tr>
+<tr class="odd">
+<td align="left">bedvol.loading</td>
+<td align="left">how many bed volumes of liquid are processed to load the column (dimensionless)</td>
+</tr>
+<tr class="even">
+<td align="left">L</td>
+<td align="left">bed length (m)</td>
+</tr>
+<tr class="odd">
+<td align="left">fraction.recovery</td>
+<td align="left">fraction of the FA fed that ends up on the resin</td>
+</tr>
+<tr class="even">
+<td align="left">capacity.frac</td>
+<td align="left">fraction of the maximum capacity of the resin that is actually used when the column is deemed &quot;saturated&quot;</td>
+</tr>
+<tr class="odd">
+<td align="left">k/K</td>
+<td align="left">combined mass transfer resistance (1/s).</td>
+</tr>
+<tr class="even">
+<td align="left">k_liquid</td>
+<td align="left">liquid-side mass transfer coefficient including surface area (1/s)</td>
+</tr>
+<tr class="odd">
+<td align="left">k_solid</td>
+<td align="left">solid-side coeficient intraparticle diffusion (1/s)</td>
+</tr>
+<tr class="even">
+<td align="left">seconds/3600</td>
+<td align="left">hours for each cycle</td>
+</tr>
+</tbody>
+</table>
+<p>Based on the above figure, it appears that the is only a small penalty for running the adsorption at a higher temperature. The difference is only about $1000. This means that the total project cost could be reduced by leaving out the cooler upstream of the adsorption column.</p>
+<p>This is because it was assumed that the internal and external mass transfer are goverened by diffusivities which decrease with the ratio \(\mu /T\). There is a significant reduction in the strength of adsorption as temperature increases: the \(K\) which governs the slope of the isotherm at low concentrations drops from above 12 m3/kg to 6 m3 / kg. However, because the product of feed concentration (c0) and \(K\) is still much greater than one, there is only a small impact on the maximum capacity of the sorbent. If it was not assumed that there is a 10x enrichment in FA concentration by the membrane filtration, then the higher temperature will have a much larger impact, since the capacity of the resin given the feed concentration (<em>Qsat</em>) will drop much more at higher temperatures.</p>
+<p>Note that this type of result is not backed by experiment, and for example in the paper referenced to find the heat of adsorption <a href="http://dx.doi.org/10.1016/j.jhazmat.2007.12.102">10.1016/j.jhazmat.2007.12.102</a> fitted their equilibrium data with lower maximum capacities as temperature increased.</p>
+<p>Additional reasons to keep the cooler upstream are:</p>
+<ul>
+<li>reduce oxidation damage to the resin which may be a limiting factor for resin lifetime</li>
+<li>reduce polymerization of adsorbed FA, which will reduce recovery depending on the end-use of FA</li>
+<li>reduce the need for additional experiments</li>
+<li>improve safety, since the column must operates at low pH (2-4) and high pressure, so leaks will be less of a hazard if they are not hot</li>
+</ul>
+<h1 id="model-2">Model 2</h1>
+<p>Assuming that the breakthrough curve's shape no longer varies with the distance traveled through the bed is a common simplification [McCabe Smith Harriott 1993]. Note that some combinations of feed concentration and isotherm do not allow this combination. In short the requirement is that on a graph of the isotherm \(q = f(c)\), when tracing a straight line from the feed composition to the initial bed concentration, \(f(c)\) has to be on the right (section 7.4 H-K Rhee cited below). Therefore this model is unlikely to be suitable for the eultion step, which has not been considered below.</p>
+<h2 id="justification">Justification</h2>
+<div class="figure">
+<img src="figure_free/unnamed-chunk-11.svg" alt="Values of x from 0 to 120, which are much smaller than values used in the previous section (1000s) give very similarly shaped breakthrough curves, especially as r \rightarrow 0. In the above section, r=0.019, so it is apparent that the breakthrough curves no longer change shape as they pass through the columns." /><p class="caption">Values of x from 0 to 120, which are much smaller than values used in the previous section (1000s) give very similarly shaped breakthrough curves, especially as \(r \rightarrow 0\). In the above section, \(r=0.019\), so it is apparent that the breakthrough curves no longer change shape as they pass through the columns.</p>
+</div>
+<div class="figure">
+<img src="figure_free/unnamed-chunk-12.svg" alt="breakthrough times (x such that u(x,y;r)=0.5) given r." /><p class="caption">breakthrough times (\(x\) such that \(u(x,y;r)=0.5\)) given r.</p>
+</div>
+<p>Further support for assuming a constant-pattern behavior can be found in the graphs calculated with it below. It is found that the mass transfer occurs within a zone whose length is much less than the length of the column.</p>
+<h2 id="equations-solved">Equations Solved</h2>
+<p>Numerical concentrations both in the liquid and solids are only given graphically in general references such as [McCabe Smith Harriott 1993]. To have numerical values of concentrations, the analysis done in section 7.10 H-K Rhee, R Aris, NR Amundson &quot;First Order Partial Differential Equations&quot; volume 1 is followed. The equation that is used in this section to model the column behavior includes dispersion in addition to the mechanisms considered in the above section. Note that some variable names have been changed from the original source to avoid conflicts with the previous section.</p>
+<p>\(\frac{1}{\mathbf{Pe}} \frac{\partial^2 c}{\partial z^2} = \frac{\partial c}{\partial z} + \frac{\partial c}{\partial \tau} + \nu \frac{\partial q}{\partial \tau}\)</p>
+<p>\(\frac{\partial q}{\partial \tau} = \mathbf{St} \left( f(c) - q \right)\)</p>
+<p>The assumption that the shape of the breakthrough curve becomes constant (in a moving frame of reference), allows the above PDE to be reduced to an ODE. Equation numbers are those in the reference cited above.</p>
+<p>(7.10.15)</p>
+<p>\(\frac{\partial c}{\partial \xi} = \theta\)</p>
+<p>\(\frac{\partial \theta}{\partial \xi} = \left[ \left( 1-\lambda \right)\mathbf{Pe} + \mathbf{St}/\lambda \right] - \nu \mathbf{Pe} \mathbf{St} F\)</p>
+<p>(7.10.14)</p>
+<p>\(F = (c - c_0)f(c_0)/c_0 - f(c) + f(c_0)\)</p>
+<p>exercise 7.10.4</p>
+<p>\(n = F - \theta /(\nu\lambda\mathbf{Pe}) + f(c)\)</p>
+<p>The above definitions are provided to an ODE solver (lsodar) which integrates backwards from initial conditions \(c \approx 0\) and \(\partial c / \partial \xi =0\). The \(\xi\) coordinate at which the ODE solver starts is arbitrary. The feed is introduced as a step, but the profile spreads out eventually becoming the profile that is calculated with the above equations. The centre of the step has a certain value of \(\xi\), refered to as \(\xi_r\) below, which needs to be known in order to calculate how long the loading step will take. One way to define that centre is that there is no net transport of solute across the centre as the curve spreads out.</p>
+<div class="figure">
+<img src="img/18.svg" alt="areas A and B are equal at \xi_r" /><p class="caption">areas A and B are equal at \(\xi_r\)</p>
+</div>
+<p>\(A = \int^{0}_{\xi_r} c d\xi\)</p>
+<p>\(B = \int_{-\infty}^{\xi_r} (c_0 - c) d\xi\)</p>
+<p>Combining and re-arranging gives:</p>
+<p>\(\xi_r = \frac{1}{c_0} \int_{-\infty}^{0} (c_0 - c) d\xi\)</p>
+<p>For numerical calculations, the infinities are instead \(\xi\) values such that the integrand (before combining the integrals) is close to 0. One additional modification to the above equations is that the average concentration considering both phases (\(\alpha c + (1-\alpha)q\)) is used.</p>
+<p>If mass transfer happened instantly, and there was no dispersion, then the profile found would be a step centred around \(\xi_r\), which would travel from the inlet of the bed to the outlet in a time equal to \(t_r = L\alpha / R \lambda\). If the cycle is stopped at a time \(\xi_e\), the step will actually take \(t = t_r (1 + \xi_r - \xi_e)\). Graphically this looks like:</p>
+<div class="figure">
+<img src="img/18b.svg" alt="Variables relating to the time at which the cycle ends" /><p class="caption">Variables relating to the time at which the cycle ends</p>
+</div>
+<p>If the cycle is stopped at a low \(c(\xi_e)\) then not much product is lost, but then the cycle time will be shorter. Below it is found that the optimal design has a \(c(\xi_e)\) at a minimum value, which will be the lowest concentration that can be detected reliably without too much expense.</p>
+<h2 id="dispersion">Dispersion</h2>
+<div class="figure">
+<img src="img/dispersion_small.png" alt="Empirical correlation for dispersion in packed beds chosen from Levenspiel 1999 pg311" /><p class="caption">Empirical correlation for dispersion in packed beds chosen from Levenspiel 1999 pg311</p>
+</div>
+<div class="figure">
+<img src="figure_free/unnamed-chunk-13.svg" alt="fit of the above curve giving the mean, max and minimum. The mean value is used in the following calculations." /><p class="caption">fit of the above curve giving the mean, max and minimum. The mean value is used in the following calculations.</p>
+</div>
+<h2 id="numerical-solution">Numerical solution</h2>
+<pre><code>## Error: object &#39;deFun&#39; not found</code></pre>
+<pre><code>## Timing stopped at: 0.012 0 0.012</code></pre>
+<div class="figure">
+<img src="figure_free/unnamed-chunk-16.svg" alt="As the interstitial velocity R is increased the number of bedvolumes processed decreased. This is because the internal mass transfer resistance dominates, so any improvement in the external mass transfer coefficient barely changes the St, while it has increases dispersion. Longer beds have a more efficient use of resin in that more bed volumes can be processed before the effluent rises to the cutoff concentration. This is because the breakthrough curve does not spread out as it passes through the bed, so there is a constant amount of resin unused at the end. This constant amount makes up a smaller fraction for longer beds." /><p class="caption">As the interstitial velocity \(R\) is increased the number of bedvolumes processed decreased. This is because the internal mass transfer resistance dominates, so any improvement in the external mass transfer coefficient barely changes the St, while it has increases dispersion. Longer beds have a more efficient use of resin in that more bed volumes can be processed before the effluent rises to the cutoff concentration. This is because the breakthrough curve does not spread out as it passes through the bed, so there is a constant amount of resin unused at the end. This constant amount makes up a smaller fraction for longer beds.</p>
+</div>
+<pre><code>## Error: object &#39;L&#39; not found</code></pre>
+<div class="figure">
+<img src="figure_free/unnamed-chunk-18.svg" alt="profiles calculated with the equations for a constant-pattern behavior. The solid concentration profile is sharper than the liquid concentration profile because the feed concentration is high enough to put the resin very close to its maximum capacity. deltaN is the driving force for mass transfer, and intC is an integral of C from the right." /><p class="caption">profiles calculated with the equations for a constant-pattern behavior. The solid concentration profile is sharper than the liquid concentration profile because the feed concentration is high enough to put the resin very close to its maximum capacity. deltaN is the driving force for mass transfer, and intC is an integral of C from the right.</p>
+</div>
+<h2 id="optimization">Optimization</h2>
+<h3 id="graphical-2-variables">Graphical: 2 variables</h3>
+<p>To make sure that the model has been set up to include competing costs which will keep the decision variables within ranges, first explore two variables graphically. The first variable is <em>cutoff</em>, this is outlet concentration at the end of the cycle. It is assumed that solutes in the liquid inside the vessel is also recovered. The other variable is the interstitial velocity \(R\).</p>
+<div class="figure">
+<img src="figure_free/unnamed-chunk-20.svg" alt="For constant bed length, there is an optimal point at which to stop the loading step and move on. If the cycle is made too short, then the unused resin at the end of the column costs are too high. If the cycle is too long, the lost revenue from product which could have been recovered exceed the previous savings. Hence there is an optimal cost in the centre. Note that fraction.recovery includes FA in the liquid in the column." /><p class="caption">For constant bed length, there is an optimal point at which to stop the loading step and move on. If the cycle is made too short, then the unused resin at the end of the column costs are too high. If the cycle is too long, the lost revenue from product which could have been recovered exceed the previous savings. Hence there is an optimal cost in the centre. Note that fraction.recovery includes FA in the liquid in the column.</p>
+</div>
+<div class="figure">
+<img src="figure_free/unnamed-chunk-21.svg" alt="variables impacted by flow velocity only, not the cutoff time. seconds.mtz13 is the time it takes for the concentration to rise from 1% to 99% of the inlet concentration. This decreases with increasing velocity because 1. the liquid is moving faster so that a larger area is exposed in a shorter time, and 2. the external mass transfer resistance is slightly decreased as the k/K (mass transfer coefficient in 1/s) panel shows. Finally a higher feed velocity reduces the vessel cost because the required cross-section area decreases." /><p class="caption">variables impacted by flow velocity only, not the cutoff time. seconds.mtz13 is the time it takes for the concentration to rise from 1% to 99% of the inlet concentration. This decreases with increasing velocity because 1. the liquid is moving faster so that a larger area is exposed in a shorter time, and 2. the external mass transfer resistance is slightly decreased as the k/K (mass transfer coefficient in 1/s) panel shows. Finally a higher feed velocity reduces the vessel cost because the required cross-section area decreases.</p>
+</div>
+<h3 id="numerical-4-variables">Numerical: 4 Variables</h3>
+<p>Below the results are for an optimization that simultaneously considers 4 variables:</p>
+<ul>
+<li>feed velocity</li>
+<li>liquid concentration to cut-off. The optimum is the minimum allowed, which will depend on instrument limitations (not in scope). Below the minimum is assumed to be 50% of the feed concentration.</li>
+<li>particle diameter</li>
+<li>bed length</li>
+</ul>
+<p>Besides the outlet concentration at which to end the cycle, all other variables at the optimum fall within the bounds set. Important limitations of the current model include:</p>
+<ul>
+<li>elution part of the model</li>
+<li><p>treatment of the hold-up in the column is an oversimplification</p>
+<ul>
+<li>mixing of elution solvent (EtOH) with water</li>
+<li>liquid hold-up is currently considered to be lost product</li>
+</ul></li>
+<li><p>detection limits may be unrealistic for deciding cycle duration. The column design may change slightly if an on-line sensor is unavailble or inaccurate, and instead the column operates with predetermined cycle times.</p></li>
+</ul>
+<div class="figure">
+<img src="figure_free/unnamed-chunk-23.svg" alt="keeping all other parameters besides bed length (L) constant, the optimum length can be seen as a balance between improved recovery which a larger column can provide (loss of FA is pretty much constant per cycle, so longer step times reduces the time-averaged loss) and higher costs resulting from larger equipment." /><p class="caption">keeping all other parameters besides bed length (L) constant, the optimum length can be seen as a balance between improved recovery which a larger column can provide (loss of FA is pretty much constant per cycle, so longer step times reduces the time-averaged loss) and higher costs resulting from larger equipment.</p>
+</div>
+<div class="figure">
+<img src="figure_free/unnamed-chunk-24.svg" alt="same data as above, but scales have equal tick spacing (k$)" /><p class="caption">same data as above, but scales have equal tick spacing (k$)</p>
+</div>
+<div class="figure">
+<img src="figure_free/unnamed-chunk-25.svg" alt="same as above, except scales are different in each panel. The seconds/3600 panel is the hour-duration of the step." /><p class="caption">same as above, except scales are different in each panel. The seconds/3600 panel is the hour-duration of the step.</p>
+</div>
+<table>
+<caption>decision variables at optimum</caption>
+<col width="11%" />
+<col width="13%" />
+<col width="8%" />
+<thead>
+<tr class="header">
+<th align="center">name</th>
+<th align="center">value</th>
+<th align="center">unit</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">\(c/c_0\)</td>
+<td align="center">0.5007633</td>
+<td align="center">1</td>
+</tr>
+<tr class="even">
+<td align="center">\(R\)</td>
+<td align="center">0.0050000</td>
+<td align="center">m/s</td>
+</tr>
+<tr class="odd">
+<td align="center">\(d_p\)</td>
+<td align="center">0.0001505</td>
+<td align="center">m</td>
+</tr>
+<tr class="even">
+<td align="center">\(L\)</td>
+<td align="center">0.2217881</td>
+<td align="center">m</td>
+</tr>
+</tbody>
+</table>
+<table>
+<caption>other variables at optimum</caption>
+<col width="25%" />
+<col width="15%" />
+<col width="8%" />
+<thead>
+<tr class="header">
+<th align="center">name</th>
+<th align="center">value</th>
+<th align="center">unit</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">C.total</td>
+<td align="center">-3.565e+01</td>
+<td align="center">k$</td>
+</tr>
+<tr class="even">
+<td align="center">C.deltaP</td>
+<td align="center">1.509e-01</td>
+<td align="center">k$</td>
+</tr>
+<tr class="odd">
+<td align="center">C.valve</td>
+<td align="center">1.675e+00</td>
+<td align="center">k$</td>
+</tr>
+<tr class="even">
+<td align="center">C.resin</td>
+<td align="center">5.865e+00</td>
+<td align="center">k$</td>
+</tr>
+<tr class="odd">
+<td align="center">C.vessel</td>
+<td align="center">1.538e+01</td>
+<td align="center">k$</td>
+</tr>
+<tr class="even">
+<td align="center">C.product</td>
+<td align="center">-5.872e+01</td>
+<td align="center">k$</td>
+</tr>
+<tr class="odd">
+<td align="center">deltaP</td>
+<td align="center">1.379e+05</td>
+<td align="center">Pa</td>
+</tr>
+<tr class="even">
+<td align="center">bedvol.loading</td>
+<td align="center">1.861e+03</td>
+<td align="center">1</td>
+</tr>
+<tr class="odd">
+<td align="center">St</td>
+<td align="center">1.239e+00</td>
+<td align="center">1</td>
+</tr>
+<tr class="even">
+<td align="center">Pe</td>
+<td align="center">3.441e+02</td>
+<td align="center">1</td>
+</tr>
+<tr class="odd">
+<td align="center">discharged</td>
+<td align="center">3.591e-03</td>
+<td align="center">kg</td>
+</tr>
+<tr class="even">
+<td align="center">fed</td>
+<td align="center">5.645e-01</td>
+<td align="center">kg</td>
+</tr>
+<tr class="odd">
+<td align="center">fraction.recovery</td>
+<td align="center">9.936e-01</td>
+<td align="center">1</td>
+</tr>
+<tr class="even">
+<td align="center">seconds</td>
+<td align="center">2.476e+04</td>
+<td align="center">s</td>
+</tr>
+<tr class="odd">
+<td align="center">Dbed</td>
+<td align="center">2.200e-01</td>
+<td align="center">m</td>
+</tr>
+<tr class="even">
+<td align="center">Nbed</td>
+<td align="center">2.000e+00</td>
+<td align="center">1</td>
+</tr>
+</tbody>
+</table>
+<h3 id="impact-of-particle-diameter">Impact of particle diameter</h3>
+<div class="figure">
+<img src="figure_free/unnamed-chunk-28.svg" alt="smaller particle diameters reduce the internal mass transfer resistance. Because a short bed length has been chosen, there is no concern over pressure drop unless the diameter is reduced 100x below the literature value of 0.635 mm." /><p class="caption">smaller particle diameters reduce the internal mass transfer resistance. Because a short bed length has been chosen, there is no concern over pressure drop unless the diameter is reduced 100x below the literature value of 0.635 mm.</p>
+</div>
+</body>
+</html>

@@ -1,0 +1,158 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<title>~/doc/4th/adsorption2/jversion/Jfun.f90.html</title>
+<meta name="Generator" content="Vim/7.3">
+<meta name="plugin-version" content="vim7.3_v10">
+<meta name="syntax" content="fortran">
+<meta name="settings" content="use_css,expand_tabs">
+<style type="text/css">
+<!--
+pre { font-family: monospace; color: #000000; background-color: #ffffff; }
+body { font-family: monospace; color: #000000; background-color: #ffffff; }
+.String { color: #808080; }
+.Keyword { color: #008040; }
+.Statement { color: #0000c8; }
+.Special { color: #6a5acd; }
+.Function { color: #008040; }
+.Number { color: #808080; }
+.Type { color: #0000c8; }
+.PreProc { color: #008040; }
+.Comment { color: #c80000; }
+-->
+</style>
+</head>
+<body>
+<pre>
+<span class="Comment">! Jfun.f90</span>
+<span class="Comment">! aavogt@uwaterloo.ca April 2013.</span>
+<span class="Comment">! refer to Jversion.html or Jversion.Rmd</span>
+<span class="Comment">!</span>
+<span class="Comment">! A pure R version was also done, but this is 50 times or so faster.</span>
+
+<span class="Comment">! result after calling intU contains an integral of</span>
+<span class="Comment">! (u-u0) from yMin to yMax, all other parameters constant:</span>
+<span class="Comment">!</span>
+<span class="Comment">!             yMax</span>
+<span class="Comment">!            /</span>
+<span class="Comment">!            [</span>
+<span class="Comment">! result =   I     (u(y; x, r, u0) - u0) dy</span>
+<span class="Comment">!            ]</span>
+<span class="Comment">!            /</span>
+<span class="Comment">!             yMin</span>
+<span class="Comment">!</span>
+<span class="Comment">! this is a multiple of the outlet concentration. This</span>
+<span class="Comment">! can then be multiplied by some parameters to give</span>
+<span class="Comment">! the total mass of solute that was lost.</span>
+<span class="Comment">!</span>
+<span class="Comment">! this approach works much better than integrating over</span>
+<span class="Comment">! the bed volume, particularly after the column is fully</span>
+<span class="Comment">! loaded.</span>
+<span class="PreProc">subroutine</span> intU(x, yMin, yMax, r, u0, <span class="PreProc">result</span><span class="">)</span>
+    <span class="Type">implicit</span><span class=""> </span><span class="Type">none</span>
+<span class="Type">    real</span> (<span class="Type">kind</span>=<span class="Number">8</span><span class="">), </span><span class="Type">intent</span><span class="">(</span><span class="Type">in</span><span class="">) :: x,yMin, yMax, r, u0</span>
+<span class="Type">    real</span> (<span class="Type">kind</span>=<span class="Number">8</span><span class="">), </span><span class="Type">intent</span><span class="">(</span><span class="Type">out</span><span class="">) :: </span><span class="PreProc">result</span>
+
+    <span class="Type">integer</span><span class="">, </span><span class="Type">parameter</span><span class=""> :: limit </span>=<span class=""> </span><span class="Number">100</span><span class="">, lenw </span><span class="Operator">=</span><span class=""> limit</span><span class="Operator">*</span><span class="Number">4</span>
+
+<span class="Type">    real</span> (<span class="Type">kind</span>=<span class="Number">8</span><span class="">) :: epsabs, epsrel, abserr, work(lenw)</span>
+    <span class="Type">integer</span><span class=""> neval, ier, last, iwork(limit)</span>
+
+    epsabs =<span class=""> </span><span class="Number">1e-7</span>
+    epsrel =<span class=""> </span><span class="Number">1e-6</span>
+
+    <span class="Function">call</span><span class=""> dqags ( subfun, yMin, yMax, epsabs, epsrel, </span><span class="PreProc">result</span><span class="">, abserr, </span><span class="Special">&amp;</span>
+        <span class="Special">&amp;</span><span class=""> neval, ier, limit, lenw, last, iwork, work)</span>
+
+    <span class="PreProc">contains</span>
+    <span class="PreProc">function</span><span class=""> subfun(y)</span>
+
+<span class="Type">    real</span> *<span class="Number">8</span><span class=""> :: y, subfun</span>
+<span class="Type">    real</span> *<span class="Number">8</span><span class="">, </span><span class="Type">external</span><span class=""> :: FU</span>
+
+    subfun =<span class=""> FU( x, y, r, u0 )</span>
+
+    <span class="PreProc">end function</span>
+<span class="PreProc">end subroutine</span> intU
+
+<span class="Comment">! FF FU FV are based on equation 55.</span>
+<span class="Comment">! The M and N disapear because they are substituted into equation 16</span>
+<span class="PreProc">function</span> FF (x,y,r,u0)
+<span class="Type">    real</span> *<span class="Number">8</span><span class=""> :: FF,x,y,r,u0</span>
+<span class="Type">    real</span> *<span class="Number">8</span><span class="">, </span><span class="Type">external</span><span class=""> :: J</span>
+
+    <span class="Comment">! b is beta defined right above eq. 31</span>
+    b =<span class=""> (</span><span class="Number">1d0</span><span class="Operator">-</span><span class="">r)</span><span class="Operator">*</span><span class="">u0 </span><span class="Operator">+</span><span class=""> r</span>
+    FF =<span class=""> J((r</span><span class="Operator">*</span><span class="">x)</span><span class="Operator">/</span><span class="">b,b</span><span class="Operator">*</span><span class="">y)</span><span class="Operator">*</span><span class="Function">exp</span><span class="">((b</span><span class="Operator">-</span><span class="Number">1d0</span><span class="">)</span><span class="Operator">*</span><span class="">y</span><span class="Operator">+</span><span class="">(</span><span class="Number">1d0</span><span class="Operator">/</span><span class="">b</span><span class="Operator">-</span><span class="Number">1d0</span><span class="">)</span><span class="Operator">*</span><span class="">r</span><span class="Operator">*</span><span class="">x) </span><span class="Special">&amp;</span><span class=""> </span>
+        <span class="Special">&amp;</span><span class=""> </span>+<span class="">(</span><span class="Number">1d0</span><span class="Operator">-</span><span class="">J(x,r</span><span class="Operator">*</span><span class="">y))</span><span class="Operator">*</span><span class="Function">exp</span><span class="">((</span><span class="Number">1d0</span><span class="Operator">-</span><span class="">r)</span><span class="Operator">*</span><span class="">(x</span><span class="Operator">-</span><span class="">y))</span>
+<span class="PreProc">end function</span>
+
+<span class="PreProc">function</span> FU (x,y,r,u0)
+<span class="Type">    real</span> *<span class="Number">8</span><span class=""> ::  FU, x,y,r,u0, FF</span>
+<span class="Type">    real</span> *<span class="Number">8</span><span class="">, </span><span class="Type">external</span><span class=""> :: J</span>
+    b =<span class=""> (</span><span class="Number">1d0</span><span class="Operator">-</span><span class="">r)</span><span class="Operator">*</span><span class="">u0 </span><span class="Operator">+</span><span class=""> r</span>
+    FU =<span class=""> u0</span><span class="Operator">*</span><span class="">J((r</span><span class="Operator">*</span><span class="">x)</span><span class="Operator">/</span><span class="">b,b</span><span class="Operator">*</span><span class="">y)</span><span class="Operator">*</span><span class=""> </span><span class="Special">&amp;</span><span class=""> </span>
+            <span class="Special">&amp;</span><span class=""> </span><span class="Function">exp</span><span class="">((b</span>-<span class="Number">1d0</span><span class="">)</span><span class="Operator">*</span><span class="">y</span><span class="Operator">-</span><span class="">(</span><span class="Number">1d0</span><span class="Operator">/</span><span class="">b</span><span class="Operator">-</span><span class="Number">1d0</span><span class="">)</span><span class="Operator">*</span><span class="">r</span><span class="Operator">*</span><span class="">x) </span><span class="Operator">/</span><span class=""> FF(x,y,r,u0)</span>
+    <span class="Statement">if</span><span class=""> (FU </span>-<span class=""> </span><span class="Number">1d0</span><span class=""> </span><span class="Operator">.GE.</span><span class=""> </span><span class="Number">1d-3</span><span class="">) </span><span class="Keyword">print</span><span class=""> </span><span class="Operator">*</span><span class="">, </span><span class="String">&quot;FU=&quot;</span><span class="">, FU</span>
+<span class="PreProc">end function</span>
+
+<span class="PreProc">function</span> FV (x,y,r,u0)
+<span class="Type">    real</span> *<span class="Number">8</span><span class=""> :: FV, x,y,r,u0, FF</span>
+<span class="Type">    real</span> *<span class="Number">8</span><span class="">, </span><span class="Type">external</span><span class=""> :: J</span>
+    b =<span class=""> (</span><span class="Number">1d0</span><span class="Operator">-</span><span class="">r)</span><span class="Operator">*</span><span class="">u0 </span><span class="Operator">+</span><span class=""> r</span>
+    FV =<span class=""> (u0</span><span class="Operator">*</span><span class="Function">exp</span><span class="">((b</span><span class="Operator">-</span><span class="Number">1d0</span><span class="">)</span><span class="Operator">*</span><span class="">y</span><span class="Operator">+</span><span class="">(</span><span class="Number">1d0</span><span class="Operator">/</span><span class="">b</span><span class="Operator">-</span><span class="Number">1d0</span><span class="">)</span><span class="Operator">*</span><span class="">r</span><span class="Operator">*</span><span class="">x) </span><span class="Special">&amp;</span><span class=""> </span>
+            <span class="Special">&amp;</span><span class=""> </span>*<span class="">(</span><span class="Number">1d0</span><span class="Operator">-</span><span class="">J(b</span><span class="Operator">*</span><span class="">y,(r</span><span class="Operator">*</span><span class="">x)</span><span class="Operator">/</span><span class="">b)))</span><span class="Operator">/</span><span class="">b </span><span class="Operator">/</span><span class=""> FF(x,y,r,u0)</span>
+    <span class="Statement">if</span><span class=""> (FV </span>-<span class=""> </span><span class="Number">1d0</span><span class=""> </span><span class="Operator">.GE.</span><span class=""> </span><span class="Number">1d-3</span><span class="">) </span><span class="Keyword">print</span><span class=""> </span><span class="Operator">*</span><span class="">, </span><span class="String">&quot;FV=&quot;</span><span class="">, FV</span>
+<span class="PreProc">end function</span>
+
+<span class="Comment">! same as FV but a subroutine for R</span>
+<span class="PreProc">subroutine</span> FVsub (x,y,r,u0, <span class="Type">out</span><span class="">)</span>
+    <span class="Type">implicit real</span><span class=""> </span>*<span class="Number">8</span><span class=""> (a</span><span class="Operator">-</span><span class="">z)</span>
+    <span class="Type">out</span><span class=""> </span>=<span class=""> FV(x,y,r,u0)</span>
+<span class="PreProc">end subroutine</span>
+
+<span class="Comment">! same as FU but a subroutine for R</span>
+<span class="PreProc">subroutine</span> FUsub (x,y,r,u0, <span class="Type">out</span><span class="">)</span>
+    <span class="Type">implicit real</span><span class=""> </span>*<span class="Number">8</span><span class=""> (a</span><span class="Operator">-</span><span class="">z)</span>
+    <span class="Type">out</span><span class=""> </span>=<span class=""> FU(x,y,r,u0)</span>
+<span class="PreProc">end subroutine</span>
+
+<span class="Comment">! same as Jsub, but as a function</span>
+<span class="PreProc">function</span> J (x,y)
+<span class="Type">    real</span> (<span class="Type">kind</span>=<span class="Number">8</span><span class="">) :: J, x, y</span>
+    <span class="Function">call</span><span class=""> Jsub (x,y,J)</span>
+<span class="PreProc">end function</span>
+
+<span class="Comment">! equation 39, slight manipulation should avoid 0*inf</span>
+<span class="PreProc">subroutine</span> Jsub (x,y,j)
+<span class="Type">    real</span> (<span class="Type">kind</span>=<span class="Number">8</span><span class="">), </span><span class="Type">intent</span><span class="">(</span><span class="Type">in</span><span class="">) :: x,y</span>
+<span class="Type">    real</span> (<span class="Type">kind</span>=<span class="Number">8</span><span class="">), </span><span class="Type">intent</span><span class="">(</span><span class="Type">out</span><span class="">) :: j</span>
+
+    <span class="Type">integer</span><span class="">, </span><span class="Type">parameter</span><span class=""> :: limit </span>=<span class=""> </span><span class="Number">100</span><span class="">, lenw </span><span class="Operator">=</span><span class=""> limit</span><span class="Operator">*</span><span class="Number">4</span>
+
+<span class="Type">    real</span> (<span class="Type">kind</span>=<span class="Number">8</span><span class="">) :: epsabs, epsrel, abserr, work(lenw)</span>
+    <span class="Type">integer</span><span class=""> neval, ier, last, iwork(limit)</span>
+
+    epsabs =<span class=""> </span><span class="Number">1e-7</span>
+    epsrel =<span class=""> </span><span class="Number">1e-6</span>
+
+    <span class="Function">call</span><span class=""> dqags ( subfun, </span><span class="Number">0d0</span><span class="">, x, epsabs, epsrel, j, abserr, neval, ier, </span><span class="Special">&amp;</span>
+        <span class="Special">&amp;</span><span class=""> limit, lenw, last, iwork, work)</span>
+
+    j =<span class=""> </span><span class="Number">1d0</span><span class=""> </span><span class="Operator">-</span><span class=""> j</span>
+
+    <span class="Statement">if</span><span class=""> (ier </span>.ne.<span class=""> </span><span class="Number">0</span><span class="">) </span><span class="Keyword">print</span><span class=""> </span><span class="Operator">*</span><span class="">, ier, abserr, abserr</span><span class="Operator">/</span><span class="">j</span>
+
+    <span class="PreProc">contains</span>
+    <span class="PreProc">function</span><span class=""> subfun(tau)</span>
+        <span class="Type">implicit</span><span class=""> </span><span class="Type">none</span>
+<span class="Type">        real</span> (<span class="Type">kind</span>=<span class="Number">8</span><span class="">) :: tau, subfun</span>
+<span class="Type">        real</span> (<span class="Type">kind</span>=<span class="Number">8</span><span class="">), </span><span class="Type">external</span><span class=""> :: dbsi0e</span>
+        subfun =<span class=""> dbsi0e(</span><span class="Number">2d0</span><span class=""> </span><span class="Operator">*</span><span class=""> </span><span class="Function">sqrt</span><span class="">(tau</span><span class="Operator">*</span><span class="">y)) </span><span class="Operator">*</span><span class=""> </span><span class="Function">exp</span><span class="">(</span><span class="Number">2d0</span><span class="Operator">*</span><span class="Function">sqrt</span><span class="">(tau</span><span class="Operator">*</span><span class="">y) </span><span class="Operator">-</span><span class=""> (y</span><span class="Operator">+</span><span class="">tau))</span>
+    <span class="PreProc">end function</span>
+<span class="PreProc">end subroutine</span>
+
+</pre>
+</body>
+</html>

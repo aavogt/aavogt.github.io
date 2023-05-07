@@ -1,0 +1,1124 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<title>~/doc/4th/adsorption2/jversion/Jversion.R.html</title>
+<meta name="Generator" content="Vim/7.3">
+<meta name="plugin-version" content="vim7.3_v10">
+<meta name="syntax" content="r">
+<meta name="settings" content="use_css,expand_tabs">
+<style type="text/css">
+<!--
+pre { font-family: monospace; color: #000000; background-color: #ffffff; }
+body { font-family: monospace; color: #000000; background-color: #ffffff; }
+.Boolean { color: #0000c8; }
+.Error { color: #ffffff; background-color: #ff0000; }
+.Function { color: #008040; }
+.Number { color: #808080; }
+.Type { color: #0000c8; }
+.Statement { color: #0000c8; }
+.Constant { color: #808080; }
+.String { color: #808080; }
+.Normal { color: #000000; background-color: #ffffff; }
+.Special { color: #6a5acd; }
+.PreProc { color: #008040; }
+.Comment { color: #c80000; }
+-->
+</style>
+</head>
+<body>
+<pre>
+<span class="Comment">## @knitr echo=F, cache=F</span>
+<span class="PreProc">library</span><span class="Special">(</span>knitr<span class="Special">)</span>
+opts_chunk<span class="Special">$</span><span class="Normal">set</span><span class="Special">(</span><span class="">dev</span>=<span class="String">'svg'</span><span class="Special">,</span><span class="">cache</span><span class="Operator">=</span><span class="Constant">T</span><span class="Special">,</span><span class=""> tidy</span><span class="Operator">=</span><span class="Constant">F</span><span class="Special">,</span><span class=""> echo</span><span class="Operator">=</span><span class="Constant">F</span><span class="Special">)</span>
+
+toDataFrameDropping <span class="Statement">&lt;-</span><span class=""> </span><span class="Type">function</span><span class="Special">(</span><span class="">x</span><span class="Special">,</span><span class=""> prefix</span>=<span class="String">''</span><span class="Special">,</span><span class=""> nn</span><span class="Operator">=</span><span class="Number">1</span><span class="Special">)</span><span class=""> </span><span class="Special">{</span>
+    d0 <span class="Statement">&lt;-</span><span class=""> </span><span class="Type">list</span><span class="Special">()</span>
+    <span class="Statement">for</span><span class=""> </span><span class="Special">(</span><span class="">n </span><span class="Statement">in</span><span class=""> </span><span class="Function">names</span><span class="Special">(</span><span class="">x</span><span class="Special">))</span><span class=""> </span><span class="Special">{</span>
+        xn <span class="Statement">&lt;-</span><span class=""> x</span><span class="Special">[[</span><span class="">n</span><span class="Special">]]</span>
+        <span class="Statement">if</span><span class=""> </span><span class="Special">((</span><span class="Function">is.integer</span><span class="Special">(</span><span class="">xn</span><span class="Special">)</span><span class=""> </span>|<span class=""> </span><span class="Function">is.double</span><span class="Special">(</span><span class="">xn</span><span class="Special">)</span><span class=""> </span><span class="Operator">|</span><span class=""> </span><span class="Function">is.character</span><span class="Special">(</span><span class="">xn</span><span class="Special">))</span><span class=""> </span><span class="Operator">&amp;</span><span class=""> </span><span class="Function">length</span><span class="Special">(</span><span class="">xn</span><span class="Special">)</span><span class=""> </span><span class="Operator">==</span><span class=""> nn</span><span class="Special">)</span><span class=""> </span><span class="Special">{</span>
+            d0<span class="Special">[[</span><span class=""> </span><span class="Function">paste</span><span class="Special">(</span><span class="">prefix</span><span class="Special">,</span><span class=""> n</span><span class="Special">,</span><span class=""> sep</span>=<span class="String">''</span><span class="Special">)</span><span class=""> </span><span class="Special">]]</span><span class=""> </span><span class="Statement">&lt;-</span><span class=""> xn</span>
+        <span class="Special">}</span>
+    <span class="Special">}</span>
+    <span class="Type">data.frame</span><span class="Special">(</span><span class="">d0</span><span class="Special">)</span>
+<span class="Special">}</span>
+
+
+
+<span class="Comment">#' </span>
+<span class="Comment">#' </span>
+<span class="Comment">#' # Summary</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' Two models are set-up and analyzed for the adsorption column. Only the loading</span>
+<span class="Comment">#' step is considered. The first model could apply to any situation, but neglects</span>
+<span class="Comment">#' dispersion. The second applies only to the situation where concentration</span>
+<span class="Comment">#' profiles have a tendency to sharpen, but has the benefit of also considering</span>
+<span class="Comment">#' dispersion.</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' An optimization is done with the second yielding decisions for the column</span>
+<span class="Comment">#' length and cross-sectional area, cycle time and resin particle size.</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' Several sensitivity analyses are done. Results tentatively suggest that a</span>
+<span class="Comment">#' cooler upstream of the column may be unnecessary, or at least that it is unnecessary for it to be large enough to cool the feed all the way down to 20 °C. A</span>
+<span class="Comment">#' second analysis suggests that the particle diameter is not very important so</span>
+<span class="Comment">#' long as it is within rather wide bounds.</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' </span>
+<span class="Comment">#' +----------------------------------+-------------+-------------------------------------------------------------------------------+</span>
+<span class="Comment">#' | Variable                         | unit        | Description                                                                   |</span>
+<span class="Comment">#' +==================================+=============+===============================================================================+</span>
+<span class="Comment">#' | $a = 6(1-\alpha)/D_p$            | 1/m         | particle surface area per unit volume                                         |</span>
+<span class="Comment">#' +----------------------------------+-------------+-------------------------------------------------------------------------------+</span>
+<span class="Comment">#' | $c$                              | kg / m3     | ferulic acid concentration in the liquid phase                                |</span>
+<span class="Comment">#' +----------------------------------+-------------+-------------------------------------------------------------------------------+</span>
+<span class="Comment">#' | $c_0$                            | kg / m3     | ferulic acid concentration in the feed liquid                                 |</span>
+<span class="Comment">#' +----------------------------------+-------------+-------------------------------------------------------------------------------+</span>
+<span class="Comment">#' | $f(c) = K'Qc/(1 + K'c)$          | kg/m3       | ferulic acid concentration in the solid at equilibrium with a liquid at $c$   |</span>
+<span class="Comment">#' +----------------------------------+-------------+-------------------------------------------------------------------------------+</span>
+<span class="Comment">#' | $k_La$                           | 1/s         | mass transfer coefficient (including surface area per volume term)            |</span>
+<span class="Comment">#' +----------------------------------+-------------+-------------------------------------------------------------------------------+</span>
+<span class="Comment">#' | $k' = K'k_La$                    | m3 / kg / s | mass transfer coefficient                                                     |</span>
+<span class="Comment">#' +----------------------------------+-------------+-------------------------------------------------------------------------------+</span>
+<span class="Comment">#' | $q$                              | kg / m3     | ferulic acid concentration in the solid                                       |</span>
+<span class="Comment">#' +----------------------------------+-------------+-------------------------------------------------------------------------------+</span>
+<span class="Comment">#' | $r$                              | 1           | deviation from isotherm (see eq 9 below)                                      |</span>
+<span class="Comment">#' +----------------------------------+-------------+-------------------------------------------------------------------------------+</span>
+<span class="Comment">#' | $t$                              | s           | time                                                                          |</span>
+<span class="Comment">#' +----------------------------------+-------------+-------------------------------------------------------------------------------+</span>
+<span class="Comment">#' | $u_s = R / \alpha$               | m/s         | superficial velocity                                                          |</span>
+<span class="Comment">#' +----------------------------------+-------------+-------------------------------------------------------------------------------+</span>
+<span class="Comment">#' | $x$                              | 1           | dimensionless bed length (see equation (9) below)                             |</span>
+<span class="Comment">#' +----------------------------------+-------------+-------------------------------------------------------------------------------+</span>
+<span class="Comment">#' | $z = X/L$                        | 1           | dimensionless bed length (from 0 to 1)                                        |</span>
+<span class="Comment">#' +----------------------------------+-------------+-------------------------------------------------------------------------------+</span>
+<span class="Comment">#' | $A_c$                            | m^2         | empty bed cross section                                                       |</span>
+<span class="Comment">#' +----------------------------------+-------------+-------------------------------------------------------------------------------+</span>
+<span class="Comment">#' | $D$                              | m^2/s       | mass diffusivity (of FA in water)                                             |</span>
+<span class="Comment">#' +----------------------------------+-------------+-------------------------------------------------------------------------------+</span>
+<span class="Comment">#' | $D_p$                            | m           | particle diameter                                                             |</span>
+<span class="Comment">#' +----------------------------------+-------------+-------------------------------------------------------------------------------+</span>
+<span class="Comment">#' | $E$                              | m2/s        | dispersion                                                                    |</span>
+<span class="Comment">#' +----------------------------------+-------------+-------------------------------------------------------------------------------+</span>
+<span class="Comment">#' | $K'$                             | m3 / kg     | adsorption isotherm parameter                                                 |</span>
+<span class="Comment">#' +----------------------------------+-------------+-------------------------------------------------------------------------------+</span>
+<span class="Comment">#' | $L$                              | m           | bed length (maximum X)                                                        |</span>
+<span class="Comment">#' +----------------------------------+-------------+-------------------------------------------------------------------------------+</span>
+<span class="Comment">#' | $L_0$                            | m           | reference length (currently the minimum bed length)                           |</span>
+<span class="Comment">#' +----------------------------------+-------------+-------------------------------------------------------------------------------+</span>
+<span class="Comment">#' | $Q$                              | kg / m3     | adsorbent maximum capacity                                                    |</span>
+<span class="Comment">#' +----------------------------------+-------------+-------------------------------------------------------------------------------+</span>
+<span class="Comment">#' | $\mathbf{Pe} = RL_0/E\alpha$     | 1           | Peclet number                                                                 |</span>
+<span class="Comment">#' +----------------------------------+-------------+-------------------------------------------------------------------------------+</span>
+<span class="Comment">#' | $R$                              | m/s         | interstitial velocity                                                         |</span>
+<span class="Comment">#' +----------------------------------+-------------+-------------------------------------------------------------------------------+</span>
+<span class="Comment">#' | $\mathbf{Re} = D_p u_s / \nu$    | 1           | Reynolds number                                                               |</span>
+<span class="Comment">#' +----------------------------------+-------------+-------------------------------------------------------------------------------+</span>
+<span class="Comment">#' | $\mathbf{Sc} = \eta / D$         | 1           | Schmidt number (external)                                                     |</span>
+<span class="Comment">#' +----------------------------------+-------------+-------------------------------------------------------------------------------+</span>
+<span class="Comment">#' | $\mathbf{St} = k_La L_0\alpha/R$ | 1           | Stanton number                                                                |</span>
+<span class="Comment">#' +----------------------------------+-------------+-------------------------------------------------------------------------------+</span>
+<span class="Comment">#' | $\mathbf{Sh} = k_L D_p / D$      | 1           | Sherwood number (external mass transfer resistance)                           |</span>
+<span class="Comment">#' +----------------------------------+-------------+-------------------------------------------------------------------------------+</span>
+<span class="Comment">#' | $X$                              | m           | distance from bed feed end                                                    |</span>
+<span class="Comment">#' +----------------------------------+-------------+-------------------------------------------------------------------------------+</span>
+<span class="Comment">#' | $1/\lambda=1+\nu f(c_0)/c_0$     | 1           | dimensionless speed of the shock Rhee equation (7.10.12)                      |</span>
+<span class="Comment">#' +----------------------------------+-------------+-------------------------------------------------------------------------------+</span>
+<span class="Comment">#' | $\alpha$                         | 1           | ratio of liquid volume in the bed to total volume                             |</span>
+<span class="Comment">#' +----------------------------------+-------------+-------------------------------------------------------------------------------+</span>
+<span class="Comment">#' | $\eta$                           | m^2/s       | kinematic viscosity of water                                                  |</span>
+<span class="Comment">#' +----------------------------------+-------------+-------------------------------------------------------------------------------+</span>
+<span class="Comment">#' | $\theta$                         | 1           | variable added to convert a 2nd order ODE into a system of two 1st order ODEs |</span>
+<span class="Comment">#' +----------------------------------+-------------+-------------------------------------------------------------------------------+</span>
+<span class="Comment">#' | $\nu = (1-\alpha)/\alpha$        | 1           | ratio of solid volume to liquid volume in the column                          |</span>
+<span class="Comment">#' +----------------------------------+-------------+-------------------------------------------------------------------------------+</span>
+<span class="Comment">#' | $\xi = z - \lambda\tau$          | 1           | coordinate moving at the same speed as the shock wave                         |</span>
+<span class="Comment">#' +----------------------------------+-------------+-------------------------------------------------------------------------------+</span>
+<span class="Comment">#' | $\tau = Rt/\alpha L$             | 1           | dimensionless time                                                            |</span>
+<span class="Comment">#' +----------------------------------+-------------+-------------------------------------------------------------------------------+</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' Table: Nomenclature</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' # Model 1</span>
+<span class="Comment">#' ## Governing Equations</span>
+<span class="Comment">#' Equations are based on S. Goldstein &quot;On the mathematics of exchange processes in</span>
+<span class="Comment">#' fixed columns 1. Mathematical solutions and asymptotic expansions&quot;.</span>
+<span class="Comment">#' Equations present with numbers like (x) are copied from the paper.</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' Conservation of mass in a packed bed considering accumulation in solid and liquid phases as well as transport by the liquid moving with velocity $R$ is given by the equation below. Note that this equation neglects dispersion either due to</span>
+<span class="Comment">#' a velocity profile in the bed or axial mixing.</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' ![](img/eq5_goldstein.png)</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' The boundary conditions selected are those for loading an initially clean column with a constant feed concentration:</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' $c|_{X &gt; 0, t=0} = 0$</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' $q|_{X &gt; 0, t=0} = 0$</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' $c|_{X=0, t} = c_0$</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' The rate of transport between phases where the adsorption follows a Langmuir isotherm $q_e / Q = c K' / (1 + K' c)$, and has a mass transfer coefficient $k'$ which is related to the $k_La$ which has units of $1/s$ by the equation $k' = K'k_La$.</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' ![](img/eq7_goldstein.png)</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' The following dimensionless variables will be substituted to simplify the above equations:</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' ![](img/eq9_goldstein.png)</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' The dimensionless version of equation 5 is: $\frac{\partial u}{\partial x} + \frac{\partial v}{\partial y} = 0$, while equation 7 becomes: $\frac{\partial v}{\partial y} = u - rv + (r-1)uv$.</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' After a lengthly derivation, which can be found in the reference, the concentrations in the solid and liquid can be recovered from the following equations. Note that these are vaild for a constant $u_0$. Substituting $u_0=1$, which is the natural dimensionless inlet concentration, allows some simplifications but these have not been done below.</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' $J(x,y) = \int_0^x I_0(2\sqrt{\tau y}) e^{-(y+\tau)} d\tau$, where $I_0$ is a modified Bessel function (Abramowitz &amp; Stegun section 9.6)</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' ![](img/beta.png)</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' ![](img/MNF.png)</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' $u = N/F$</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' $v = M/F$</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' The actual concentrations of FA in the solid $q(X, t)$ and liquid</span>
+<span class="Comment">#' $c(X, t)$ are recovered by substituting the values of $u$ and $v$ into equation</span>
+<span class="Comment">#' 9 above. Numerical integration, both for the $J$ as well as  calculating the</span>
+<span class="Comment">#' total mass of solute to leave the column $R \alpha A_c \int_0^t c(X, t) dt$ is done in</span>
+<span class="Comment">#' [Jfun.f90](Jfun.f90.html). That fortran code is called from the R code below</span>
+<span class="Comment">#' which does the rest of the analysis.</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' </span>
+<span class="Comment">#' ## Correlations for parameters</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' ### Diffusivity</span>
+<span class="Comment">#' From RE Treybal &quot;Mass transfer operations&quot; 1980, the Wilke-Chang correlation is given using</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' ![](img/wilke_chang1.png)</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' ![](img/wilke_chang2.png)</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' This leads to value of around $2\times 10^{-9}$ m$^2$/s. Note that the units for atomic volume are assumed to be m3 / kmol atoms × 1000, not a volume per 1000 atoms as listed, since this makes the two columns a comparable order of magnitude.</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' ### Mass transfer coefficient</span>
+<span class="Comment">#' From N Wakao and S Kaguei &quot;Heat and mass transfer in packed beds&quot; 1982, a correlation for a mass transfer coefficient $k$ which considers a wide range of experimental data is reported below</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' ![](img/transferB.png)</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' </span>
+<span class="Comment">## @knitr </span>
+<span class="PreProc">library</span><span class="Special">(</span>lattice<span class="Special">)</span>
+<span class="PreProc">library</span><span class="Special">(</span>plyr<span class="Special">)</span>
+<span class="PreProc">library</span><span class="Special">(</span>nloptr<span class="Special">)</span>
+<span class="PreProc">library</span><span class="Special">(</span>doMC<span class="Special">)</span>
+
+<span class="Function">dyn.load</span><span class="Special">(</span><span class="String">'Jfun.so'</span><span class="Special">)</span>
+<span class="Comment"># Jfun.so loaded above is generated with something like example:</span>
+<span class="Comment"># gfortran -O3 -fPIC -shared  -g Jfun.f90 libslatec.so -llapack -o Jfun.so</span>
+
+<span class="Comment"># refer to Jfun.f90 what these functions are</span>
+discharged <span class="Statement">&lt;-</span><span class=""> </span><span class="Type">function</span><span class="Special">(</span><span class="">xMax</span><span class="Special">,</span><span class=""> yMin</span><span class="Special">,</span><span class=""> yMax</span><span class="Special">,</span><span class=""> r</span><span class="Special">,</span><span class=""> u0</span><span class="Special">)</span>
+    .Fortran<span class="Special">(</span><span class="String">'intU'</span><span class="Special">,</span><span class=""> x</span>=<span class="">xMax</span><span class="Special">,</span><span class=""> yMin</span><span class="Operator">=</span><span class="">yMin</span><span class="Special">,</span><span class=""> yMax</span><span class="Operator">=</span><span class="">yMax</span><span class="Special">,</span><span class=""> r</span><span class="Operator">=</span><span class="">r</span><span class="Special">,</span><span class=""> u0</span><span class="Operator">=</span><span class="">u0</span><span class="Special">,</span><span class=""> result</span><span class="Operator">=</span><span class="Number">0.0</span><span class="Special">)</span><span class="Special">$</span><span class="Normal">result</span>
+
+FV <span class="Statement">&lt;-</span><span class=""> </span><span class="Type">function</span><span class="Special">(</span><span class="">x</span><span class="Special">,</span><span class="">y</span><span class="Special">,</span><span class=""> r</span><span class="Special">,</span><span class=""> u0</span><span class="Special">)</span>
+     .Fortran<span class="Special">(</span><span class="String">'FVsub'</span><span class="Special">,</span><span class=""> x</span>=<span class="">x</span><span class="Special">,</span><span class=""> y</span><span class="Operator">=</span><span class="">y</span><span class="Special">,</span><span class=""> r</span><span class="Operator">=</span><span class="">r</span><span class="Special">,</span><span class=""> u0</span><span class="Operator">=</span><span class="">u0</span><span class="Special">,</span><span class=""> out</span><span class="Operator">=</span><span class="Number">0</span><span class="Special">)</span><span class="Special">$</span><span class="Normal">out</span>
+FU <span class="Statement">&lt;-</span><span class=""> </span><span class="Type">function</span><span class="Special">(</span><span class="">x</span><span class="Special">,</span><span class="">y</span><span class="Special">,</span><span class=""> r</span><span class="Special">,</span><span class=""> u0</span><span class="Special">)</span>
+     .Fortran<span class="Special">(</span><span class="String">'FUsub'</span><span class="Special">,</span><span class=""> x</span>=<span class="">x</span><span class="Special">,</span><span class=""> y</span><span class="Operator">=</span><span class="">y</span><span class="Special">,</span><span class=""> r</span><span class="Operator">=</span><span class="">r</span><span class="Special">,</span><span class=""> u0</span><span class="Operator">=</span><span class="">u0</span><span class="Special">,</span><span class=""> out</span><span class="Operator">=</span><span class="Number">0</span><span class="Special">)</span><span class="Special">$</span><span class="Normal">out</span>
+
+J <span class="Statement">&lt;-</span><span class=""> </span><span class="Type">function</span><span class="Special">(</span><span class="">x</span><span class="Special">,</span><span class="">y</span><span class="Special">)</span><span class=""> .Fortran</span><span class="Special">(</span><span class="String">'Jsub'</span><span class="Special">,</span><span class=""> x</span>=<span class="">x</span><span class="Special">,</span><span class=""> y</span><span class="Operator">=</span><span class="">y</span><span class="Special">,</span><span class=""> j</span><span class="Operator">=</span><span class="Number">0</span><span class="Special">)</span><span class="Special">$</span><span class="Normal">j</span>
+
+<span class="Comment"># water properties from engineering toolbox</span>
+<span class="Comment"># <a href="http://www.engineeringtoolbox.com/water-thermal-properties-d_162.html">http://www.engineeringtoolbox.com/water-thermal-properties-d_162.html</a></span>
+water_thermal <span class="Statement">&lt;-</span><span class=""> </span><span class="Function">read.csv</span><span class="Special">(</span><span class="String">'water_thermal.csv'</span><span class="Special">,</span><span class=""> comment.char</span>=<span class="String">'#'</span><span class="Special">)</span>
+wp <span class="Statement">&lt;-</span><span class=""> </span><span class="Type">function</span><span class="Special">(</span><span class="">v</span><span class="Special">,</span><span class="Function">t</span><span class="Special">)</span><span class=""> </span><span class="Function">approxfun</span><span class="Special">(</span><span class=""> water_thermal</span><span class="Special">$</span><span class="Normal">T</span><span class="Special">,</span><span class=""> water_thermal</span><span class="Special">[</span><span class="Special">,</span><span class=""> v</span><span class="Special">])(</span><span class="Function">t</span><span class="Special">)</span>
+
+<span class="Comment">#' </span>
+<span class="Comment">#' </span>
+<span class="Comment">#' ## Model </span>
+<span class="Comment">## @knitr cache=T</span>
+
+<span class="Comment"># default values for variables</span>
+defP <span class="Statement">&lt;-</span><span class=""> </span><span class="Type">list</span><span class="Special">(</span>
+    <span class="Comment"># temperature (K)</span>
+    <span class="Constant">T</span>=<span class="Number">273</span><span class="Operator">+</span><span class="Number">20</span><span class="Special">,</span>
+
+    <span class="Comment"># interstitial velocity (m/s)</span>
+    R =<span class=""> </span><span class="Number">1e-4</span><span class="Special">,</span>
+
+    <span class="Comment"># length (m)</span>
+    L=<span class="Number">0.1</span><span class="Special">,</span>
+
+    <span class="Comment"># reference length for 2nd model</span>
+    L0=<span class="Number">0.1</span><span class="Special">,</span>
+
+    <span class="Comment"># fractions of inlet concentration</span>
+    <span class="Comment"># at which it is considered that</span>
+    <span class="Comment">#</span>
+    <span class="Comment"># 1. mass transfer begins</span>
+    <span class="Comment"># 2. the maximum outlet concentration (at which time the feed is stopped)</span>
+    <span class="Comment"># 3. mass transfer is complete</span>
+    cutoffs =<span class=""> </span><span class="Function">c</span><span class="Special">(</span><span class="Number">0.01</span><span class="Special">,</span><span class=""> </span><span class="Number">0.5</span><span class="Special">,</span><span class=""> </span><span class="Number">0.99</span><span class="Special">)</span><span class="Special">,</span>
+
+    <span class="Comment"># time to load column (s)</span>
+    seconds=<span class="Number">24</span><span class="Operator">*</span><span class="Number">3600</span><span class="Special">,</span>
+
+    <span class="Comment"># the upstream membrane filtration reduces volume</span>
+    <span class="Comment"># to be processed and increases concentrations by the same factor</span>
+    volReduction=<span class="Number">10</span><span class="Special">,</span>
+
+    <span class="Comment"># void fraction</span>
+    alpha =<span class=""> </span><span class="Number">0.3</span><span class="Special">,</span>
+
+    <span class="Comment"># isotherm parameters</span>
+    <span class="Comment"># <a href="http://dx.doi.org/10.1016/j.cej.2011.12.037">http://dx.doi.org/10.1016/j.cej.2011.12.037</a></span>
+    Q =<span class=""> </span><span class="Number">220</span><span class="Special">,</span><span class="">      </span><span class="Comment"># kg/m^3.</span>
+    K_298 =<span class=""> </span><span class="Number">12</span><span class="Special">,</span><span class="">   </span><span class="Comment"># m^3/kg.</span>
+
+    dp =<span class=""> </span><span class="Number">0.635e-3</span><span class="Special">,</span><span class=""> </span><span class="Comment"># 0.635 mm particles (same as above expts)</span>
+
+    dischargedFun =<span class=""> </span><span class="Type">function</span><span class="Special">(</span><span class="">env</span><span class="Special">)</span><span class=""> </span><span class="Function">evalq</span><span class="Special">(</span><span class="">discharged</span><span class="Special">(</span><span class="">xMax</span><span class="Special">,</span><span class=""> </span><span class="Number">0</span><span class="Special">,</span><span class=""> yMax</span><span class="Special">,</span><span class=""> r</span><span class="Special">,</span><span class=""> u0</span><span class="Special">)</span><span class=""> </span><span class="Operator">*</span><span class=""> </span><span class="Special">(</span><span class="">K</span><span class="Operator">*</span><span class="">r</span><span class="Operator">/</span><span class="">k</span><span class="Special">)</span><span class=""> </span><span class="Operator">*</span><span class=""> c0 </span><span class="Operator">*</span><span class=""> R </span><span class="Operator">*</span><span class=""> Ac </span><span class="Operator">*</span><span class=""> alpha</span><span class="Special">,</span><span class=""> envir</span><span class="Operator">=</span><span class="">env</span><span class="Special">)</span>
+<span class="Error">)</span>
+
+mkP <span class="Statement">&lt;-</span><span class=""> </span><span class="Type">function</span><span class="Special">(</span><span class="">...</span><span class="Special">)</span><span class=""> </span><span class="Function">within</span><span class="Special">(</span><span class="">defP</span><span class="Special">,</span><span class=""> </span><span class="Special">{</span>
+
+    <span class="Statement">for</span><span class=""> </span><span class="Special">(</span><span class="">v </span><span class="Statement">in</span><span class=""> </span><span class="Function">names</span><span class="Special">(</span><span class="Type">list</span><span class="Special">(</span><span class="">...</span><span class="Special">)))</span><span class=""> </span><span class="Function">assign</span><span class="Special">(</span><span class="">v</span><span class="Special">,</span><span class=""> </span><span class="Type">list</span><span class="Special">(</span><span class="">...</span><span class="Special">)[[</span><span class="">v</span><span class="Special">]])</span>
+
+
+    u0 <span class="Statement">&lt;-</span><span class=""> </span><span class="Number">1</span><span class=""> </span><span class="Comment"># part boundary conditions...</span>
+
+    K <span class="Statement">&lt;-</span><span class=""> K_298 </span>*<span class=""> </span><span class="Function">exp</span><span class="Special">(</span><span class=""> </span><span class="Number">12.8e3</span><span class=""> </span><span class="Operator">/</span><span class=""> </span><span class="Number">8.314</span><span class=""> </span><span class="Operator">*</span><span class=""> </span><span class="Special">(</span><span class="Number">1</span><span class="Operator">/</span><span class="Constant">T</span><span class=""> </span><span class="Operator">-</span><span class=""> </span><span class="Number">1</span><span class="Operator">/</span><span class="Number">298</span><span class="Special">)</span><span class=""> </span><span class="Special">)</span>
+    <span class="Comment"># <a href="http://dx.doi.org/10.1016/j.jhazmat.2007.12.102">http://dx.doi.org/10.1016/j.jhazmat.2007.12.102</a></span>
+    <span class="Comment"># gives:</span>
+    <span class="Comment"># H = -12.8 kJ /mol for phenol (different compound) with a different resin</span>
+    <span class="Comment"># (more polar acrylic). K should decrease with increasing T as in that paper</span>
+
+    <span class="Comment"># intraparticle diffusion also from</span>
+    <span class="Comment"># <a href="http://dx.doi.org/10.1016/j.cej.2011.12.037">http://dx.doi.org/10.1016/j.cej.2011.12.037</a></span>
+    Diffusivity_s0 <span class="Statement">&lt;-</span><span class=""> </span><span class="Number">7.18e-8</span><span class=""> </span>/<span class=""> </span><span class="Number">100</span><span class="Operator">^</span><span class="Number">2</span><span class=""> </span><span class="Comment"># m^2/s</span>
+
+    <span class="Comment"># Assuming the internal resistance is also bulk diffusion</span>
+    <span class="Comment"># in the liquid in the adsorbent's pores, the temperature</span>
+    <span class="Comment"># dependence will be the same as what was assumed for the</span>
+    <span class="Comment"># liquid phase diffusivity. This is a questionable assumption,</span>
+    <span class="Comment"># since the XAD-16 pore sizes are 10 nm per</span>
+    <span class="Comment"># <a href="http://www.safcglobal.com/etc/medialib/docs/Sigma/Product_Information_Sheet/xad16pis.Par.0001.File.tmp/xad16pis.pdf">http://www.safcglobal.com/etc/medialib/docs/Sigma/Product_Information_Sheet/xad16pis.Par.0001.File.tmp/xad16pis.pdf</a></span>
+    <span class="Comment">#</span>
+    <span class="Comment"># A surface diffusion mechanism should probably have been used,</span>
+    <span class="Comment"># which will certainly have different temperature dependence.</span>
+    Diffusivity <span class="Statement">&lt;-</span><span class=""> Diffusivity_s0 </span>*<span class=""> </span>
+            <span class="Special">(</span><span class="Constant">T</span><span class=""> </span>/<span class=""> </span><span class="Number">298</span><span class="Special">)</span><span class=""> </span><span class="Operator">*</span><span class=""> wp</span><span class="Special">(</span><span class="String">'mu'</span><span class="Special">,</span><span class=""> </span><span class="Number">20</span><span class="Special">)</span><span class=""> </span><span class="Operator">/</span><span class=""> wp</span><span class="Special">(</span><span class="String">'mu'</span><span class="Special">,</span><span class=""> </span><span class="Constant">T</span><span class=""> </span><span class="Operator">-</span><span class=""> </span><span class="Number">273</span><span class="Special">)</span>
+
+    <span class="Comment"># water</span>
+    mu_L <span class="Statement">&lt;-</span><span class=""> wp</span><span class="Special">(</span><span class="String">&quot;mu&quot;</span><span class="Special">,</span><span class=""> </span><span class="Constant">T</span>-<span class="Number">273</span><span class="Special">)</span><span class=""> </span><span class="Operator">/</span><span class=""> </span><span class="Number">1000</span><span class=""> </span><span class="Comment"># kg/m/s</span>
+    nu_L <span class="Statement">&lt;-</span><span class=""> wp</span><span class="Special">(</span><span class="String">&quot;nu&quot;</span><span class="Special">,</span><span class=""> </span><span class="Constant">T</span>-<span class="Number">273</span><span class="Special">)</span><span class=""> </span><span class="Operator">*</span><span class=""> </span><span class="Number">1e-6</span><span class=""> </span><span class="Comment"># m^2/s</span>
+    rho_L <span class="Statement">&lt;-</span><span class=""> mu_L </span>/<span class=""> nu_L</span>
+
+    <span class="Comment"># at the reference temperature</span>
+    <span class="Comment"># feed water is measured at the reference temperature. The</span>
+    <span class="Comment"># impact is small, but important when comparing operating</span>
+    <span class="Comment"># temperatures</span>
+    rho_L_ref <span class="Statement">&lt;-</span><span class=""> wp</span><span class="Special">(</span><span class="String">'mu'</span><span class="Special">,</span><span class=""> </span><span class="Number">20</span><span class="Special">)</span>/<span class=""> wp</span><span class="Special">(</span><span class="String">'nu'</span><span class="Special">,</span><span class=""> </span><span class="Number">20</span><span class="Special">)</span><span class=""> </span><span class="Operator">*</span><span class=""> </span><span class="Number">1000</span>
+
+    <span class="Comment"># feed FA concentration</span>
+    c0 <span class="Statement">&lt;-</span><span class=""> </span><span class="Number">2</span>/<span class="Number">5</span><span class=""> </span><span class="Operator">*</span><span class=""> volReduction </span><span class="Operator">*</span><span class=""> rho_L </span><span class="Operator">/</span><span class=""> rho_L_ref </span><span class="Comment"># kg/m^3</span>
+
+    MW_FA <span class="Statement">&lt;-</span><span class=""> </span><span class="Number">194</span>
+
+    <span class="Comment"># C10H10O4 ferulic acid molar volume</span>
+    <span class="Comment"># table 2.3 in Treybal 1980. Used with Wilke-Chang correlation</span>
+    v_FA <span class="Statement">&lt;-</span><span class=""> </span><span class="Special">(</span><span class="Number">10</span>*<span class=""> </span><span class="Number">14.8</span><span class=""> </span><span class="Operator">+</span><span class=""> </span><span class="Number">10</span><span class="Operator">*</span><span class="Number">3.7</span><span class=""> </span><span class="Operator">+</span><span class=""> </span><span class="Number">9.1</span><span class=""> </span><span class="Operator">+</span><span class=""> </span><span class="Number">12</span><span class="Operator">*</span><span class="Number">2</span><span class=""> </span><span class="Operator">+</span><span class=""> </span><span class="Number">7.4</span><span class=""> </span><span class="Operator">-</span><span class=""> </span><span class="Number">15</span><span class="Special">)</span><span class=""> </span><span class="Operator">/</span><span class=""> </span><span class="Number">1000</span>
+    Diffusivity_L <span class="Statement">&lt;-</span><span class=""> </span><span class="Number">117.3e-18</span><span class=""> </span>*<span class=""> </span><span class="Function">sqrt</span><span class="Special">(</span><span class="Number">2.26</span><span class=""> </span><span class="Operator">*</span><span class=""> MW_FA</span><span class="Special">)</span><span class=""> </span><span class="Operator">*</span><span class=""> </span><span class="Constant">T</span><span class=""> </span><span class="Operator">/</span><span class=""> mu_L </span><span class="Operator">/</span><span class=""> v_FA </span><span class="Operator">^</span><span class=""> </span><span class="Number">0.6</span>
+
+    Sc <span class="Statement">&lt;-</span><span class=""> nu_L </span>/<span class=""> Diffusivity_L</span>
+
+    <span class="Function">Re</span><span class=""> </span><span class="Statement">&lt;-</span><span class=""> dp </span>*<span class=""> R </span><span class="Operator">/</span><span class=""> nu_L</span>
+
+    <span class="Comment"># Wakao &amp; Kaguei 1982 pg. 158</span>
+    Sh <span class="Statement">&lt;-</span><span class=""> </span><span class="Number">2</span><span class=""> </span>+<span class=""> </span><span class="Number">1.1</span><span class="Operator">*</span><span class="">Sc</span><span class="Operator">^</span><span class="Special">(</span><span class="Number">1</span><span class="Operator">/</span><span class="Number">3</span><span class="Special">)</span><span class="Operator">*</span><span class="Function">Re</span><span class="Operator">^</span><span class="Number">0.6</span>
+
+    <span class="Comment"># from Glueckauf 1955, which is a 1st order rate to approximating</span>
+    <span class="Comment"># the interal resistance.</span>
+    k_solid  <span class="Statement">&lt;-</span><span class=""> </span><span class="Number">15</span>*<span class="">Diffusivity </span><span class="Operator">/</span><span class=""> </span><span class="Special">(</span><span class="">dp</span><span class="Operator">/</span><span class="Number">2</span><span class="Special">)</span><span class="Operator">^</span><span class="Number">2</span>
+    area_per_bed_volume <span class="Statement">&lt;-</span><span class=""> </span><span class="Special">(</span><span class="Number">1</span>-<span class="">alpha</span><span class="Special">)</span><span class=""> </span><span class="Operator">*</span><span class=""> </span><span class="Number">6</span><span class=""> </span><span class="Operator">/</span><span class=""> dp</span>
+    k_liquid <span class="Statement">&lt;-</span><span class=""> Sh </span>*<span class=""> Diffusivity_L </span><span class="Operator">/</span><span class=""> dp </span><span class="Operator">*</span><span class=""> area_per_bed_volume</span>
+    k <span class="Statement">&lt;-</span><span class=""> K</span>/<span class="Special">(</span><span class="Number">1</span><span class="Operator">/</span><span class="">k_solid </span><span class="Operator">+</span><span class=""> </span><span class="Number">1</span><span class="Operator">/</span><span class="">k_liquid</span><span class="Special">)</span>
+
+    <span class="Comment"># parameter for isotherm</span>
+    r <span class="Statement">&lt;-</span><span class=""> </span><span class="Number">1</span><span class=""> </span>/<span class=""> </span><span class="Special">(</span><span class="Number">1</span><span class=""> </span><span class="Operator">+</span><span class=""> K</span><span class="Operator">*</span><span class="">c0</span><span class="Special">)</span>
+
+    <span class="Comment"># <a href="http://www.google.com/patents/US6453946">http://www.google.com/patents/US6453946</a></span>
+    <span class="Comment"># pressure holding capacity vs. cycles is steep</span>
+    <span class="Comment"># for reference valves (not the invention)</span>
+    <span class="Comment">#valveLife &lt;- 20e3</span>
+    valveLife <span class="Statement">&lt;-</span><span class=""> </span><span class="Number">2000</span>
+    C_valve <span class="Statement">&lt;-</span><span class=""> </span><span class="Number">800</span><span class=""> </span>*<span class=""> </span><span class="Number">2</span><span class=""> </span><span class="Comment"># in and out, $800 (personal experience)</span>
+
+    <span class="Comment">#resinLife &lt;- 20e3</span>
+    resinLife <span class="Statement">&lt;-</span><span class=""> </span><span class="Number">1000</span>
+    C_resin <span class="Statement">&lt;-</span><span class=""> </span><span class="Number">332.5</span>*<span class="Number">1.02</span><span class="Operator">*</span><span class="Special">(</span><span class="Number">1</span><span class="Operator">-</span><span class="">alpha</span><span class="Special">)</span><span class="">  </span><span class="Comment"># $ / L, Sigma's XAD-16 price</span>
+
+    <span class="Comment"># time to regenerate is neglected here:</span>
+    <span class="Comment"># it is supposed to be short (4 bed volumes)</span>
+    Flow_gpm <span class="Statement">&lt;-</span><span class=""> </span><span class="Number">60</span><span class=""> </span>/<span class=""> volReduction </span><span class="Operator">*</span><span class="">  rho_L_ref </span><span class="Operator">/</span><span class=""> rho_L</span>
+    Flow <span class="Statement">&lt;-</span><span class=""> Flow_gpm </span>*<span class=""> </span><span class="Number">3.8e-3</span><span class=""> </span><span class="Operator">/</span><span class=""> </span><span class="Number">60</span><span class=""> </span><span class="Comment"># m^3 / s</span>
+
+    Ac   <span class="Statement">&lt;-</span><span class=""> Flow </span>/<span class=""> R </span><span class="Comment"># cross section</span>
+
+    <span class="Comment"># Diameter if a single bed could work</span>
+    Dbed1 <span class="Statement">&lt;-</span><span class=""> </span><span class="Function">sqrt</span><span class="Special">(</span><span class="">Ac </span>*<span class=""> </span><span class="Number">4</span><span class=""> </span><span class="Operator">/</span><span class=""> </span><span class="Constant">pi</span><span class="Special">)</span>
+
+    <span class="Comment"># maximum is a 12&quot; ID bed?</span>
+    Nbed <span class="Statement">&lt;-</span><span class=""> </span><span class="Function">ceiling</span><span class="Special">(</span><span class="">Dbed1</span>^<span class="Number">2</span><span class=""> </span><span class="Operator">/</span><span class=""> </span><span class="Special">(</span><span class="Number">12</span><span class=""> </span><span class="Operator">*</span><span class=""> </span><span class="Number">25.4e-3</span><span class="Special">)</span><span class="Operator">^</span><span class="Number">2</span><span class="Special">)</span>
+    Dbed <span class="Statement">&lt;-</span><span class=""> Dbed1 </span>/<span class=""> </span><span class="Function">sqrt</span><span class="Special">(</span><span class="">Nbed</span><span class="Special">)</span>
+
+    vpipe   <span class="Statement">&lt;-</span><span class=""> </span><span class="Number">1</span><span class=""> </span><span class="Comment"># m/s in attached piping</span>
+    ID.inch <span class="Statement">&lt;-</span><span class=""> </span><span class="Function">sqrt</span><span class="Special">(</span><span class=""> </span><span class="Number">4</span>/<span class=""> </span><span class="Constant">pi</span><span class=""> </span><span class="Operator">*</span><span class=""> Flow </span><span class="Operator">/</span><span class=""> vpipe</span><span class="Special">)</span><span class=""> </span><span class="Operator">/</span><span class=""> </span><span class="Number">25.4e-3</span>
+
+    <span class="Comment"># <a href="http://www.felkerbrothers.com/Files/PPLPSHTS/Felker%20Price%20Sheet%20P-030111.pdf">http://www.felkerbrothers.com/Files/PPLPSHTS/Felker%20Price%20Sheet%20P-030111.pdf</a></span>
+    <span class="Comment"># 200 $ / foot 316L 40S pipe: excess material</span>
+    <span class="Comment"># there will cover fittings. </span>
+    <span class="Comment">#C_vessel_area &lt;- 2443 # $ / m^2 surface area</span>
+    C_vessel_area <span class="Statement">&lt;-</span><span class=""> </span><span class="Special">{</span>
+        price <span class="Statement">&lt;-</span><span class=""> </span><span class="Number">200</span><span class=""> </span><span class="Comment"># $/foot</span>
+        m3perFoot <span class="Statement">&lt;-</span><span class=""> </span><span class="Number">12</span>*<span class=""> </span><span class="Number">25.4e-3</span><span class=""> </span><span class="Operator">*</span><span class=""> </span><span class="Constant">pi</span><span class=""> </span><span class="Operator">*</span><span class=""> </span><span class="Number">0.3048</span>
+        labor_factor <span class="Statement">&lt;-</span><span class=""> </span><span class="Number">100</span>
+        price *<span class=""> m3perFoot </span><span class="Operator">*</span><span class=""> labor_factor</span>
+    <span class="Special">}</span>
+
+
+    C_vessel_cylinder <span class="Statement">&lt;-</span><span class="">  Nbed </span>*<span class=""> Dbed </span><span class="Operator">*</span><span class=""> </span><span class="Constant">pi</span><span class=""> </span><span class="Operator">*</span><span class=""> C_vessel_area </span><span class="Comment"># $/m length</span>
+
+    C_vessel_ends <span class="Statement">&lt;-</span><span class="">  Nbed </span>*<span class=""> Ac </span><span class="Operator">*</span><span class=""> </span><span class="Constant">pi</span><span class="">   </span><span class="Operator">*</span><span class=""> C_vessel_area</span>
+
+    L_non_bed <span class="Statement">&lt;-</span><span class=""> </span><span class="Number">0.1</span><span class=""> </span><span class="Comment"># m of vessel not occupied by vessel</span>
+                     <span class="Comment"># for liquid distributor for example</span>
+
+    C_fa <span class="Statement">&lt;-</span><span class=""> </span><span class="Number">50</span><span class=""> </span><span class="Comment"># $/kg sale price less downstream costs</span>
+
+    C_electricity <span class="Statement">&lt;-</span><span class=""> </span><span class="Number">0.1</span><span class=""> </span>/<span class=""> </span><span class="Comment"># $0.1 / kWh in $/J</span>
+                     <span class="Number">1000</span><span class=""> </span>/<span class=""> </span><span class="Number">3600</span>
+
+    <span class="Comment"># pump efficiency</span>
+    epsilon_pump <span class="Statement">&lt;-</span><span class=""> </span><span class="Number">0.5</span>
+
+    <span class="Comment"># time used to turn capital costs into annualized costs</span>
+    payback.period <span class="Statement">&lt;-</span><span class=""> </span><span class="Number">2</span><span class=""> </span>*<span class=""> </span><span class="Number">300</span><span class=""> </span><span class="Operator">*</span><span class=""> </span><span class="Number">24</span><span class=""> </span><span class="Operator">*</span><span class=""> </span><span class="Number">3600</span><span class=""> </span><span class="Comment"># seconds</span>
+
+<span class="Error">})</span>
+
+<span class="Comment">#' </span>
+<span class="Comment">#' </span>
+<span class="Comment">## @knitr </span>
+calcDesign <span class="Statement">&lt;-</span><span class=""> </span><span class="Type">function</span><span class="Special">(</span><span class="">p</span><span class="Special">)</span><span class=""> </span><span class="Function">within</span><span class="Special">(</span><span class="">p</span><span class="Special">,</span><span class=""> </span><span class="Special">{</span>
+
+    xMax <span class="Statement">&lt;-</span><span class=""> k</span>*<span class="">Q</span><span class="Operator">*</span><span class="">L</span><span class="Operator">/</span><span class="">R </span><span class="Operator">*</span><span class=""> </span><span class="Special">(</span><span class="Number">1</span><span class="Operator">-</span><span class="">alpha</span><span class="Special">)</span><span class="Operator">/</span><span class="">alpha</span>
+    yMax <span class="Statement">&lt;-</span><span class=""> k</span>/<span class="">r</span><span class="Operator">/</span><span class="">K</span><span class="Operator">*</span><span class="Special">(</span><span class="">seconds </span><span class="Operator">-</span><span class=""> L</span><span class="Operator">/</span><span class="">R</span><span class="Special">)</span>
+
+    vOut <span class="Statement">&lt;-</span><span class=""> FV</span><span class="Special">(</span><span class="">xMax</span><span class="Special">,</span><span class=""> yMax</span><span class="Special">,</span><span class=""> r</span><span class="Special">,</span><span class=""> u0</span><span class="Special">)</span>
+    uOut <span class="Statement">&lt;-</span><span class=""> FU</span><span class="Special">(</span><span class="">xMax</span><span class="Special">,</span><span class=""> yMax</span><span class="Special">,</span><span class=""> r</span><span class="Special">,</span><span class=""> u0</span><span class="Special">)</span>
+
+    discharged <span class="Statement">&lt;-</span><span class=""> dischargedFun</span><span class="Special">(</span><span class="Function">environment</span><span class="Special">())</span>
+    <span class="Comment">#print(seconds)</span>
+
+    fed <span class="Statement">&lt;-</span><span class=""> R </span>*<span class=""> Ac </span><span class="Operator">*</span><span class=""> seconds </span><span class="Operator">*</span><span class=""> c0 </span><span class="Operator">*</span><span class=""> alpha</span>
+
+    loaded <span class="Statement">&lt;-</span><span class=""> fed </span>-<span class=""> discharged</span>
+
+    capacity <span class="Statement">&lt;-</span><span class=""> Q</span>*<span class="">K</span><span class="Operator">*</span><span class="">c0</span><span class="Operator">*</span><span class="">r</span><span class="Operator">*</span><span class="">     L</span><span class="Operator">*</span><span class=""> Ac </span><span class="Operator">*</span><span class=""> </span><span class="Special">(</span><span class="Number">1</span><span class="Operator">-</span><span class="">alpha</span><span class="Special">)</span>
+    liquid.capacity <span class="Statement">&lt;-</span><span class=""> c0 </span>*<span class=""> alpha </span><span class="Operator">*</span><span class=""> L </span><span class="Operator">*</span><span class=""> Ac</span>
+
+    fraction.recovery <span class="Statement">&lt;-</span><span class=""> loaded</span>/<span class="">fed</span>
+
+    <span class="Comment"># not really meaningful to add on the capacity in the liquid,</span>
+    <span class="Comment"># but this way the number won't go over 100%</span>
+    capacity.frac <span class="Statement">&lt;-</span><span class=""> loaded </span>/<span class=""> </span><span class="Special">(</span><span class="">capacity </span><span class="Operator">+</span><span class=""> liquid.capacity</span><span class="Special">)</span>
+
+    bedVolume <span class="Statement">&lt;-</span><span class=""> L </span>*<span class=""> Ac</span>
+    bedvol.loading <span class="Statement">&lt;-</span><span class=""> seconds </span>*<span class=""> R </span><span class="Operator">/</span><span class=""> L </span><span class="Operator">/</span><span class=""> alpha</span>
+
+    C.product <span class="Statement">&lt;-</span><span class=""> </span>-<span class=""> loaded </span><span class="Operator">*</span><span class=""> C_fa </span><span class="Operator">*</span><span class=""> payback.period </span><span class="Operator">/</span>
+                    seconds /<span class=""> </span><span class="Number">1000</span>
+    <span class="Comment"># It might be worth to have some kind of penalty for</span>
+    <span class="Comment"># unused capacity here, such as multiplying by (* capacity.frac)</span>
+
+    C.vessel  <span class="Statement">&lt;-</span><span class=""> C_vessel_cylinder </span>*<span class=""> </span><span class="Special">(</span><span class="">L </span><span class="Operator">+</span><span class=""> L_non_bed</span><span class="Special">)</span><span class=""> </span><span class="Operator">/</span><span class=""> </span><span class="Number">1000</span><span class=""> </span><span class="Operator">+</span><span class=""> </span>
+                 C_vessel_ends /<span class=""> </span><span class="Number">1000</span><span class=""> </span><span class="Operator">+</span>
+                 Nbed *<span class=""> </span><span class="Number">5</span><span class=""> </span><span class="Comment"># installation 5k / bed</span>
+
+    C.resin <span class="Statement">&lt;-</span><span class=""> C_resin </span>*<span class=""> </span><span class="Special">(</span><span class="Number">1</span><span class="Operator">-</span><span class="">alpha</span><span class="Special">)</span><span class=""> </span><span class="Operator">*</span><span class=""> bedVolume </span><span class="Operator">*</span>
+                    payback.period /<span class=""> seconds </span><span class="Operator">/</span><span class=""> resinLife</span>
+
+    C.valve <span class="Statement">&lt;-</span><span class=""> C_valve </span>/<span class=""> </span><span class="Number">1000</span><span class=""> </span><span class="Operator">*</span><span class=""> payback.period </span><span class="Operator">/</span><span class=""> seconds </span><span class="Operator">/</span><span class=""> valveLife</span>
+
+    <span class="Comment"># Ergun equation friction factor</span>
+    friction.factor <span class="Statement">&lt;-</span><span class=""> </span><span class="Number">150</span><span class=""> </span>*<span class=""> </span><span class="Special">(</span><span class="Number">1</span><span class="Operator">-</span><span class="">alpha</span><span class="Special">)</span><span class=""> </span><span class="Operator">*</span><span class=""> mu_L </span><span class="Operator">/</span><span class=""> </span><span class="Special">(</span><span class="">dp </span><span class="Operator">*</span><span class=""> R </span><span class="Operator">*</span><span class=""> rho_L</span><span class="Special">)</span><span class=""> </span><span class="Operator">+</span><span class=""> </span><span class="Number">1.75</span>
+
+    deltaP.heads.bed <span class="Statement">&lt;-</span><span class=""> </span><span class="Number">2</span>*<span class="">L </span><span class="Operator">/</span><span class=""> dp </span><span class="Operator">*</span><span class="">  </span><span class="Special">(</span><span class="Number">1</span><span class="Operator">-</span><span class="">alpha</span><span class="Special">)</span><span class=""> </span><span class="Operator">/</span><span class=""> alpha </span><span class="Operator">^</span><span class=""> </span><span class="Number">3</span><span class=""> </span><span class="Operator">*</span><span class=""> friction.factor</span>
+    deltaP.heads.fittings <span class="Statement">&lt;-</span><span class=""> </span><span class="Number">6</span>
+
+    deltaP <span class="Statement">&lt;-</span><span class=""> rho_L </span>*<span class=""> R</span><span class="Operator">^</span><span class="Number">2</span><span class="Operator">/</span><span class="Number">2</span><span class=""> </span><span class="Operator">*</span><span class=""> deltaP.heads.bed </span><span class="Operator">+</span>
+            rho_L *<span class=""> vpipe</span><span class="Operator">^</span><span class="Number">2</span><span class=""> </span><span class="Operator">/</span><span class=""> </span><span class="Number">2</span><span class=""> </span><span class="Operator">*</span><span class=""> deltaP.heads.fittings</span>
+
+
+    C.deltaP <span class="Statement">&lt;-</span><span class=""> deltaP </span>*<span class=""> Flow </span><span class="Operator">/</span><span class=""> epsilon_pump </span><span class="Operator">*</span><span class=""> </span>
+                C_electricity *<span class=""> payback.period </span><span class="Operator">/</span><span class=""> </span><span class="Number">1000</span>
+
+    C.total <span class="Statement">&lt;-</span><span class=""> C.product </span>+<span class=""> C.vessel </span><span class="Operator">+</span><span class=""> C.resin </span><span class="Operator">+</span><span class=""> C.valve </span><span class="Operator">+</span><span class=""> C.deltaP</span>
+<span class="Error">})</span>
+
+ps2 <span class="Statement">&lt;-</span><span class=""> </span><span class="Function">expand.grid</span><span class="Special">(</span><span class="">L</span>=<span class=""> </span><span class="Function">round</span><span class="Special">(</span><span class="Function">seq</span><span class="Special">(</span><span class="">from</span><span class="Operator">=</span><span class="Number">10</span><span class="Special">,</span><span class=""> to</span><span class="Operator">=</span><span class="Number">50</span><span class="Special">,</span><span class=""> length.out</span><span class="Operator">=</span><span class="Number">3</span><span class="Special">))</span><span class="Operator">/</span><span class="Number">100</span><span class="Special">,</span>
+                   seconds =<span class=""> </span><span class="Function">seq</span><span class="Special">(</span><span class="">from</span><span class="Operator">=</span><span class="Number">0</span><span class="Special">,</span><span class=""> to</span><span class="Operator">=</span><span class="Number">8</span><span class="Operator">*</span><span class="Number">24</span><span class="Operator">*</span><span class="Number">3600</span><span class="Special">,</span><span class=""> length.out</span><span class="Operator">=</span><span class="Number">10</span><span class="Special">))</span>
+
+registerDoMC<span class="Special">(</span><span class="Number">2</span><span class="Special">)</span>
+ps2 <span class="Statement">&lt;-</span><span class=""> mdply</span><span class="Special">(</span><span class=""> </span><span class="Function">subset</span><span class="Special">(</span><span class="">ps2</span><span class="Special">,</span><span class=""> seconds</span>*<span class="">mkP</span><span class="Special">()</span><span class="Special">$</span><span class="Normal">R</span><span class=""> </span><span class="Operator">-</span><span class=""> L </span><span class="Operator">&gt;</span><span class=""> </span><span class="Number">0</span><span class="Special">)</span><span class="Special">,</span><span class=""> </span><span class="Type">function</span><span class="Special">(</span><span class="">L</span><span class="Special">,</span><span class="">seconds</span><span class="Special">)</span><span class=""> </span><span class="Special">{</span>
+             toDataFrameDropping<span class="Special">(</span><span class="">calcDesign</span><span class="Special">(</span><span class="">mkP</span><span class="Special">(</span><span class="">L</span>=<span class="">L</span><span class="Special">,</span><span class=""> seconds</span><span class="Operator">=</span><span class="">seconds</span><span class="Special">)))</span>
+            <span class="Special">}</span><span class="Special">,</span><span class=""> .parallel</span>=<span class="Constant">T</span><span class="Special">)</span>
+
+<span class="Comment">#' </span>
+<span class="Comment">#' </span>
+<span class="Comment">## @knitr fig.cap=&quot;The longer column (green) takes longer to be saturated as expected.&quot;, fig.height=3, fig.width=5</span>
+ps3 <span class="Statement">&lt;-</span><span class=""> ddply</span><span class="Special">(</span><span class="">ps2</span><span class="Special">,</span><span class=""> .</span><span class="Special">(</span><span class="">L</span><span class="Special">)</span><span class="Special">,</span><span class=""> </span><span class="Type">function</span><span class="Special">(</span><span class="">x</span><span class="Special">)</span><span class=""> </span><span class="Special">{</span>
+             <span class="Function">cbind</span><span class="Special">(</span><span class="">x</span><span class="Special">,</span><span class=""> seconds.breakthrough </span>=<span class=""> </span>
+                        <span class="Function">rep</span><span class="Special">(</span><span class="">x</span><span class="Special">$</span><span class="Normal">seconds</span><span class="Special">[</span><span class=""> x</span><span class="Special">$</span><span class="Normal">uOut</span><span class=""> </span>&gt;<span class=""> </span><span class="Number">0.01</span><span class=""> </span><span class="Special">][</span><span class="Number">1</span><span class="Special">]</span><span class="Special">,</span>
+                            <span class="Function">nrow</span><span class="Special">(</span><span class="">x</span><span class="Special">)))</span><span class=""> </span>
+             <span class="Special">})</span>
+<span class="Function">plot</span><span class="Special">(</span>xyplot<span class="Special">(</span><span class="">fraction.recovery </span>+<span class=""> capacity.frac </span><span class="Operator">~</span><span class=""> </span><span class="Special">(</span><span class="">seconds </span><span class="Operator">-</span><span class=""> seconds.breakthrough</span><span class="Special">)</span><span class="Operator">/</span><span class="Number">3600</span><span class="Operator">/</span><span class="Number">24</span><span class="Special">,</span>
+            <span class="Function">data</span>=<span class="">ps3</span><span class="Special">,</span><span class=""> type</span><span class="Operator">=</span><span class="String">'l'</span><span class="Special">,</span><span class=""> groups</span><span class="Operator">=</span><span class="">L</span><span class="Special">,</span><span class=""> ylab</span><span class="Operator">=</span><span class="String">''</span><span class="Special">,</span>
+            auto.key=<span class="Type">list</span><span class="Special">(</span><span class="">columns</span><span class="Operator">=</span><span class="Number">3</span><span class="Special">,</span><span class=""> </span><span class="Function">points</span><span class="Operator">=</span><span class="Boolean">FALSE</span><span class="Special">,</span><span class=""> </span><span class="Function">lines</span><span class="Operator">=</span><span class="Boolean">TRUE</span><span class="Special">,</span>
+                          <span class="Function">title</span>=<span class="String">'bed length (m)'</span><span class="Special">)</span><span class="Special">,</span>
+            scales=<span class="Type">list</span><span class="Special">(</span><span class="">alternating</span><span class="Operator">=</span><span class="Constant">F</span><span class="Special">,</span><span class=""> y</span><span class="Operator">=</span><span class="Type">list</span><span class="Special">(</span><span class="">relation</span><span class="Operator">=</span><span class="String">'free'</span><span class="Special">))</span><span class="Special">,</span>
+            xlab =<span class=""> </span><span class="String">'days after breakthrough (1% of feed conc)'</span><span class="Special">))</span>
+
+<span class="Comment">#' </span>
+<span class="Comment">#' </span>
+<span class="Comment">#' </span>
+<span class="Comment">## @knitr fig.cap=&quot;breakthrough times&quot;, fig.width=2, fig.height=2</span>
+<span class="Function">plot</span><span class="Special">(</span>xyplot<span class="Special">(</span><span class=""> seconds.breakthrough</span>/<span class="Number">3600</span><span class="Operator">/</span><span class="Number">24</span><span class=""> </span><span class="Operator">~</span><span class=""> L</span><span class="Special">,</span><span class=""> ps3</span><span class="Special">,</span><span class=""> type</span><span class="Operator">=</span><span class="String">'b'</span><span class="Special">,</span><span class=""> aspect</span><span class="Operator">=</span><span class="String">'xy'</span><span class="Special">,</span><span class=""> ylab</span><span class="Operator">=</span><span class="String">'days to breakthough'</span><span class="Special">))</span>
+<span class="Function">print</span><span class="Special">(</span><span class="Function">confint</span><span class="Special">(</span><span class="Function">lm</span><span class="Special">(</span> seconds.breakthrough ~<span class=""> L</span><span class="Special">,</span><span class=""> ps3</span><span class="Special">)))</span>
+
+<span class="Comment">#' </span>
+<span class="Comment">#' </span>
+<span class="Comment">#' </span>
+<span class="Comment">## @knitr </span>
+optt <span class="Statement">&lt;-</span><span class=""> </span><span class="Type">function</span><span class="Special">(</span><span class="">seconds</span><span class="Special">)</span><span class=""> nloptr</span><span class="Special">(</span>
+    <span class="Function">c</span><span class="Special">(</span><span class="Number">0.13</span><span class="Special">)</span><span class="Special">,</span><span class=""> </span><span class="Comment"># m</span>
+    <span class="Type">function</span><span class="Special">(</span><span class="">x</span><span class="Special">)</span>
+        calcDesign<span class="Special">(</span><span class=""> mkP</span><span class="Special">(</span><span class=""> seconds</span>=<span class="">seconds</span><span class="Special">,</span><span class=""> L</span><span class="Operator">=</span><span class="">x</span><span class="Special">[</span><span class="Number">1</span><span class="Special">])</span><span class=""> </span><span class="Special">)</span><span class="Special">$</span><span class="Normal">C.total</span><span class="Special">,</span>
+    opts=<span class="Type">list</span><span class="Special">(</span><span class="">algorithm</span><span class="Operator">=</span><span class="String">'NLOPT_LN_COBYLA'</span><span class="Special">,</span>
+                xtol_rel =<span class=""> </span><span class="Number">0.001</span><span class="Special">,</span>
+                maxeval=<span class="Number">1000</span><span class="Special">,</span><span class=""> maxtime</span><span class="Operator">=</span><span class="Number">3</span><span class="Operator">*</span><span class="Number">60</span><span class="Special">)</span><span class="Special">,</span>
+    lb =<span class=""> </span><span class="Function">c</span><span class="Special">(</span><span class="Number">0.1</span><span class="Special">)</span><span class="Special">,</span><span class=""> ub </span><span class="Operator">=</span><span class=""> </span><span class="Function">c</span><span class="Special">(</span><span class="Number">0.5</span><span class="Special">)</span>
+<span class="Special">)</span>
+
+registerDoMC<span class="Special">(</span><span class="Number">2</span><span class="Special">)</span>
+
+<span class="Function">print</span><span class="Special">(</span><span class="Function">system.time</span><span class="Special">(</span>
+optts <span class="Statement">&lt;-</span><span class=""> mdply</span><span class="Special">(</span><span class=""> </span><span class="Type">data.frame</span><span class="Special">(</span><span class="">seconds</span>=<span class=""> </span><span class="Function">c</span><span class="Special">(</span><span class="">  </span><span class="Function">seq</span><span class="Special">(</span><span class="">from</span><span class="Operator">=</span><span class="Number">3</span><span class="Special">,</span><span class=""> to</span><span class="Operator">=</span><span class="Number">6</span><span class="Special">,</span><span class=""> length.out</span><span class="Operator">=</span><span class="Number">5</span><span class="Special">)</span><span class="Operator">*</span>
+                                      <span class="Number">60</span>*<span class="Number">60</span><span class="Special">,</span>
+                                      <span class="Function">seq</span><span class="Special">(</span><span class="">from</span>=<span class="Number">0.3</span><span class="Special">,</span><span class=""> to</span><span class="Operator">=</span><span class="Number">6</span><span class="Special">,</span><span class=""> length.out</span><span class="Operator">=</span><span class="Number">20</span><span class="Special">)</span><span class=""> </span><span class="Operator">*</span>
+                                        <span class="Number">3600</span><span class=""> </span>*<span class=""> </span><span class="Number">24</span><span class="Special">))</span><span class="Special">,</span>
+               <span class="Type">function</span><span class="Special">(</span><span class="">seconds</span><span class="Special">)</span><span class=""> </span><span class="Special">{</span>
+                   y <span class="Statement">&lt;-</span><span class=""> optt</span><span class="Special">(</span><span class="">seconds</span><span class="Special">)</span>
+                   y <span class="Statement">&lt;-</span><span class=""> </span><span class="Type">data.frame</span><span class="Special">(</span><span class="">L</span>=<span class="">y</span><span class="Special">$</span><span class="Normal">solution</span><span class="Special">,</span><span class=""> seconds </span><span class="Operator">=</span><span class=""> seconds</span><span class="Special">,</span><span class=""> status</span><span class="Operator">=</span><span class="">y</span><span class="Special">$</span><span class="Normal">status</span><span class="Special">,</span><span class=""> </span><span class="Function">message</span><span class="Operator">=</span><span class="">y</span><span class="Special">$</span><span class="Normal">message</span><span class="Special">)</span>
+                   <span class="Function">cbind</span><span class="Special">(</span><span class="">y</span><span class="Special">,</span><span class=""> toDataFrameDropping</span><span class="Special">(</span><span class="">calcDesign</span><span class="Special">(</span><span class="">mkP</span><span class="Special">(</span><span class="">L</span>=<span class="">y</span><span class="Special">$</span><span class="Normal">L</span><span class="Special">,</span><span class=""> seconds</span><span class="Operator">=</span><span class="">seconds</span><span class="Special">))))</span>
+                <span class="Special">}</span><span class="Special">,</span><span class=""> .parallel</span>=<span class="Constant">T</span><span class="Special">)</span><span class=""> </span><span class="Special">))</span>
+
+<span class="Comment">#' </span>
+<span class="Comment">#' </span>
+<span class="Comment">## @knitr fig.width=10, fig.height=3, fig.cap='For a fixed time at which to claim the resin is used up, there is a certain optimal design. The design with the lowest cost is the cycle time (1.5 days) that saturates a minimum length column (L = 0.1 m)'</span>
+<span class="Function">plot</span><span class="Special">(</span>xyplot<span class="Special">(</span><span class=""> C.total </span>+<span class=""> C.valve </span><span class="Operator">+</span><span class=""> C.resin</span>
+                +<span class=""> fraction.recovery </span><span class="Operator">+</span><span class=""> capacity.frac </span><span class="Operator">+</span><span class=""> L</span>
+             ~<span class=""> seconds </span><span class="Operator">/</span><span class=""> </span><span class="Number">3600</span><span class=""> </span><span class="Operator">/</span><span class=""> </span><span class="Number">24</span><span class="Special">,</span>
+    <span class="Function">data</span>=<span class="">optts</span><span class="Special">,</span><span class=""> type</span><span class="Operator">=</span><span class="String">'b'</span><span class="Special">,</span>
+    <span class="Function">outer</span>=<span class="Constant">T</span><span class="Special">,</span>
+    scales=<span class="Type">list</span><span class="Special">(</span><span class="">y</span><span class="Operator">=</span><span class="Type">list</span><span class="Special">(</span><span class="">relation</span><span class="Operator">=</span><span class="String">'free'</span><span class="Special">)</span><span class="Special">,</span><span class=""> alternating</span><span class="Operator">=</span><span class="Constant">F</span><span class="Special">)</span><span class="Special">,</span>
+    xlab =<span class=""> </span><span class="String">'days for adsorption step'</span><span class="Special">,</span>
+    ylab =<span class=""> </span><span class="String">''</span><span class="Special">,</span>
+    <span class="Special">))</span>
+
+<span class="Comment">#' </span>
+<span class="Comment">#' </span>
+<span class="Comment">#' ------------------ ---------------------------------------</span>
+<span class="Comment">#' panel              description</span>
+<span class="Comment">#' ------------------ ---------------------------------------</span>
+<span class="Comment">#' C.total            the total cost of the unit, less revenues in k\$ </span>
+<span class="Comment">#' </span>
+<span class="Comment">#' C.valve            the cost of replacing valves (k\$) which have an assumed cost and number of cycles before they need to be replaced. Longer cycle times reduce this cost, but it is small compared with other prices.</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' C.resin            this cost is independent of the cycle time, except when a constraint on the minimum bed length forces the bed to be oversized</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' fraction.recovery  in most cases nearly 99% of the inlet FA is to be adsorbed on the resin. This might not be practical for real operation, where a detector for breakthrough may not be sensitive enough. For example, absorbance at 280 nm which is expected to occur from the aromatic ring in FA may not be reliabily measured in the plant environment, since other minor components, such as protein, will also absorb at such a wavelength.</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' capacity.frac      fraction of the total capacity used. In most situations this is around 99.2%</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' L                  bed length. This is directly proportional to the cycle time.</span>
+<span class="Comment">#' ------------------ ---------------------------------------</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' Resin is also assumed to have a finite number of cycles before it must be replaced. This cost does not vary much with the cycle time since the longer cycle times which lead to a longer resin lifetime is offset by the requirement for more resin. Loss of resin capacity due to irreversible adsorption might be a mechanism that follows the above method, if the poisons are present in low quantities and completely removed by the resin. On the other hand, some mechanisms might involve reactants (oxidisers for example) which are not reactive enough that a short bed will completly remove it from the stream. In that situation, it would appear that it would be better to have a smaller bed, since the total rate of resin deactivation will be faster when more resin is present.</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' </span>
+<span class="Comment">## @knitr </span>
+
+registerDoMC<span class="Special">(</span><span class="Number">2</span><span class="Special">)</span>
+opt2 <span class="Statement">&lt;-</span><span class=""> mdply</span><span class="Special">(</span><span class=""> </span><span class="Type">data.frame</span><span class="Special">(</span><span class="">T0 </span>=<span class=""> </span><span class="Function">seq</span><span class="Special">(</span><span class=""> from</span><span class="Operator">=</span><span class="Number">20</span><span class="Special">,</span><span class=""> to</span><span class="Operator">=</span><span class="Number">80</span><span class="Special">,</span><span class=""> </span><span class="Function">by</span><span class="Operator">=</span><span class="Number">10</span><span class=""> </span><span class="Special">)</span><span class=""> </span><span class="Special">)</span><span class="Special">,</span><span class=""> .parallel</span><span class="Operator">=</span><span class="Boolean">TRUE</span><span class="Special">,</span>
+ <span class="Type">function</span><span class="Special">(</span><span class="">T0</span><span class="Special">)</span><span class=""> </span><span class="Special">{</span>
+  SG <span class="Statement">&lt;-</span><span class=""> wp</span><span class="Special">(</span><span class="String">'mu'</span><span class="Special">,</span><span class=""> T0</span><span class="Special">)</span><span class=""> </span>/<span class=""> wp</span><span class="Special">(</span><span class="String">'nu'</span><span class="Special">,</span><span class=""> T0</span><span class="Special">)</span>
+  opi <span class="Statement">&lt;-</span><span class=""> nloptr</span><span class="Special">(</span>
+    <span class="Function">c</span><span class="Special">(</span><span class="Number">24</span>*<span class="Number">3600</span><span class="Special">,</span><span class=""> </span><span class="Number">0.167</span><span class="Special">,</span><span class=""> </span><span class="Number">1e-3</span><span class="Operator">/</span><span class="">SG</span><span class="Special">)</span><span class="Special">,</span>
+    <span class="Type">function</span><span class="Special">(</span><span class="">x</span><span class="Special">)</span><span class=""> </span><span class="Special">{</span>
+        calcDesign<span class="Special">(</span><span class=""> p</span>=<span class="">mkP</span><span class="Special">(</span><span class="">seconds</span><span class="Operator">=</span><span class="">x</span><span class="Special">[</span><span class="Number">1</span><span class="Special">]</span><span class="Special">,</span><span class=""> L</span><span class="Operator">=</span><span class="">x</span><span class="Special">[</span><span class="Number">2</span><span class="Special">]</span><span class="Special">,</span>
+                          <span class="Constant">T</span>=<span class=""> T0</span><span class="Operator">+</span><span class="Number">273</span><span class="Special">,</span>
+                          R=<span class=""> x</span><span class="Special">[</span><span class="Number">3</span><span class="Special">])</span><span class=""> </span><span class="Special">)</span><span class="Special">$</span><span class="Normal">C.total</span>
+    <span class="Special">}</span><span class="Special">,</span>
+    opts=<span class="Type">list</span><span class="Special">(</span><span class="">algorithm</span><span class="Operator">=</span><span class="String">'NLOPT_LN_NELDERMEAD'</span><span class="Special">,</span>
+                xtol_rel =<span class=""> </span><span class="Number">1e-8</span><span class="Special">,</span>
+                maxeval=<span class="Number">1000</span><span class="Special">,</span><span class=""> maxtime</span><span class="Operator">=</span><span class="Number">3</span><span class="Operator">*</span><span class="Number">60</span><span class="Special">)</span><span class="Special">,</span>
+    lb =<span class=""> </span><span class="Function">c</span><span class="Special">(</span><span class="Number">0.3</span><span class="Operator">*</span><span class="Number">60</span><span class="Operator">*</span><span class="Number">60</span><span class="Special">,</span><span class=""> </span><span class="Number">0.1</span><span class="Special">,</span><span class=""> </span><span class="Number">1e-3</span><span class="Operator">/</span><span class="">SG </span><span class="Special">)</span><span class="Special">,</span>
+    ub =<span class=""> </span><span class="Function">c</span><span class="Special">(</span><span class="Number">5</span><span class="Operator">*</span><span class="Number">24</span><span class="Operator">*</span><span class="Number">3600</span><span class="Special">,</span><span class=""> </span><span class="Number">1</span><span class="Special">,</span><span class=""> </span><span class="Number">1e-2</span><span class="Operator">/</span><span class="">SG</span><span class="Special">)</span>
+ <span class="Special">)</span>
+ <span class="Function">cbind</span><span class="Special">(</span><span class="">toDataFrameDropping</span><span class="Special">(</span><span class="">opi</span><span class="Special">,</span><span class=""> prefix</span>=<span class="String">'nlopt.'</span><span class="Special">)</span><span class="Special">,</span>
+       toDataFrameDropping<span class="Special">(</span><span class="">calcDesign</span><span class="Special">(</span><span class="">p</span>=<span class="">mkP</span><span class="Special">(</span><span class="">L </span><span class="Operator">=</span><span class=""> opi</span><span class="Special">$</span><span class="Normal">solution</span><span class="Special">[</span><span class="Number">2</span><span class="Special">]</span><span class="Special">,</span>
+                        seconds =<span class=""> opi</span><span class="Special">$</span><span class="Normal">solution</span><span class="Special">[</span><span class="Number">1</span><span class="Special">]</span><span class="Special">,</span>
+                        <span class="Constant">T</span><span class=""> </span>=<span class=""> T0 </span><span class="Operator">+</span><span class=""> </span><span class="Number">273</span><span class="Special">,</span>
+                        R =<span class=""> opi</span><span class="Special">$</span><span class="Normal">solution</span><span class="Special">[</span><span class="Number">3</span><span class="Special">]))</span><span class=""> </span><span class="Special">))</span>
+<span class="Special">})</span>
+
+<span class="Comment">#' </span>
+<span class="Comment">#' </span>
+<span class="Comment">## @knitr fig.cap='operating at higher temperatures improves kinetics, but reduces the equilibrium capacity of the resin. Overall higher temperatures are worse, but not by much.', fig.width=10, fig.height=6</span>
+opt2 <span class="Statement">&lt;-</span><span class=""> </span><span class="Function">within</span><span class="Special">(</span><span class="">opt2</span><span class="Special">,</span><span class=""> Qsat </span><span class="Statement">&lt;-</span><span class=""> Q</span>*<span class="">K</span><span class="Operator">*</span><span class="">c0 </span><span class="Operator">/</span><span class=""> </span><span class="Special">(</span><span class="Number">1</span><span class="Operator">+</span><span class="">K</span><span class="Operator">*</span><span class="">c0</span><span class="Special">))</span>
+<span class="Function">plot</span><span class="Special">(</span>xyplot<span class="Special">(</span><span class="">C.total </span>+<span class=""> C.resin</span>
+            +<span class=""> C.valve</span>
+            +<span class=""> Qsat </span><span class="Operator">/</span><span class=""> Q</span>
+            +<span class=""> bedvol.loading</span>
+            +<span class=""> L</span>
+            +<span class=""> fraction.recovery</span>
+            +<span class=""> capacity.frac</span>
+            +<span class=""> k</span><span class="Operator">/</span><span class="">K</span>
+            +<span class=""> k_liquid</span>
+            +<span class=""> k_solid </span>
+            +<span class=""> seconds</span><span class="Operator">/</span><span class="Number">3600</span>
+            ~<span class=""> T0 </span><span class="Special">,</span><span class=""> opt2</span><span class="Special">,</span>
+            <span class="Function">outer</span>=<span class="Constant">T</span><span class="Special">,</span>
+            type=<span class="String">'b'</span><span class="Special">,</span>
+            <span class="Function">layout</span>=<span class="Function">c</span><span class="Special">(</span><span class="Number">4</span><span class="Special">,</span><span class=""> </span><span class="Number">NA</span><span class="Special">)</span><span class="Special">,</span>
+            ylab=<span class="String">''</span><span class="Special">,</span><span class=""> xlab</span><span class="Operator">=</span><span class="String">'temperature'</span><span class="Special">,</span>
+            scales=<span class="Type">list</span><span class="Special">(</span><span class="">y</span><span class="Operator">=</span><span class="Type">list</span><span class="Special">(</span><span class="">relation</span><span class="Operator">=</span><span class="String">'free'</span><span class="Special">,</span><span class=""> rot</span><span class="Operator">=</span><span class="Number">0</span><span class="Special">)</span><span class="Special">,</span>
+                        x=<span class="Type">list</span><span class="Special">(</span><span class="">alternating</span><span class="Operator">=</span><span class="Constant">F</span><span class="Special">,</span><span class=""> rot</span><span class="Operator">=</span><span class="Number">90</span><span class="Special">))))</span>
+
+<span class="Comment">#' </span>
+<span class="Comment">#' </span>
+<span class="Comment">#' ------------------ ---------------------------------------</span>
+<span class="Comment">#' panel              description</span>
+<span class="Comment">#' ------------------ ---------------------------------------</span>
+<span class="Comment">#' C.total            total present value including revenue (1000 $)</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' C.resin            contribution to C.total by resin replacement (1000 $)</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' C.valve            contribution to C.total by valve replacement (1000 $)</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' Qsat/Q             equilibrium loading on the resin (kg/m^3) given the feed temperature and concentration divided by the value at infinite feed concentration</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' bedvol.loading     how many bed volumes of liquid are processed to load the column (dimensionless)</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' L                  bed length (m)</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' fraction.recovery  fraction of the FA fed that ends up on the resin</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' capacity.frac      fraction of the maximum capacity of the resin that is actually used when the column is deemed &quot;saturated&quot;</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' k/K                combined mass transfer resistance (1/s). </span>
+<span class="Comment">#' </span>
+<span class="Comment">#' k_liquid           liquid-side mass transfer coefficient including surface area (1/s)</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' k_solid            solid-side coeficient intraparticle diffusion (1/s)</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' seconds/3600       hours for each cycle</span>
+<span class="Comment">#' ------------------ ---------------------------------------</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' Based on the above figure, it appears that the is only a small penalty for</span>
+<span class="Comment">#' running the adsorption at a higher temperature. The difference is only about</span>
+<span class="Comment">#' $1000. This means that the total project cost could be reduced by leaving out</span>
+<span class="Comment">#' the cooler upstream of the adsorption column.</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' This is because it was assumed</span>
+<span class="Comment">#' that the internal and external mass transfer are goverened by diffusivities</span>
+<span class="Comment">#' which decrease with the ratio $\mu /T$. There is a significant reduction in</span>
+<span class="Comment">#' the strength of adsorption as temperature increases: the $K$ which governs the</span>
+<span class="Comment">#' slope of the isotherm at low concentrations drops from above 12 m3/kg to 6</span>
+<span class="Comment">#' m3 / kg. However, because the product of feed concentration (c0) and $K$ is</span>
+<span class="Comment">#' still much greater than one, there is only a small impact on the maximum</span>
+<span class="Comment">#' capacity of the sorbent. If it was not assumed that there is a 10x enrichment</span>
+<span class="Comment">#' in FA concentration by the membrane filtration, then the higher temperature</span>
+<span class="Comment">#' will have a much larger impact, since the capacity of the resin given the feed concentration (*Qsat*) will drop much more at higher temperatures.</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' Note that this type of result is not backed by experiment,</span>
+<span class="Comment">#' and for example in the paper referenced to find the heat of</span>
+<span class="Comment">#' adsorption</span>
+<span class="Comment">#' [10.1016/j.jhazmat.2007.12.102](<a href="http://dx.doi.org/10.1016/j.jhazmat.2007.12.102)">http://dx.doi.org/10.1016/j.jhazmat.2007.12.102)</a></span>
+<span class="Comment">#' fitted their equilibrium data with lower maximum capacities</span>
+<span class="Comment">#' as temperature increased.</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' Additional reasons to keep the cooler upstream are:</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' * reduce oxidation damage to the resin which may be a limiting factor for resin lifetime</span>
+<span class="Comment">#' * reduce polymerization of adsorbed FA, which will reduce recovery depending on the end-use of FA</span>
+<span class="Comment">#' * reduce the need for additional experiments</span>
+<span class="Comment">#' * improve safety, since the column must operates at low pH (2-4) and high pressure, so leaks will be less of a hazard if they are not hot</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' # Model 2</span>
+<span class="Comment">#' Assuming that the breakthrough curve's shape no longer varies with the distance traveled through the bed is a common simplification [McCabe Smith Harriott 1993]. Note that some combinations of feed concentration and isotherm do not allow this combination. In short the requirement is that on a graph of the isotherm $q = f(c)$, when tracing a straight line from the feed composition to the initial bed concentration, $f(c)$ has to be on the right (section 7.4 H-K Rhee cited below). Therefore this model is unlikely to be suitable for the eultion step, which has not been considered below.</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' ## Justification</span>
+<span class="Comment">## @knitr fig.width=6, fig.height=3, fig.cap='Values of x from 0 to 120, which are much smaller than values used in the previous section (1000s) give very similarly shaped breakthrough curves, especially as $r \\rightarrow 0$. In the above section, $r=0.019$, so it is apparent that the breakthrough curves no longer change shape as they pass through the columns.'</span>
+xypts <span class="Statement">&lt;-</span><span class=""> </span><span class="Special">{</span>
+    xMax <span class="Statement">&lt;-</span><span class=""> </span><span class="Number">120</span>
+    <span class="Function">expand.grid</span><span class="Special">(</span><span class=""> x </span>=<span class=""> </span><span class="Function">seq</span><span class="Special">(</span><span class="">from</span><span class="Operator">=</span><span class="Number">0</span><span class="Special">,</span><span class=""> to </span><span class="Operator">=</span><span class=""> xMax</span><span class="Special">,</span><span class=""> length.out</span><span class="Operator">=</span><span class="Number">200</span><span class="Special">)</span><span class="Special">,</span><span class=""> y </span><span class="Operator">=</span><span class=""> </span><span class="Function">seq</span><span class="Special">(</span><span class="">from</span><span class="Operator">=</span><span class="">xMax</span><span class="Operator">/</span><span class="Number">20</span><span class="Special">,</span><span class=""> to</span><span class="Operator">=</span><span class="">xMax</span><span class="Special">,</span><span class=""> length.out</span><span class="Operator">=</span><span class="Number">5</span><span class="Special">)</span><span class="Special">,</span><span class=""> r </span><span class="Operator">=</span><span class=""> </span><span class="Function">c</span><span class="Special">(</span><span class="Number">0.03</span><span class="Special">,</span><span class=""> </span><span class="Number">0.5</span><span class="Special">,</span><span class=""> </span><span class="Number">0.8</span><span class="Special">,</span><span class=""> </span><span class="Number">0.99</span><span class="Special">)</span><span class=""> </span><span class="Special">)</span>
+
+<span class="Error">}</span>
+xypts <span class="Statement">&lt;-</span><span class=""> mdply</span><span class="Special">(</span><span class=""> xypts</span><span class="Special">,</span><span class=""> </span><span class="Type">function</span><span class="Special">(</span><span class="">x</span><span class="Special">,</span><span class=""> y</span><span class="Special">,</span><span class=""> r</span><span class="Special">)</span><span class=""> FV</span><span class="Special">(</span><span class="">x</span><span class="Special">,</span><span class=""> y</span><span class="Special">,</span><span class=""> r</span><span class="Special">,</span><span class=""> u0</span>=<span class="Number">1</span><span class="Special">)</span><span class="Special">,</span><span class=""> .parallel</span><span class="Operator">=</span><span class="Constant">T</span><span class="Special">)</span>
+xypts <span class="Statement">&lt;-</span><span class=""> ddply</span><span class="Special">(</span><span class="">xypts</span><span class="Special">,</span><span class=""> .</span><span class="Special">(</span><span class="">y</span><span class="Special">,</span><span class="">r</span><span class="Special">)</span><span class="Special">,</span><span class=""> </span><span class="Type">function</span><span class="Special">(</span><span class="">x</span><span class="Special">)</span><span class=""> </span><span class="Special">{</span>
+             <span class="Function">cbind</span><span class="Special">(</span><span class="">x</span><span class="Special">,</span><span class=""> x.50 </span>=<span class=""> </span>
+                        <span class="Function">rep</span><span class="Special">(</span><span class="">x</span><span class="Special">$</span><span class="Normal">x</span><span class="Special">[</span><span class=""> x</span><span class="Special">$</span><span class="Normal">V1</span><span class=""> </span>&lt;<span class=""> </span><span class="Number">0.5</span><span class=""> </span><span class="Special">][</span><span class="Number">1</span><span class="Special">]</span><span class="Special">,</span>
+                            <span class="Function">nrow</span><span class="Special">(</span><span class="">x</span><span class="Special">)))</span><span class=""> </span>
+             <span class="Special">})</span>
+<span class="Function">plot</span><span class="Special">(</span>xyplot<span class="Special">(</span><span class=""> V1 </span>~<span class=""> x</span><span class="Operator">-</span><span class="">x.50 </span><span class="Operator">|</span><span class=""> </span><span class="Function">factor</span><span class="Special">(</span><span class="">r</span><span class="Special">)</span><span class=""> </span><span class="Special">,</span><span class=""> xypts</span><span class="Special">,</span><span class=""> groups</span><span class="Operator">=</span><span class="">y</span><span class="Special">,</span>
+            type=<span class="String">'l'</span><span class="Special">,</span><span class=""> xlim</span><span class="Operator">=</span><span class="Function">c</span><span class="Special">(</span><span class="Operator">-</span><span class="Number">1</span><span class="Special">,</span><span class="Number">1</span><span class="Special">)</span><span class="Operator">*</span><span class="Number">5</span><span class="Special">,</span><span class=""> ylab</span><span class="Operator">=</span><span class="String">'u at outlet'</span><span class="Special">,</span>
+               auto.key=<span class="Type">list</span><span class="Special">(</span><span class="">columns</span><span class="Operator">=</span><span class="Number">5</span><span class="Special">,</span><span class=""> </span><span class="Function">points</span><span class="Operator">=</span><span class="Constant">F</span><span class="Special">,</span><span class=""> </span><span class="Function">lines</span><span class="Operator">=</span><span class="Constant">T</span><span class="Special">)))</span>
+
+<span class="Comment">#' </span>
+<span class="Comment">#' </span>
+<span class="Comment">## @knitr fig.height=3, fig.width=4, fig.cap='breakthrough times ($x$ such that $u(x,y;r)=0.5$) given r.'</span>
+<span class="Function">plot</span><span class="Special">(</span>dotplot<span class="Special">(</span><span class=""> </span><span class="Function">factor</span><span class="Special">(</span><span class="">r</span><span class="Special">)</span><span class=""> </span>~<span class=""> x.50</span><span class="Special">,</span><span class=""> xypts</span><span class="Special">,</span><span class=""> groups</span><span class="Operator">=</span><span class="">y</span><span class="Special">,</span>
+            type=<span class="String">'b'</span><span class="Special">,</span><span class=""> ylab</span><span class="Operator">=</span><span class="String">'r'</span><span class="Special">,</span><span class=""> auto.key</span><span class="Operator">=</span><span class="Type">list</span><span class="Special">(</span><span class="">columns</span><span class="Operator">=</span><span class="Number">3</span><span class="Special">,</span><span class=""> </span><span class="Function">points</span><span class="Operator">=</span><span class="Constant">T</span><span class="Special">,</span><span class=""> </span><span class="Function">title</span><span class="Operator">=</span><span class="String">'y'</span><span class="Special">)))</span>
+
+<span class="Comment">#' </span>
+<span class="Comment">#' </span>
+<span class="Comment">#' Further support for assuming a constant-pattern behavior can be found in the graphs calculated with it below. It is found that the mass transfer occurs within a zone whose length is much less than the length of the column.</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' ## Equations Solved</span>
+<span class="Comment">#' Numerical concentrations both in the liquid and solids are only given graphically in general references such as [McCabe Smith Harriott 1993]. To have numerical values of concentrations, the analysis done in section 7.10 H-K Rhee, R Aris, NR Amundson &quot;First Order Partial Differential Equations&quot; volume 1 is followed. The equation that is used in this section to model the column behavior includes dispersion in addition to the mechanisms considered in the above section. Note that some variable names have been changed from the original source to avoid conflicts with the previous section.</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' $\frac{1}{\mathbf{Pe}} \frac{\partial^2 c}{\partial z^2} = \frac{\partial c}{\partial z} + \frac{\partial c}{\partial \tau} + \nu \frac{\partial q}{\partial \tau}$</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' $\frac{\partial q}{\partial \tau} = \mathbf{St} \left( f(c) - q \right)$</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' </span>
+<span class="Comment">#' The assumption that the shape of the breakthrough curve becomes constant (in a</span>
+<span class="Comment">#' moving frame of reference), allows the above PDE to be reduced to an ODE. </span>
+<span class="Comment">#' Equation numbers are those in the reference cited above.</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' (7.10.15)</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' $\frac{\partial c}{\partial \xi} = \theta$</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' $\frac{\partial \theta}{\partial \xi} = \left[ \left( 1-\lambda \right)\mathbf{Pe} + \mathbf{St}/\lambda \right] - \nu \mathbf{Pe} \mathbf{St} F$</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' (7.10.14)</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' $F = (c - c_0)f(c_0)/c_0 - f(c) + f(c_0)$</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' exercise 7.10.4</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' $n = F - \theta /(\nu\lambda\mathbf{Pe}) + f(c)$</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' The above definitions are provided to an ODE solver (lsodar) which integrates backwards from initial conditions $c \approx 0$ and $\partial c / \partial \xi =0$.  The $\xi$ coordinate at which the ODE solver starts is arbitrary. The feed is introduced as a step, but the profile spreads out eventually becoming the profile that is calculated with the above equations. The centre of the step has a certain value of $\xi$, refered to as $\xi_r$ below, which needs to be known in order to calculate how long the loading step will take. One way to define that centre is that there is no net transport of solute across the centre as the curve spreads out.</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' ![areas A and B are equal at $\xi_r$](img/18.svg)</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' $A = \int^{0}_{\xi_r} c d\xi$</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' $B = \int_{-\infty}^{\xi_r} (c_0 - c) d\xi$</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' Combining and re-arranging gives:</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' $\xi_r = \frac{1}{c_0} \int_{-\infty}^{0} (c_0 - c) d\xi$</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' For numerical calculations, the infinities are instead $\xi$ values such that the integrand (before combining the integrals) is close to 0. One additional modification to the above equations is that the average concentration considering both phases ($\alpha c + (1-\alpha)q$) is used.</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' If mass transfer happened instantly, and there was no dispersion, then the profile found would be a step centred around $\xi_r$, which would travel from the inlet of the bed to the outlet in a time equal to $t_r = L\alpha / R \lambda$. If the cycle is stopped at a time $\xi_e$, the step will actually take $t = t_r (1 + \xi_r - \xi_e)$. Graphically this looks like:</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' ![Variables relating to the time at which the cycle ends](img/18b.svg)</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' If the cycle is stopped at a low $c(\xi_e)$ then not much product is lost, but then the cycle time will be shorter. Below it is found that the optimal design has a $c(\xi_e)$ at a minimum value, which will be the lowest concentration that can be detected reliably without too much expense.</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' ## Dispersion</span>
+<span class="Comment">#' ![Empirical correlation for dispersion in packed beds chosen from Levenspiel 1999 pg311](img/dispersion_small.png)</span>
+<span class="Comment">#' </span>
+<span class="Comment">## @knitr fig.height=3, fig.width=6, fig.cap='fit of the above curve giving the mean, max and minimum. The mean value is used in the following calculations.'</span>
+dispersion <span class="Statement">&lt;-</span><span class=""> </span><span class="Function">rbind</span><span class="Special">(</span><span class="Function">cbind</span><span class="Special">(</span><span class="Function">read.table</span><span class="Special">(</span><span class="String">'img/dispersion_lower.txt'</span><span class="Special">)</span><span class="Special">,</span><span class=""> side</span>=<span class="String">'u'</span><span class="Special">)</span><span class="Special">,</span>
+                    <span class="Function">cbind</span><span class="Special">(</span><span class="Function">read.table</span><span class="Special">(</span><span class="String">'img/dispersion_upper.txt'</span><span class="Special">)</span><span class="Special">,</span><span class=""> side</span>=<span class="String">'l'</span><span class="Special">))</span>
+dispersion <span class="Statement">&lt;-</span><span class=""> dispersion</span><span class="Special">[</span><span class=""> </span><span class="Function">order</span><span class="Special">(</span><span class="">dispersion</span><span class="Special">$</span><span class="Normal">V1</span><span class="Special">)</span><span class="Special">,</span><span class=""> </span><span class="Special">]</span>
+
+dispersion2 <span class="Statement">&lt;-</span><span class=""> </span><span class="Type">function</span><span class="Special">(</span><span class="">x2</span><span class="Special">)</span><span class=""> </span><span class="Special">{</span>
+    sspline <span class="Statement">&lt;-</span><span class=""> </span><span class="Function">Map</span><span class="Special">(</span><span class=""> </span><span class="Type">function</span><span class="Special">(</span><span class="">side</span><span class="Special">)</span><span class=""> </span><span class="Special">{</span>
+            ds <span class="Statement">&lt;-</span><span class=""> dispersion</span><span class="Special">[</span><span class=""> dispersion</span><span class="Special">$</span><span class="Normal">side</span><span class=""> </span>==<span class=""> side</span><span class="Special">,</span><span class=""> </span><span class="Special">]</span>
+            <span class="Function">predict</span><span class="Special">(</span><span class=""> </span><span class="Function">smooth.spline</span><span class="Special">(</span><span class="">ds</span><span class="Special">$</span><span class="Normal">V1</span><span class="Special">,</span><span class=""> y</span>=<span class="">ds</span><span class="Special">$</span><span class="Normal">V2</span><span class="Special">,</span><span class=""> </span><span class="Function">df</span><span class="Operator">=</span><span class="Number">20</span><span class="Special">)</span><span class="Special">,</span><span class=""> x2</span><span class="Special">)</span><span class="Special">$</span><span class="Normal">y</span>
+            <span class="Special">}</span><span class=""> </span><span class="Special">,</span><span class=""> </span><span class="Type">list</span><span class="Special">(</span><span class="String">'u'</span><span class="Special">,</span><span class="String">'l'</span><span class="Special">))</span>
+    <span class="Type">data.frame</span><span class="Special">(</span>
+         <span class="Function">Re</span><span class=""> </span>=<span class=""> x2</span><span class="Special">,</span>
+         lower =<span class=""> sspline</span><span class="Special">[[</span><span class="Number">2</span><span class="Special">]]</span><span class="Special">,</span>
+         upper =<span class=""> sspline</span><span class="Special">[[</span><span class="Number">1</span><span class="Special">]]</span><span class="Special">,</span>
+         <span class="Function">range</span><span class=""> </span>=<span class=""> sspline</span><span class="Special">[[</span><span class="Number">2</span><span class="Special">]]</span><span class=""> </span><span class="Operator">-</span><span class=""> sspline</span><span class="Special">[[</span><span class="Number">1</span><span class="Special">]]</span><span class="Special">,</span>
+         middle =<span class=""> </span><span class="Function">exp</span><span class="Special">((</span><span class="Function">log</span><span class="Special">(</span><span class="">sspline</span><span class="Special">[[</span><span class="Number">1</span><span class="Special">]])</span><span class=""> </span><span class="Operator">+</span><span class=""> </span><span class="Function">log</span><span class="Special">(</span><span class="">sspline</span><span class="Special">[[</span><span class="Number">2</span><span class="Special">]]))</span><span class="Operator">/</span><span class="Number">2</span><span class="Special">)</span><span class=""> </span><span class="Special">)</span>
+    <span class="Special">}</span>
+
+<span class="Function">plot</span><span class="Special">(</span> xyplot<span class="Special">(</span><span class="">  lower </span>+<span class=""> upper </span><span class="Operator">+</span><span class=""> middle </span><span class="Operator">~</span><span class=""> </span><span class="Function">Re</span><span class=""> </span><span class="Special">,</span>
+    dispersion2<span class="Special">(</span><span class=""> </span><span class="Function">exp</span><span class="Special">(</span>
+                 <span class="Function">seq</span><span class="Special">(</span><span class="">from</span>=<span class="Function">log</span><span class="Special">(</span><span class="Function">min</span><span class="Special">(</span><span class="">dispersion</span><span class="Special">$</span><span class="Normal">V1</span><span class="Special">))</span><span class="Special">,</span>
+                     to=<span class="Function">log</span><span class="Special">(</span><span class="Function">max</span><span class="Special">(</span><span class="">dispersion</span><span class="Special">$</span><span class="Normal">V1</span><span class="Special">))</span><span class="Special">,</span>
+                     length.out=<span class="Number">200</span><span class="Special">)))</span><span class="Special">,</span>
+    type=<span class="String">'l'</span><span class="Special">,</span><span class=""> ylab</span><span class="Operator">=</span><span class="String">'smoothed D/R dp'</span><span class="Special">,</span>
+    scales=<span class="Type">list</span><span class="Special">(</span><span class="Function">log</span><span class="Operator">=</span><span class="Constant">T</span><span class="Special">,</span><span class=""> equispaced.log</span><span class="Operator">=</span><span class="Constant">F</span><span class="Special">)))</span>
+
+<span class="Comment">#' </span>
+<span class="Comment">#' </span>
+<span class="Comment">#' ## Numerical solution</span>
+<span class="Comment">## @knitr fig.height=3, fig.width=6, fig.cap='above is the concentration profile over distance. The loss panel gives the kg solute / bed cross section that have left the bed up to that point. According to this model, the mass transfer to the resin is completed in a length of about 5 mm: the rest of the bed is either fully loaded or sees liquid that is completely depleted in FA.'</span>
+<span class="PreProc">library</span><span class="Special">(</span>deSolve<span class="Special">)</span>
+
+deFun <span class="Statement">&lt;-</span><span class=""> </span><span class="Type">function</span><span class="Special">(</span><span class="Function">t</span><span class="Special">,</span><span class=""> y</span><span class="Special">,</span><span class=""> params</span><span class="Special">)</span><span class=""> </span><span class="Function">with</span><span class="Special">(</span><span class="">params</span><span class="Special">,</span><span class=""> </span><span class="Special">{</span>
+    <span class="Function">C</span><span class=""> </span><span class="Statement">&lt;-</span><span class=""> y</span><span class="Special">[</span><span class="Number">1</span><span class="Special">]</span>
+    Q <span class="Statement">&lt;-</span><span class=""> y</span><span class="Special">[</span><span class="Number">2</span><span class="Special">]</span>
+
+    <span class="Comment"># 7.10.14</span>
+    <span class="Constant">F</span><span class=""> </span><span class="Statement">&lt;-</span><span class=""> </span><span class="Special">(</span><span class="">f</span><span class="Special">(</span><span class="">c0</span><span class="Special">)</span><span class=""> </span>-<span class=""> f</span><span class="Special">(</span><span class="">c_r</span><span class="Special">))</span><span class=""> </span><span class="Operator">/</span><span class="Special">(</span><span class="">c0 </span><span class="Operator">-</span><span class=""> c_r</span><span class="Special">)</span><span class=""> </span><span class="Operator">*</span><span class=""> </span><span class="Special">(</span><span class="Function">C</span><span class=""> </span><span class="Operator">-</span><span class=""> c0</span><span class="Special">)</span><span class=""> </span><span class="Operator">-</span><span class=""> f</span><span class="Special">(</span><span class="Function">C</span><span class="Special">)</span><span class=""> </span><span class="Operator">+</span><span class=""> f</span><span class="Special">(</span><span class="">c0</span><span class="Special">)</span>
+
+    <span class="Comment"># formula given in exercise 7.10.4</span>
+    n <span class="Statement">&lt;-</span><span class=""> </span><span class="Constant">F</span><span class=""> </span>-<span class=""> Q</span><span class="Operator">/</span><span class="Special">(</span><span class="">nu</span><span class="Operator">*</span><span class="">lambda</span><span class="Operator">*</span><span class="">Pe</span><span class="Special">)</span><span class=""> </span><span class="Operator">+</span><span class=""> f</span><span class="Special">(</span><span class="Function">C</span><span class="Special">)</span>
+
+    <span class="Comment"># 7.10.15</span>
+    dy <span class="Statement">&lt;-</span><span class=""> </span><span class="Function">c</span><span class="Special">(</span><span class="Function">C</span>=<span class="">Q</span><span class="Special">,</span>
+            Q=<span class="Special">((</span><span class="Number">1</span><span class="Operator">-</span><span class="">lambda</span><span class="Special">)</span><span class="Operator">*</span><span class="">Pe </span><span class="Operator">+</span><span class=""> St</span><span class="Operator">/</span><span class="">lambda</span><span class="Special">)</span><span class="Operator">*</span><span class="">Q </span><span class="Operator">-</span><span class=""> nu</span><span class="Operator">*</span><span class="">Pe</span><span class="Operator">*</span><span class="">St</span><span class="Operator">*</span><span class="Constant">F</span><span class="Special">,</span>
+            intC =<span class=""> </span><span class="Operator">-</span><span class=""> </span><span class="Function">C</span><span class="Special">,</span>
+            intN =<span class=""> </span><span class="Operator">-</span><span class=""> n</span><span class="Special">)</span>
+
+
+    <span class="Type">list</span><span class="Special">(</span><span class="">dy</span><span class="Special">,</span><span class=""> n</span>=<span class="Function">as.double</span><span class="Special">(</span><span class="">n</span><span class="Special">)</span><span class="Special">,</span>
+             deltaN =<span class=""> </span><span class="Function">as.double</span><span class="Special">(</span><span class="">f</span><span class="Special">(</span><span class="Function">C</span><span class="Special">)</span><span class=""> </span><span class="Operator">-</span><span class=""> n</span><span class="Special">)</span><span class=""> </span><span class="Special">)</span>
+<span class="Error">})</span>
+
+<span class="Comment"># isn't really used</span>
+deJac <span class="Statement">&lt;-</span><span class=""> </span><span class="Type">function</span><span class="Special">(</span><span class="Function">t</span><span class="Special">,</span><span class=""> y</span><span class="Special">,</span><span class=""> params</span><span class="Special">)</span><span class=""> </span><span class="Function">with</span><span class="Special">(</span><span class="">params</span><span class="Special">,</span><span class=""> </span><span class="Special">{</span>
+    <span class="Function">C</span><span class=""> </span><span class="Statement">&lt;-</span><span class=""> y</span><span class="Special">[</span><span class="Number">1</span><span class="Special">]</span>
+    Q <span class="Statement">&lt;-</span><span class=""> y</span><span class="Special">[</span><span class="Number">2</span><span class="Special">]</span>
+
+    <span class="Comment"># 7.10.14</span>
+    <span class="Comment"># F &lt;- (f(c0) - f(c_r)) /(c0 - c_r) * (C - c0) - f(C) + f(c0)</span>
+    dFdC <span class="Statement">&lt;-</span><span class=""> </span><span class="Special">(</span><span class="">f</span><span class="Special">(</span><span class="">c0</span><span class="Special">)</span><span class=""> </span>-<span class=""> f</span><span class="Special">(</span><span class="">c_r</span><span class="Special">))</span><span class=""> </span><span class="Operator">/</span><span class="Special">(</span><span class="">c0 </span><span class="Operator">-</span><span class=""> c_r</span><span class="Special">)</span><span class=""> </span><span class="Operator">-</span><span class=""> fprime</span><span class="Special">(</span><span class="Function">C</span><span class="Special">)</span>
+
+    <span class="Comment"># 7.10.15</span>
+    <span class="Comment">#dy &lt;- c(C=Q,</span>
+    <span class="Comment">#        Q=((1-lambda)*Pe + St/lambda)*Q - nu*Pe*St*F,</span>
+    <span class="Comment">#        intC = - C,</span>
+    <span class="Comment">#        intN = - n)</span>
+    dydtdy <span class="Statement">&lt;-</span><span class=""> </span><span class="Type">matrix</span><span class="Special">(</span><span class="Function">nrow</span>=<span class="Number">4</span><span class="Special">,</span><span class=""> </span><span class="Function">ncol</span><span class="Operator">=</span><span class="Number">4</span><span class="Special">,</span><span class=""> </span><span class="Number">0</span><span class="Special">)</span>
+
+    dydtdy<span class="Special">[</span><span class="Number">2</span><span class="Special">,</span><span class=""> </span><span class="Number">1</span><span class="Special">]</span><span class=""> </span><span class="Statement">&lt;-</span><span class=""> nu</span>*<span class="">Pe</span><span class="Operator">*</span><span class="">St</span><span class="Operator">*</span><span class="">dFdC</span>
+    dydtdy<span class="Special">[</span><span class="Number">3</span><span class="Special">,</span><span class=""> </span><span class="Number">1</span><span class="Special">]</span><span class=""> </span><span class="Statement">&lt;-</span><span class=""> </span>-<span class=""> </span><span class="Number">1</span>
+    dydtdy<span class="Special">[</span><span class="Number">4</span><span class="Special">,</span><span class=""> </span><span class="Number">1</span><span class="Special">]</span><span class=""> </span><span class="Statement">&lt;-</span><span class=""> dFdC </span>+<span class=""> fprime</span><span class="Special">(</span><span class="Function">C</span><span class="Special">)</span>
+
+    dydtdy<span class="Special">[</span><span class="Number">1</span><span class="Special">,</span><span class=""> </span><span class="Number">2</span><span class="Special">]</span><span class=""> </span><span class="Statement">&lt;-</span><span class=""> </span><span class="Number">1</span>
+    dydtdy<span class="Special">[</span><span class="Number">2</span><span class="Special">,</span><span class=""> </span><span class="Number">2</span><span class="Special">]</span><span class=""> </span><span class="Statement">&lt;-</span><span class=""> </span><span class="Special">((</span><span class="Number">1</span>-<span class="">lambda</span><span class="Special">)</span><span class="Operator">*</span><span class="">Pe </span><span class="Operator">+</span><span class=""> St</span><span class="Operator">/</span><span class="">lambda</span><span class="Special">)</span>
+    dydtdy<span class="Special">[</span><span class="Number">4</span><span class="Special">,</span><span class=""> </span><span class="Number">2</span><span class="Special">]</span><span class=""> </span><span class="Statement">&lt;-</span><span class=""> </span>-<span class=""> </span><span class="Number">1</span><span class="Operator">/</span><span class="Special">(</span><span class="">nu</span><span class="Operator">*</span><span class="">lambda</span><span class="Operator">*</span><span class="">Pe</span><span class="Special">)</span>
+
+    dydtdy
+<span class="Error">})</span>
+
+mkP2 <span class="Statement">&lt;-</span><span class=""> </span><span class="Type">function</span><span class="Special">(</span><span class="">...</span><span class="Special">)</span><span class=""> </span><span class="Function">within</span><span class="Special">(</span><span class=""> mkP</span><span class="Special">(</span><span class="">...</span><span class="Special">)</span><span class="Special">,</span><span class=""> </span><span class="Special">{</span>
+    nu <span class="Statement">&lt;-</span><span class=""> </span><span class="Special">(</span><span class="Number">1</span>-<span class="">alpha</span><span class="Special">)</span><span class="Operator">/</span><span class="">alpha</span>
+
+    dispersion2 <span class="Statement">&lt;-</span><span class=""> dispersion2</span><span class="Special">(</span><span class=""> </span><span class="Function">Re</span><span class=""> </span><span class="Special">)</span>
+
+    Pe <span class="Statement">&lt;-</span><span class=""> </span><span class="Number">1</span>/<span class="">dispersion2</span><span class="Special">$</span><span class="Normal">middle</span><span class=""> </span><span class="Operator">*</span><span class=""> </span><span class="Special">(</span><span class="">L0 </span><span class="Operator">/</span><span class=""> dp</span><span class="Special">)</span>
+
+    St <span class="Statement">&lt;-</span><span class=""> k </span>/<span class=""> K </span><span class="Operator">*</span><span class=""> L0 </span><span class="Operator">/</span><span class=""> alpha </span><span class="Operator">/</span><span class=""> R</span>
+
+    c_r <span class="Statement">&lt;-</span><span class=""> </span><span class="Number">0</span>
+
+    f <span class="Statement">&lt;-</span><span class=""> </span><span class="Type">function</span><span class="Special">(</span><span class="Function">C</span><span class="Special">)</span><span class=""> Q</span>*<span class="">K</span><span class="Operator">*</span><span class="Function">C</span><span class=""> </span><span class="Operator">/</span><span class=""> </span><span class="Special">(</span><span class="Number">1</span><span class=""> </span><span class="Operator">+</span><span class=""> K</span><span class="Operator">*</span><span class="Function">C</span><span class="Special">)</span>
+
+    <span class="Comment"># df/dc</span>
+    fprime <span class="Statement">&lt;-</span><span class=""> </span><span class="Type">function</span><span class="Special">(</span><span class="Function">C</span><span class="Special">)</span><span class=""> K</span>*<span class="">Q </span><span class="Operator">/</span><span class=""> </span><span class="Special">(</span><span class="Number">1</span><span class=""> </span><span class="Operator">+</span><span class=""> K</span><span class="Operator">*</span><span class="Function">C</span><span class="Special">)</span><span class="Operator">^</span><span class="Number">2</span>
+
+    <span class="Comment"># equation 7.10.12</span>
+    lambda <span class="Statement">&lt;-</span><span class=""> </span><span class="Number">1</span>/<span class="Special">(</span><span class="Number">1</span><span class=""> </span><span class="Operator">+</span><span class=""> nu </span><span class="Operator">*</span><span class=""> </span><span class="Special">(</span><span class="">f</span><span class="Special">(</span><span class="">c0</span><span class="Special">)</span><span class=""> </span><span class="Operator">-</span><span class=""> f</span><span class="Special">(</span><span class="">c_r</span><span class="Special">))</span><span class=""> </span><span class="Operator">/</span><span class="Special">(</span><span class="">c0 </span><span class="Operator">-</span><span class=""> c_r</span><span class="Special">))</span>
+
+
+    dischargedFun <span class="Statement">&lt;-</span><span class=""> </span><span class="Type">function</span><span class="Special">(</span><span class="">env</span><span class="Special">)</span><span class=""> </span><span class="Function">evalq</span><span class="Special">(</span><span class=""> </span>
+     <span class="Special">{</span><span class=""> sol </span><span class="Statement">&lt;-</span><span class=""> ode</span><span class="Special">(</span>
+        <span class="Function">c</span><span class="Special">(</span><span class="Function">C</span>=<span class="Number">1e-15</span><span class="Operator">*</span><span class="">c0</span><span class="Special">,</span><span class=""> Q</span><span class="Operator">=</span><span class="Number">0</span><span class="Special">,</span><span class=""> intC</span><span class="Operator">=</span><span class="Number">0</span><span class="Special">,</span><span class=""> intN</span><span class="Operator">=</span><span class="Number">0</span><span class="Special">)</span><span class="Special">,</span>
+        <span class="Function">seq</span><span class="Special">(</span><span class="">from</span>=<span class="Number">0</span><span class="Special">,</span><span class=""> to</span><span class="Operator">=-</span><span class="Number">2</span><span class="Special">,</span><span class=""> length.out</span><span class="Operator">=</span><span class="Number">10000</span><span class="Special">)</span><span class="Special">,</span>
+        deFun<span class="Special">,</span><span class=""> p</span><span class="Special">,</span>
+        rtol =<span class=""> </span><span class="Number">1e-5</span><span class="Special">,</span><span class=""> atol</span><span class="Operator">=</span><span class="Number">1e-3</span><span class="Special">,</span>
+        method=<span class="String">'lsodar'</span><span class="Special">,</span>
+        verbose=<span class="Constant">F</span><span class="Special">,</span><span class=""> </span>
+        jactype=<span class="String">'fullusr'</span><span class="Special">,</span><span class=""> jacfunc </span><span class="Operator">=</span><span class=""> deJac</span><span class="Special">,</span>
+        events =<span class=""> </span><span class="Type">list</span><span class="Special">(</span><span class="">root</span><span class="Operator">=</span><span class="Constant">T</span><span class="Special">,</span><span class=""> func </span><span class="Operator">=</span><span class=""> </span><span class="Type">function</span><span class="Special">(</span><span class="Function">t</span><span class="Special">,</span><span class="">x</span><span class="Special">,</span><span class="">p</span><span class="Special">)</span><span class=""> x</span><span class="Special">,</span>
+                        terminalroot=<span class="Function">length</span><span class="Special">(</span><span class="">cutoffs</span><span class="Special">))</span><span class="Special">,</span>
+        rootfunc =<span class=""> </span><span class="Type">function</span><span class="Special">(</span><span class="Function">t</span><span class="Special">,</span><span class=""> y</span><span class="Special">,</span><span class=""> ...</span><span class="Special">)</span><span class=""> y</span><span class="Special">[</span><span class="Number">1</span><span class="Special">]</span><span class=""> </span><span class="Operator">-</span><span class=""> cutoffs</span><span class="Operator">*</span><span class="">c0 </span><span class="Special">)</span>
+
+       xi <span class="Statement">&lt;-</span><span class=""> </span><span class="Function">attr</span><span class="Special">(</span><span class="">sol</span><span class="Special">,</span><span class=""> </span><span class="String">'troot'</span><span class="Special">)</span>
+
+       <span class="Comment"># xi.ref is the coordinate that should correspond</span>
+       <span class="Comment"># to the point where the area below the curve to the right</span>
+       <span class="Comment"># is equal to the area above the curve to the left.</span>
+       <span class="Comment">#</span>
+       <span class="Comment"># the curve in question is the average composition in the column,</span>
+       <span class="Comment"># given by    c*alpha + n*(1-alpha)</span>
+       xi.1 <span class="Statement">&lt;-</span><span class=""> xi</span><span class="Special">[</span><span class="Number">1</span><span class="Special">]</span>
+       xi.2 <span class="Statement">&lt;-</span><span class=""> xi</span><span class="Special">[</span><span class="Number">2</span><span class="Special">]</span>
+       xi.3 <span class="Statement">&lt;-</span><span class=""> xi</span><span class="Special">[</span><span class="Number">3</span><span class="Special">]</span>
+       xi.ref <span class="Statement">&lt;-</span><span class=""> </span><span class="Function">as.double</span><span class="Special">(</span>
+              <span class="Special">(((</span><span class="">c0 </span>*<span class="">xi</span><span class="Special">[</span><span class="Number">3</span><span class="Special">]</span><span class="">  </span><span class="Operator">+</span><span class=""> sol</span><span class="Special">[</span><span class=""> </span><span class="Function">nrow</span><span class="Special">(</span><span class="">sol</span><span class="Special">)</span><span class="Special">,</span><span class=""> </span><span class="String">'intC'</span><span class=""> </span><span class="Special">])</span><span class="Operator">*</span><span class="">alpha </span><span class="Operator">+</span>
+              <span class="Special">(</span><span class="">f</span><span class="Special">(</span><span class="">c0</span><span class="Special">)</span>*<span class="">xi</span><span class="Special">[</span><span class="Number">3</span><span class="Special">])</span><span class=""> </span><span class="Operator">+</span><span class=""> sol</span><span class="Special">[</span><span class=""> </span><span class="Function">nrow</span><span class="Special">(</span><span class="">sol</span><span class="Special">)</span><span class="Special">,</span><span class=""> </span><span class="String">'intN'</span><span class=""> </span><span class="Special">])</span><span class="Operator">*</span><span class="Special">(</span><span class="Number">1</span><span class="Operator">-</span><span class="">alpha</span><span class="Special">))</span><span class=""> </span><span class="Operator">/</span>
+              <span class="Special">(</span><span class="">c0</span>*<span class="">alpha </span><span class="Operator">+</span><span class=""> f</span><span class="Special">(</span><span class="">c0</span><span class="Special">)</span><span class="Operator">*</span><span class="Special">(</span><span class="Number">1</span><span class="Operator">-</span><span class="">alpha</span><span class="Special">))</span><span class=""> </span><span class="Special">)</span>
+       <span class="Comment"># print(paste(paste(xi, collapse=' '), xi.ref))</span>
+
+       <span class="Comment"># number of seconds between points whose c/c0 cross the 3 cutoffs</span>
+       <span class="Comment"># specified above</span>
+       seconds.mtz23 <span class="Statement">&lt;-</span><span class=""> </span><span class="Special">(</span><span class="">xi</span><span class="Special">[</span><span class="Number">2</span><span class="Special">]</span><span class=""> </span>-<span class=""> xi</span><span class="Special">[</span><span class="Number">3</span><span class="Special">])</span><span class=""> </span><span class="Operator">/</span><span class=""> lambda </span><span class="Operator">*</span><span class=""> alpha </span><span class="Operator">*</span><span class=""> L0 </span><span class="Operator">/</span><span class=""> R</span>
+       seconds.mtz12 <span class="Statement">&lt;-</span><span class=""> </span><span class="Special">(</span><span class="">xi</span><span class="Special">[</span><span class="Number">1</span><span class="Special">]</span><span class=""> </span>-<span class=""> xi</span><span class="Special">[</span><span class="Number">2</span><span class="Special">])</span><span class=""> </span><span class="Operator">/</span><span class=""> lambda </span><span class="Operator">*</span><span class=""> alpha </span><span class="Operator">*</span><span class=""> L0 </span><span class="Operator">/</span><span class=""> R</span>
+       seconds.mtz13 <span class="Statement">&lt;-</span><span class=""> seconds.mtz12 </span>+<span class=""> seconds.mtz23</span>
+
+       length.mtz12 <span class="Statement">&lt;-</span><span class=""> seconds.mtz12 </span>*<span class=""> lambda </span><span class="Operator">*</span><span class=""> R </span><span class="Operator">/</span><span class=""> alpha</span>
+       length.mtz23 <span class="Statement">&lt;-</span><span class=""> seconds.mtz23 </span>*<span class=""> lambda </span><span class="Operator">*</span><span class=""> R </span><span class="Operator">/</span><span class=""> alpha</span>
+       length.mtz13 <span class="Statement">&lt;-</span><span class=""> seconds.mtz13 </span>*<span class=""> lambda </span><span class="Operator">*</span><span class=""> R </span><span class="Operator">/</span><span class=""> alpha</span>
+
+       seconds.nomtz <span class="Statement">&lt;-</span><span class=""> alpha </span>*<span class=""> L0 </span><span class="Operator">/</span><span class=""> R </span><span class="Operator">/</span><span class=""> lambda</span>
+
+       seconds <span class="Statement">&lt;-</span><span class=""> </span><span class="Special">(</span><span class="">L</span>/<span class="">L0 </span><span class="Operator">+</span><span class=""> xi.ref </span><span class="Operator">-</span><span class=""> xi</span><span class="Special">[</span><span class="Number">2</span><span class="Special">])</span><span class=""> </span><span class="Operator">/</span><span class=""> lambda </span><span class="Operator">/</span><span class=""> R </span><span class="Operator">*</span><span class=""> alpha </span><span class="Operator">*</span><span class=""> L0</span>
+       seconds <span class="Statement">&lt;&lt;-</span><span class=""> seconds</span>
+
+       <span class="Function">as.double</span><span class="Special">(</span>
+        <span class="Special">(</span><span class="">sol</span><span class="Special">[</span><span class=""> sol</span><span class="Special">[</span><span class=""> </span><span class="Special">,</span><span class=""> </span><span class="String">'time'</span><span class="Special">]</span><span class=""> </span>==<span class=""> xi</span><span class="Special">[</span><span class="Number">3</span><span class="Special">]</span><span class="Special">,</span><span class=""> </span><span class="String">'intC'</span><span class=""> </span><span class="Special">]</span><span class=""> </span><span class="Operator">+</span>
+            <span class="Special">(</span><span class="">L</span>/<span class="">L0</span><span class="Operator">+</span><span class="">xi</span><span class="Special">[</span><span class="Number">3</span><span class="Special">]</span><span class="Operator">-</span><span class="">xi.ref</span><span class="Special">)</span><span class="Operator">*</span><span class="">c0 </span><span class="Comment"># bed volume that's not covered by the above</span>
+            <span class="Special">)</span>*<span class=""> Ac </span><span class="Operator">*</span><span class=""> alpha </span><span class="Operator">+</span>
+                 sol<span class="Special">[</span><span class=""> sol</span><span class="Special">[</span><span class=""> </span><span class="Special">,</span><span class=""> </span><span class="String">'time'</span><span class="Special">]</span><span class=""> </span>==<span class=""> xi</span><span class="Special">[</span><span class="Number">2</span><span class="Special">]</span><span class="Special">,</span><span class=""> </span><span class="String">'intN'</span><span class=""> </span><span class="Special">]</span><span class=""> </span><span class="Operator">*</span><span class=""> Ac </span><span class="Operator">*</span><span class=""> </span><span class="Special">(</span><span class="Number">1</span><span class="Operator">-</span><span class="">alpha</span><span class="Special">)</span><span class=""> </span><span class="Special">)</span><span class="Operator">*</span><span class=""> L0</span>
+    <span class="Error">}</span><span class="Special">,</span><span class=""> env</span><span class="Error">)</span>
+<span class="Error">})</span>
+
+<span class="Function">print</span><span class="Special">(</span><span class="Function">system.time</span><span class="Special">(</span> calcDesign<span class="Special">(</span><span class="">mkP2</span><span class="Special">())))</span>
+
+<span class="Comment">#' </span>
+<span class="Comment">#' </span>
+<span class="Comment">## @knitr </span>
+p2s <span class="Statement">&lt;-</span><span class=""> </span><span class="Function">expand.grid</span><span class="Special">(</span><span class=""> L </span>=<span class=""> </span><span class="Function">seq</span><span class="Special">(</span><span class="">from</span><span class="Operator">=</span><span class="Number">0.1</span><span class="Special">,</span><span class=""> to </span><span class="Operator">=</span><span class=""> </span><span class="Number">0.8</span><span class="Special">,</span><span class=""> length.out</span><span class="Operator">=</span><span class="Number">100</span><span class="Special">)</span><span class="Special">,</span>
+                    R =<span class=""> </span><span class="Function">seq</span><span class="Special">(</span><span class="">from</span><span class="Operator">=</span><span class="Number">5e-5</span><span class="Special">,</span><span class=""> to </span><span class="Operator">=</span><span class=""> </span><span class="Number">1e-2</span><span class="Special">,</span><span class=""> length.out</span><span class="Operator">=</span><span class="Number">15</span><span class="Special">)</span><span class=""> </span><span class="Special">)</span>
+p2s <span class="Statement">&lt;-</span><span class=""> dlply</span><span class="Special">(</span><span class=""> p2s</span><span class="Special">,</span><span class=""> .</span><span class="Special">(</span><span class="">R</span><span class="Special">)</span><span class="Special">,</span><span class=""> .parallel</span>=<span class="Constant">T</span><span class="Special">,</span><span class=""> </span><span class="Type">function</span><span class="Special">(</span><span class="">x</span><span class="Special">)</span><span class=""> </span><span class="Special">{</span>
+    p <span class="Statement">&lt;-</span><span class=""> mkP2</span><span class="Special">(</span><span class="">L</span>=<span class="">x</span><span class="Special">$</span><span class="Normal">L</span><span class="Special">,</span><span class=""> R</span><span class="Operator">=</span><span class="">x</span><span class="Special">$</span><span class="Normal">R</span><span class="Special">[</span><span class="Number">1</span><span class="Special">])</span>
+    d <span class="Statement">&lt;-</span><span class=""> calcDesign</span><span class="Special">(</span><span class="">p</span><span class="Special">)</span>
+    <span class="Function">append</span><span class="Special">(</span><span class="">p</span><span class="Special">,</span><span class=""> d</span><span class="Special">)</span><span class=""> </span><span class="Special">}</span><span class=""> </span><span class="Special">)</span>
+
+
+<span class="Comment">#' </span>
+<span class="Comment">#' </span>
+<span class="Comment">## @knitr fig.width=5, fig.height=3, fig.cap='As the interstitial velocity $R$ is increased the number of bedvolumes processed decreased. This is because the internal mass transfer resistance dominates, so any improvement in the external mass transfer coefficient barely changes the St, while it has increases dispersion. Longer beds have a more efficient use of resin in that more bed volumes can be processed before the effluent rises to the cutoff concentration. This is because the breakthrough curve does not spread out as it passes through the bed, so there is a constant amount of resin unused at the end. This constant amount makes up a smaller fraction for longer beds.'</span>
+p2s.s1 <span class="Statement">&lt;-</span><span class=""> ldply</span><span class="Special">(</span><span class="">p2s</span><span class="Special">,</span><span class="">  </span><span class="Type">function</span><span class="Special">(</span><span class="">x</span><span class="Special">)</span><span class="">  </span><span class="Special">{</span>
+               <span class="Type">data.frame</span><span class="Special">(</span><span class="">L</span>=<span class="">x</span><span class="Special">$</span><span class="Normal">L</span><span class="Special">,</span><span class=""> R</span><span class="Operator">=</span><span class="Function">rep</span><span class="Special">(</span><span class="">x</span><span class="Special">$</span><span class="Normal">R</span><span class="Special">,</span><span class=""> </span><span class="Function">length</span><span class="Special">(</span><span class="">x</span><span class="Special">$</span><span class="Normal">L</span><span class="Special">))</span><span class="Special">,</span><span class=""> bedvol.loading</span><span class="Operator">=</span><span class="">x</span><span class="Special">$</span><span class="Normal">bedvol.loading</span><span class="Special">)</span>
+    <span class="Special">})</span>
+<span class="Function">plot</span><span class="Special">(</span>levelplot<span class="Special">(</span><span class="">  bedvol.loading </span>~<span class=""> L</span><span class="Operator">*</span><span class="Special">(</span><span class="">R</span><span class="Operator">*</span><span class="Number">1000</span><span class="Special">)</span><span class="Special">,</span>
+        p2s.s1<span class="Special">,</span>
+        ylab=<span class="String">'R (mm/s)'</span><span class="Special">,</span>
+        xlab=<span class="String">'L (m)'</span><span class="Special">,</span>
+        main=<span class="String">'bed volumes processed'</span><span class="Special">))</span>
+
+<span class="Comment">#' </span>
+<span class="Comment">#' </span>
+<span class="Comment">## @knitr fig.height=3, fig.width=6, fig.cap='Both the effective diffusivity and mass transfer coefficient increase with velocity as expected. The two effects compete, resulting in the maximum bed volumes processed at around R 3 mm/s according to the previous graph. $LR/\\mathbf{Pe}\\alpha$ is a diffusivity that explains dispersion, while $R\\mathbf{St}/L\\alpha$ is the mass transfer coefficient.'</span>
+<span class="Function">plot</span><span class="Special">(</span>xyplot<span class="Special">(</span><span class="">  L</span>*<span class="">R</span><span class="Operator">/</span><span class="">Pe</span><span class="Operator">/</span><span class="">alpha </span><span class="Operator">+</span><span class=""> R</span><span class="Operator">*</span><span class="">St</span><span class="Operator">/</span><span class="">L</span><span class="Operator">/</span><span class="">alpha </span><span class="Operator">~</span><span class=""> R</span><span class="Operator">*</span><span class="Number">1000</span><span class="Special">,</span>
+        p2s<span class="Special">,</span><span class=""> auto.key</span>=<span class="Constant">T</span><span class="Special">,</span><span class=""> ylab</span><span class="Operator">=</span><span class="String">''</span><span class="Special">,</span>
+        <span class="Function">outer</span>=<span class="Constant">T</span><span class="Special">,</span><span class=""> type</span><span class="Operator">=</span><span class="String">'b'</span><span class="Special">,</span>
+        scales=<span class="Type">list</span><span class="Special">(</span><span class="">y</span><span class="Operator">=</span><span class="Type">list</span><span class="Special">(</span><span class="">relation</span><span class="Operator">=</span><span class="String">'free'</span><span class="Special">,</span><span class=""> </span><span class="Function">log</span><span class="Operator">=</span><span class="Constant">T</span><span class="Special">,</span><span class=""> equispaced.log</span><span class="Operator">=</span><span class="Constant">F</span><span class="Special">)</span><span class="Special">,</span><span class=""> alternating</span><span class="Operator">=</span><span class="Constant">F</span><span class="Special">)</span>
+<span class="Special">))</span>
+
+<span class="Comment">#' </span>
+<span class="Comment">#' </span>
+<span class="Comment">## @knitr fig.height=4, fig.width=8, fig.cap='profiles calculated with the equations for a constant-pattern behavior. The solid concentration profile is sharper than the liquid concentration profile because the feed concentration is high enough to put the resin very close to its maximum capacity. deltaN is the driving force for mass transfer, and intC is an integral of C from the right.'</span>
+<span class="Comment">#solveShock &lt;- function(p) ode(</span>
+<span class="Comment">#    c(C=1e-8 * p$c0, Q=0, intC=0, intN=0),</span>
+<span class="Comment">#    seq(from=0, to=-0.1, length.out=100),</span>
+<span class="Comment">#    deFun, p,</span>
+<span class="Comment">#    method='lsode',</span>
+<span class="Comment">#    events = list(root=T, func = function(t,x,p) { x }, terminalroot=3),</span>
+<span class="Comment">#    rootfunc = function(t, y, ...) y[1] - p$cutoffs*p$c0 )</span>
+
+
+p.shock <span class="Statement">&lt;-</span><span class=""> mkP2</span><span class="Special">()</span>
+
+sols <span class="Statement">&lt;-</span><span class=""> mlply</span><span class="Special">(</span><span class="Type">data.frame</span><span class="Special">(</span><span class="">L</span>=<span class="Function">c</span><span class="Special">(</span><span class="Number">0.2</span><span class="Special">))</span><span class="Special">,</span><span class=""> </span><span class="Type">function</span><span class="Special">(</span><span class="">L</span><span class="Special">)</span><span class=""> calcDesign</span><span class="Special">(</span><span class="">mkP2</span><span class="Special">(</span><span class="">L</span><span class="Operator">=</span><span class="">L</span><span class="Special">)))</span>
+
+<span class="Function">plot</span><span class="Special">(</span>xyplot<span class="Special">(</span><span class=""> </span><span class="Function">C</span><span class=""> </span>+<span class=""> intC </span><span class="Operator">+</span><span class=""> n </span><span class="Operator">+</span><span class=""> deltaN </span><span class="Operator">~</span><span class=""> xi</span><span class="Special">,</span>
+        ldply<span class="Special">(</span><span class="">sols</span><span class="Special">,</span><span class=""> </span><span class="Type">function</span><span class="Special">(</span><span class="">x</span><span class="Special">)</span><span class=""> </span><span class="Type">data.frame</span><span class="Special">(</span><span class="">x</span><span class="Special">$</span><span class="Normal">sol</span><span class="Special">[</span><span class=""> </span><span class="Special">,</span><span class=""> </span><span class="Number">2</span><span class=""> </span><span class="Special">:</span><span class=""> </span><span class="Function">ncol</span><span class="Special">(</span><span class="">x</span><span class="Special">$</span><span class="Normal">sol</span><span class="Special">)]</span><span class="Special">,</span>
+                                           xi =<span class=""> </span><span class="Special">(</span><span class="">x</span><span class="Special">$</span><span class="Normal">sol</span><span class="Special">[</span><span class=""> </span><span class="Special">,</span><span class=""> </span><span class="Number">1</span><span class="Special">]</span><span class=""> </span><span class="Operator">-</span><span class=""> x</span><span class="Special">$</span><span class="Normal">xi.ref</span><span class="Special">)</span><span class="Operator">*</span><span class="">x</span><span class="Special">$</span><span class="Normal">L0</span><span class=""> </span><span class="Special">))</span><span class=""> </span><span class="Special">,</span>
+        <span class="Function">outer</span>=<span class="Constant">T</span><span class="Special">,</span><span class=""> scales</span><span class="Operator">=</span><span class="Type">list</span><span class="Special">(</span><span class="">y</span><span class="Operator">=</span><span class="Type">list</span><span class="Special">(</span><span class="">relation</span><span class="Operator">=</span><span class="String">'free'</span><span class="Special">)</span><span class="Special">,</span><span class=""> alternating</span><span class="Operator">=</span><span class="Constant">F</span><span class="Special">)</span><span class="Special">,</span>
+        type=<span class="String">'l'</span><span class="Special">,</span><span class=""> auto.key</span><span class="Operator">=</span><span class="Type">list</span><span class="Special">(</span><span class="Function">points</span><span class="Operator">=</span><span class="Constant">F</span><span class="Special">,</span><span class=""> </span><span class="Function">lines</span><span class="Operator">=</span><span class="Constant">T</span><span class="Special">)</span><span class="Special">,</span>
+        xlab=<span class="String">'position (m) relative to C=50% of feed'</span><span class="Special">,</span>
+        ylab=<span class="String">''</span><span class="Special">))</span>
+
+<span class="Comment">#' </span>
+<span class="Comment">#' </span>
+<span class="Comment">#' </span>
+<span class="Comment">#' </span>
+<span class="Comment">#' </span>
+<span class="Comment">#' ## Optimization</span>
+<span class="Comment">#' ### Graphical: 2 variables</span>
+<span class="Comment">#' To make sure that the model has been set up to include competing costs which will keep the decision variables within ranges, first explore two variables graphically. The first variable is *cutoff*, this is outlet concentration at the end of the cycle. It is assumed that solutes in the liquid inside the vessel is also recovered. The other variable is the interstitial velocity $R$.</span>
+<span class="Comment">#' </span>
+<span class="Comment">## @knitr </span>
+p3s <span class="Statement">&lt;-</span><span class=""> </span><span class="Function">expand.grid</span><span class="Special">(</span><span class=""> cutoff2 </span>=<span class=""> </span><span class="Function">seq</span><span class="Special">(</span><span class="">from</span><span class="Operator">=</span><span class="Number">0.001</span><span class="Special">,</span><span class=""> to </span><span class="Operator">=</span><span class=""> </span><span class="Number">0.99</span><span class=""> </span><span class="Operator">-</span><span class=""> </span><span class="Number">1e-4</span><span class="Special">,</span><span class=""> length.out</span><span class="Operator">=</span><span class="Number">15</span><span class="Special">)</span><span class="Special">,</span>
+                    R =<span class=""> </span><span class="Function">seq</span><span class="Special">(</span><span class="">from</span><span class="Operator">=</span><span class="Number">1e-3</span><span class="Special">,</span><span class=""> to</span><span class="Operator">=</span><span class="Number">5e-3</span><span class="Special">,</span><span class=""> length.out</span><span class="Operator">=</span><span class="Number">5</span><span class="Special">))</span>
+p3s <span class="Statement">&lt;-</span><span class=""> mdply</span><span class="Special">(</span><span class=""> p3s</span><span class="Special">,</span><span class=""> .parallel</span>=<span class="Constant">T</span><span class="Special">,</span><span class=""> </span><span class="Type">function</span><span class="Special">(</span><span class="">cutoff2</span><span class="Special">,</span><span class=""> R</span><span class="Special">)</span><span class=""> </span><span class="Special">{</span>
+    p <span class="Statement">&lt;-</span><span class=""> mkP2</span><span class="Special">(</span><span class="">cutoffs </span>=<span class=""> </span><span class="Function">c</span><span class="Special">(</span><span class="Number">0.0001</span><span class="Special">,</span><span class=""> cutoff2</span><span class="Special">,</span><span class=""> </span><span class="Number">0.999</span><span class="Special">)</span><span class="Special">,</span>
+              R =<span class=""> R</span><span class="Special">)</span>
+    <span class="Function">cbind</span><span class="Special">(</span><span class="">toDataFrameDropping</span><span class="Special">(</span><span class="">calcDesign</span><span class="Special">(</span><span class="">p</span><span class="Special">))</span><span class="Special">,</span>
+          toDataFrameDropping<span class="Special">(</span><span class="">p</span><span class="Special">))</span><span class=""> </span><span class="Special">}</span><span class=""> </span><span class="Special">)</span>
+
+<span class="Comment">#' </span>
+<span class="Comment">#' </span>
+<span class="Comment">## @knitr fig.width=10, fig.height=4, fig.cap='For constant bed length, there is an optimal point at which to stop the loading step and move on. If the cycle is made too short, then the unused resin at the end of the column costs are too high. If the cycle is too long, the lost revenue from product which could have been recovered exceed the previous savings. Hence there is an optimal cost in the centre. Note that fraction.recovery includes FA in the liquid in the column.'</span>
+<span class="Function">plot</span><span class="Special">(</span>xyplot<span class="Special">(</span><span class=""> C.total </span>+<span class=""> seconds</span><span class="Operator">/</span><span class="Number">3600</span><span class=""> </span><span class="Operator">+</span><span class=""> fraction.recovery </span><span class="Operator">+</span><span class=""> C.product </span><span class="Operator">+</span><span class=""> </span>
+            C.resin +<span class=""> C.valve </span><span class="Operator">~</span><span class=""> cutoff2</span><span class="Special">,</span><span class=""> p3s</span><span class="Special">,</span>
+    groups=<span class="">R</span><span class="Operator">*</span><span class="Number">1000</span><span class="Special">,</span><span class=""> auto.key</span><span class="Operator">=</span><span class="Type">list</span><span class="Special">(</span><span class="">columns</span><span class="Operator">=</span><span class="Number">3</span><span class="Special">,</span><span class=""> </span><span class="Function">title</span><span class="Operator">=</span><span class="String">'interstitial velocity (mm/s)'</span><span class="Special">)</span><span class="Special">,</span>
+    <span class="Function">outer</span>=<span class="Constant">T</span><span class="Special">,</span><span class=""> scales</span><span class="Operator">=</span><span class="Type">list</span><span class="Special">(</span><span class="">y</span><span class="Operator">=</span><span class="Type">list</span><span class="Special">(</span><span class="">relation</span><span class="Operator">=</span><span class="String">'free'</span><span class="Special">)</span><span class="Special">,</span><span class=""> alternating</span><span class="Operator">=</span><span class="Constant">F</span><span class="Special">)</span><span class="Special">,</span>
+    type=<span class="String">'l'</span><span class="Special">,</span><span class=""> ylab</span><span class="Operator">=</span><span class="String">''</span><span class="Special">,</span><span class=""> xlab</span><span class="Operator">=</span><span class="String">'outlet c/c0 when column feed is stopped'</span><span class="Special">))</span>
+
+<span class="Comment">#' </span>
+<span class="Comment">#' </span>
+<span class="Comment">## @knitr fig.height=3, fig.width=10, fig.cap='variables impacted by flow velocity only, not the cutoff time. seconds.mtz13 is the time it takes for the concentration to rise from 1% to 99% of the inlet concentration. This decreases with increasing velocity because 1. the liquid is moving faster so that a larger area is exposed in a shorter time, and 2. the external mass transfer resistance is slightly decreased as the k/K (mass transfer coefficient in 1/s) panel shows. Finally a higher feed velocity reduces the vessel cost because the required cross-section area decreases.'</span>
+<span class="Function">plot</span><span class="Special">(</span>xyplot<span class="Special">(</span><span class=""> seconds.mtz13</span>*<span class="">R </span><span class="Operator">+</span><span class=""> seconds.mtz13 </span><span class="Operator">+</span><span class=""> k</span><span class="Operator">/</span><span class="">K </span><span class="Operator">+</span><span class=""> C.vessel </span><span class="Operator">~</span><span class=""> R</span><span class="Operator">*</span><span class="Number">1000</span><span class="Special">,</span>
+    p3s<span class="Special">,</span><span class=""> ylab</span>=<span class="String">''</span><span class="Special">,</span><span class=""> xlab</span><span class="Operator">=</span><span class="String">'R (mm/s)'</span><span class="Special">,</span>
+    <span class="Function">outer</span>=<span class="Constant">T</span><span class="Special">,</span><span class=""> scales</span><span class="Operator">=</span><span class="Type">list</span><span class="Special">(</span><span class="">y</span><span class="Operator">=</span><span class="Type">list</span><span class="Special">(</span><span class="">relation</span><span class="Operator">=</span><span class="String">'free'</span><span class="Special">))))</span>
+
+
+<span class="Comment">#' </span>
+<span class="Comment">#' </span>
+<span class="Comment">#' ### Numerical: 4 Variables</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' Below the results are for an optimization that simultaneously considers 4 variables:</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' * feed velocity</span>
+<span class="Comment">#' * liquid concentration to cut-off. The optimum is the minimum allowed, which will depend on instrument limitations (not in scope). Below the minimum is assumed to be 50% of the feed concentration.</span>
+<span class="Comment">#' * particle diameter</span>
+<span class="Comment">#' * bed length</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' Besides the outlet concentration at which to end the cycle, all other variables at the optimum fall within the bounds set. Important limitations of the current model include:</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' * elution part of the model</span>
+<span class="Comment">#' * treatment of the hold-up in the column is an oversimplification</span>
+<span class="Comment">#' </span>
+<span class="Comment">#'     * mixing of elution solvent (EtOH) with water</span>
+<span class="Comment">#'     * liquid hold-up is currently considered to be lost product</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' * detection limits may be unrealistic for deciding cycle duration. The column design may change slightly if an on-line sensor is unavailble or inaccurate, and instead the column operates with predetermined cycle times.</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' </span>
+<span class="Comment">## @knitr </span>
+optShockLayer <span class="Statement">&lt;-</span><span class=""> </span><span class="Special">{</span>
+  fromX <span class="Statement">&lt;-</span><span class=""> </span><span class="Type">function</span><span class="Special">(</span><span class="">x</span><span class="Special">)</span><span class=""> calcDesign</span><span class="Special">(</span><span class="">mkP2</span><span class="Special">(</span>
+            cutoffs =<span class=""> </span><span class="Function">c</span><span class="Special">(</span><span class="Number">0.01</span><span class="Special">,</span><span class=""> x</span><span class="Special">[</span><span class="Number">1</span><span class="Special">]</span><span class="Special">,</span><span class=""> </span><span class="Number">0.99</span><span class="Special">)</span><span class="Special">,</span>
+            R =<span class=""> x</span><span class="Special">[</span><span class="Number">2</span><span class="Special">]</span><span class="Special">,</span><span class="">  dp </span><span class="Operator">=</span><span class=""> x</span><span class="Special">[</span><span class="Number">3</span><span class="Special">]</span><span class="Special">,</span><span class=""> L</span><span class="Operator">=</span><span class="">x</span><span class="Special">[</span><span class="Number">4</span><span class="Special">]))</span>
+
+  nloptr<span class="Special">(</span><span class=""> x0</span>=<span class="Function">c</span><span class="Special">(</span><span class="Number">0.5</span><span class="Special">,</span><span class=""> </span><span class="Number">1e-4</span><span class="Special">,</span><span class=""> </span><span class="Number">5e-4</span><span class="Special">,</span><span class=""> </span><span class="Number">0.1</span><span class="Special">)</span><span class="Special">,</span>
+    eval_f=<span class="Type">function</span><span class="Special">(</span><span class="">x</span><span class="Special">)</span><span class=""> fromX</span><span class="Special">(</span><span class="">x</span><span class="Special">)</span><span class="Special">$</span><span class="Normal">C.total</span><span class="Special">,</span>
+    opts=<span class="Type">list</span><span class="Special">(</span><span class="">algorithm</span><span class="Operator">=</span><span class="String">'NLOPT_LN_BOBYQA'</span><span class="Special">,</span>
+                ftol_rel =<span class=""> </span><span class="Number">1e-6</span><span class="Special">,</span>
+                maxeval=<span class="Number">10000</span><span class="Special">)</span><span class="Special">,</span>
+    lb =<span class=""> </span><span class="Function">c</span><span class="Special">(</span><span class="Number">0.5</span><span class="Special">,</span><span class=""> </span><span class="Number">1e-4</span><span class="Special">,</span><span class=""> </span><span class="Number">0.635e-4</span><span class="Special">,</span><span class=""> </span><span class="Number">0.1</span><span class="Special">)</span><span class="Special">,</span>
+    ub =<span class=""> </span><span class="Function">c</span><span class="Special">(</span><span class="Number">0.55</span><span class="Special">,</span><span class=""> </span><span class="Number">5e-3</span><span class="Special">,</span><span class=""> </span><span class="Number">2</span><span class="Operator">*</span><span class="Number">0.635e-3</span><span class="Special">,</span><span class=""> </span><span class="Number">2</span><span class="Special">))</span>
+<span class="Error">}</span>
+
+
+<span class="Comment">#' </span>
+<span class="Comment">#' </span>
+<span class="Comment">## @knitr fig.width=5, fig.height=3, fig.cap='keeping all other parameters besides bed length (L) constant, the optimum length can be seen as a balance between improved recovery which a larger column can provide (loss of FA is pretty much constant per cycle, so longer step times reduces the time-averaged loss) and higher costs resulting from larger equipment.'</span>
+optShockLayer.sensL <span class="Statement">&lt;-</span><span class=""> calcDesign</span><span class="Special">(</span><span class=""> mkP2</span><span class="Special">(</span>
+            cutoffs =<span class=""> </span><span class="Function">c</span><span class="Special">(</span><span class="Number">0.01</span><span class="Special">,</span><span class=""> optShockLayer</span><span class="Special">$</span><span class="Normal">sol</span><span class="Special">[</span><span class="Number">1</span><span class="Special">]</span><span class="Special">,</span><span class=""> </span><span class="Number">0.99</span><span class="Special">)</span><span class="Special">,</span>
+            R =<span class=""> optShockLayer</span><span class="Special">$</span><span class="Normal">sol</span><span class="Special">[</span><span class="Number">2</span><span class="Special">]</span><span class="Special">,</span><span class="">  dp </span><span class="Operator">=</span><span class=""> optShockLayer</span><span class="Special">$</span><span class="Normal">sol</span><span class="Special">[</span><span class="Number">3</span><span class="Special">]</span><span class="Special">,</span>
+            L=<span class="">  </span><span class="Function">seq</span><span class="Special">(</span><span class="">from</span><span class="Operator">=</span><span class="Number">0.1</span><span class="Special">,</span><span class=""> to</span><span class="Operator">=</span><span class="Number">2</span><span class="Special">,</span><span class=""> length.out</span><span class="Operator">=</span><span class="Number">50</span><span class="Special">)))</span>
+optShockLayer.sensL2 <span class="Statement">&lt;-</span><span class=""> toDataFrameDropping</span><span class="Special">(</span><span class="">optShockLayer.sensL</span><span class="Special">,</span><span class=""> nn</span>=<span class=""> </span><span class="Function">length</span><span class="Special">(</span><span class="">optShockLayer.sensL</span><span class="Special">$</span><span class="Normal">L</span><span class="Special">)</span><span class=""> </span><span class="Special">)</span>
+scale01 <span class="Statement">&lt;-</span><span class=""> </span><span class="Type">function</span><span class="Special">(</span><span class="">x</span><span class="Special">)</span><span class=""> </span><span class="Special">(</span><span class="">x </span>-<span class=""> </span><span class="Function">mean</span><span class="Special">(</span><span class="">x</span><span class="Special">))</span><span class=""> </span><span class="Operator">/</span><span class=""> </span><span class="Function">diff</span><span class="Special">(</span><span class="Function">range</span><span class="Special">(</span><span class="">x</span><span class="Special">))</span>
+
+<span class="Function">plot</span><span class="Special">(</span>xyplot<span class="Special">(</span><span class=""> scale01</span><span class="Special">(</span><span class="">C.total</span><span class="Special">)</span><span class=""> </span>+<span class=""> scale01</span><span class="Special">(</span><span class="">C.vessel</span><span class="Special">)</span>
+            +<span class=""> scale01</span><span class="Special">(</span><span class="">C.resin</span><span class="Special">)</span><span class=""> </span><span class="Operator">+</span><span class=""> scale01</span><span class="Special">(</span><span class="">C.product</span><span class="Special">)</span><span class=""> </span><span class="Operator">~</span><span class=""> L</span><span class="Special">,</span><span class=""> </span>
+            optShockLayer.sensL2<span class="Special">,</span>
+            xlab=<span class="String">'L (m)'</span><span class="Special">,</span>
+            ylab=<span class="String">''</span><span class="Special">,</span>
+            auto.key=<span class="Type">list</span><span class="Special">(</span><span class="">columns</span><span class="Operator">=</span><span class="Number">2</span><span class="Special">,</span><span class=""> </span><span class="Function">points</span><span class="Operator">=</span><span class="Constant">F</span><span class="Special">,</span><span class=""> </span><span class="Function">lines</span><span class="Operator">=</span><span class="Constant">T</span><span class=""> </span><span class="Special">)</span><span class="Special">,</span>
+            type=<span class="String">'l'</span><span class="Special">))</span>
+
+<span class="Comment">#' </span>
+<span class="Comment">#' </span>
+<span class="Comment">## @knitr fig.width=8, fig.height=3, fig.cap='same data as above, but scales have equal tick spacing (k$)'</span>
+<span class="Function">plot</span><span class="Special">(</span>xyplot<span class="Special">(</span><span class=""> C.total </span>+<span class=""> C.vessel </span><span class="Operator">+</span><span class=""> C.resin </span><span class="Operator">+</span><span class=""> C.product </span><span class="Operator">+</span><span class=""> C.valve </span><span class="Operator">~</span><span class=""> L</span><span class="Special">,</span>
+            optShockLayer.sensL2<span class="Special">,</span>
+            <span class="Function">outer</span>=<span class="Constant">T</span><span class="Special">,</span>
+            scales=<span class="Type">list</span><span class="Special">(</span><span class="">y</span><span class="Operator">=</span><span class="Type">list</span><span class="Special">(</span><span class="">relation</span><span class="Operator">=</span><span class="String">'sliced'</span><span class="Special">)</span><span class="Special">,</span><span class=""> alternating</span><span class="Operator">=</span><span class="Constant">F</span><span class="Special">)</span><span class="Special">,</span>
+            ylab=<span class="String">''</span><span class="Special">,</span><span class=""> auto.key</span><span class="Operator">=</span><span class="Type">list</span><span class="Special">(</span><span class="">columns</span><span class="Operator">=</span><span class="Number">2</span><span class="Special">,</span><span class=""> </span><span class="Function">points</span><span class="Operator">=</span><span class="Constant">F</span><span class="Special">,</span><span class=""> </span><span class="Function">lines</span><span class="Operator">=</span><span class="Constant">T</span><span class=""> </span><span class="Special">)</span><span class="Special">,</span>
+            type=<span class="String">'l'</span><span class="Special">))</span>
+
+<span class="Comment">#' </span>
+<span class="Comment">#' </span>
+<span class="Comment">## @knitr fig.width=8, fig.height=4, fig.cap='same as above, except scales are different in each panel. The seconds/3600 panel is the hour-duration of the step.'</span>
+<span class="Function">plot</span><span class="Special">(</span>xyplot<span class="Special">(</span><span class=""> C.total </span>+<span class=""> C.vessel</span>
+            +<span class=""> C.resin </span><span class="Operator">+</span><span class=""> C.product </span><span class="Operator">+</span><span class=""> fraction.recovery </span><span class="Operator">+</span><span class=""> seconds</span><span class="Operator">/</span><span class="Number">3600</span><span class=""> </span><span class="Operator">~</span><span class=""> L</span><span class="Special">,</span>
+            optShockLayer.sensL2<span class="Special">,</span>
+            <span class="Function">outer</span>=<span class="Constant">T</span><span class="Special">,</span>
+            scales=<span class="Type">list</span><span class="Special">(</span><span class="">y</span><span class="Operator">=</span><span class="Type">list</span><span class="Special">(</span><span class="">relation</span><span class="Operator">=</span><span class="String">'free'</span><span class="Special">,</span><span class=""> rot</span><span class="Operator">=</span><span class="Number">0</span><span class="Special">))</span><span class="Special">,</span>
+            ylab=<span class="String">''</span><span class="Special">,</span><span class=""> auto.key</span><span class="Operator">=</span><span class="Type">list</span><span class="Special">(</span><span class="">columns</span><span class="Operator">=</span><span class="Number">2</span><span class="Special">,</span><span class=""> </span><span class="Function">points</span><span class="Operator">=</span><span class="Constant">F</span><span class="Special">,</span><span class=""> </span><span class="Function">lines</span><span class="Operator">=</span><span class="Constant">T</span><span class=""> </span><span class="Special">)</span><span class="Special">,</span>
+            type=<span class="String">'l'</span><span class="Special">))</span>
+
+<span class="Comment">#' </span>
+<span class="Comment">#' </span>
+<span class="Comment">## @knitr results='asis'</span>
+<span class="PreProc">library</span><span class="Special">(</span>pander<span class="Special">)</span>
+pander<span class="Special">(</span><span class=""> </span><span class="Special">{</span>
+        x <span class="Statement">&lt;-</span><span class=""> optShockLayer</span><span class="Special">$</span><span class="Normal">solution</span>
+        <span class="Type">data.frame</span><span class="Special">(</span><span class=""> </span>
+                name=<span class="Function">c</span><span class="Special">(</span><span class="String">'$c/c_0$'</span><span class="Special">,</span><span class=""> </span><span class="String">'$R$'</span><span class="Special">,</span><span class=""> </span><span class="String">'$d_p$'</span><span class="Special">,</span><span class=""> </span><span class="String">'$L$'</span><span class="Special">)</span><span class="Special">,</span>
+                value=<span class="">x</span><span class="Special">,</span>
+                unit=<span class="Function">c</span><span class="Special">(</span><span class="String">'1'</span><span class="Special">,</span><span class=""> </span><span class="String">'m/s'</span><span class="Special">,</span><span class=""> </span><span class="String">'m'</span><span class="Special">,</span><span class=""> </span><span class="String">'m'</span><span class="Special">))</span><span class=""> </span><span class="Special">}</span><span class=""> </span><span class="Special">)</span>
+
+<span class="Comment">#' </span>
+<span class="Comment">#' </span>
+<span class="Comment">#' Table: decision variables at optimum</span>
+<span class="Comment">#' </span>
+<span class="Comment">## @knitr results='asis'</span>
+pander<span class="Special">(</span><span class=""> </span><span class="Special">{</span>
+        x <span class="Statement">&lt;-</span><span class=""> fromX</span><span class="Special">(</span><span class="">optShockLayer</span><span class="Special">$</span><span class="Normal">solution</span><span class="Special">)</span>
+        y <span class="Statement">&lt;-</span><span class=""> x</span><span class="Special">[</span><span class=""> </span><span class="Function">c</span><span class="Special">(</span><span class=""> </span><span class="Function">names</span><span class="Special">(</span><span class="">x</span><span class="Special">)[</span><span class=""> </span><span class="Function">grep</span><span class="Special">(</span><span class="String">'C</span><span class="Special">\\</span><span class="String">.'</span><span class="Special">,</span><span class=""> </span><span class="Function">names</span><span class="Special">(</span><span class="">x</span><span class="Special">))]</span><span class="Special">,</span><span class=""> </span><span class="String">'deltaP'</span><span class="Special">,</span><span class=""> </span><span class="String">'bedvol.loading'</span><span class="Special">,</span>
+             <span class="String">'St'</span><span class="Special">,</span><span class=""> </span><span class="String">'Pe'</span><span class="Special">,</span><span class=""> </span><span class="String">'discharged'</span><span class="Special">,</span><span class=""> </span><span class="String">'fed'</span><span class="Special">,</span><span class=""> </span><span class="String">'fraction.recovery'</span><span class="Special">,</span><span class=""> </span><span class="String">'seconds'</span><span class="Special">,</span><span class=""> </span><span class="String">'Dbed'</span><span class="Special">,</span><span class=""> </span><span class="String">'Nbed'</span><span class="Special">)</span><span class=""> </span><span class="Special">]</span>
+        y <span class="Statement">&lt;-</span><span class=""> </span><span class="Type">data.frame</span><span class="Special">(</span><span class="">name</span>=<span class="Function">names</span><span class="Special">(</span><span class="">y</span><span class="Special">)</span><span class="Special">,</span><span class=""> value</span><span class="Operator">=</span><span class="Function">mapply</span><span class="Special">(</span><span class="Type">function</span><span class="Special">(</span><span class="">x</span><span class="Special">)</span><span class=""> x</span><span class="Special">,</span><span class=""> y</span><span class="Special">))</span>
+        y<span class="Special">$</span><span class="Normal">unit</span><span class=""> </span><span class="Statement">&lt;-</span><span class=""> </span><span class="Function">c</span><span class="Special">(</span><span class="Function">rep</span><span class="Special">(</span><span class="String">'k$'</span><span class="Special">,</span><span class=""> </span><span class="Number">6</span><span class="Special">)</span><span class="Special">,</span><span class=""> </span><span class="String">'Pa'</span><span class="Special">,</span><span class=""> </span><span class="String">'1'</span><span class="Special">,</span><span class=""> </span><span class="String">'1'</span><span class="Special">,</span><span class=""> </span><span class="String">'1'</span><span class="Special">,</span><span class=""> </span><span class="String">'kg'</span><span class="Special">,</span><span class=""> </span><span class="String">'kg'</span><span class="Special">,</span><span class=""> </span><span class="String">'1'</span><span class="Special">,</span><span class=""> </span><span class="String">'s'</span><span class="Special">,</span><span class=""> </span><span class="String">'m'</span><span class="Special">,</span><span class=""> </span><span class="String">'1'</span><span class="Special">)</span>
+        <span class="Function">rownames</span><span class="Special">(</span><span class="">y</span><span class="Special">)</span><span class=""> </span><span class="Statement">&lt;-</span><span class=""> </span><span class="Constant">NULL</span>
+        y
+        <span class="Special">}</span><span class=""> </span><span class="Special">)</span>
+
+<span class="Comment">#' </span>
+<span class="Comment">#' </span>
+<span class="Comment">#' Table: other variables at optimum</span>
+<span class="Comment">#' </span>
+<span class="Comment">#' ### Impact of particle diameter</span>
+<span class="Comment">#' </span>
+<span class="Comment">## @knitr fig.height=4, fig.width=10, fig.cap='smaller particle diameters reduce the internal mass transfer resistance. Because a short bed length has been chosen, there is no concern over pressure drop unless the diameter is reduced 100x below the literature value of 0.635 mm.'</span>
+p4s <span class="Statement">&lt;-</span><span class=""> </span><span class="Type">data.frame</span><span class="Special">(</span><span class=""> dp </span>=<span class=""> </span><span class="Function">exp</span><span class="Special">(</span><span class="Function">seq</span><span class="Special">(</span><span class="">from</span><span class="Operator">=</span><span class="Function">log</span><span class="Special">(</span><span class="Number">5e-6</span><span class="Special">)</span><span class="Special">,</span><span class=""> to</span><span class="Operator">=</span><span class="Function">log</span><span class="Special">(</span><span class="Number">5</span><span class="Operator">*</span><span class=""> </span><span class="Number">0.635e-3</span><span class="Special">)</span><span class="Special">,</span><span class=""> length.out</span><span class="Operator">=</span><span class="Number">20</span><span class="Special">)))</span>
+
+p4s <span class="Statement">&lt;-</span><span class=""> mdply</span><span class="Special">(</span><span class=""> p4s</span><span class="Special">,</span><span class=""> .parallel</span>=<span class="Constant">T</span><span class="Special">,</span><span class=""> </span><span class="Type">function</span><span class="Special">(</span><span class="">dp</span><span class="Special">)</span><span class=""> </span><span class="Special">{</span>
+    p <span class="Statement">&lt;-</span><span class=""> mkP2</span><span class="Special">(</span><span class="">dp </span>=<span class=""> dp</span><span class="Special">,</span><span class=""> R </span><span class="Operator">=</span><span class=""> optShockLayer</span><span class="Special">$</span><span class="Normal">solution</span><span class="Special">[</span><span class="Number">2</span><span class="Special">]</span><span class="Special">,</span>
+              cutoffs =<span class=""> </span><span class="Function">c</span><span class="Special">(</span><span class="Number">1e-3</span><span class="Special">,</span><span class=""> optShockLayer</span><span class="Special">$</span><span class="Normal">solution</span><span class="Special">[</span><span class="Number">1</span><span class="Special">]</span><span class="Special">,</span><span class=""> </span><span class="Number">0.99</span><span class="Special">)</span><span class="Special">,</span>
+              L=<span class="">optShockLayer</span><span class="Special">$</span><span class="Normal">solution</span><span class="Special">[</span><span class="Number">4</span><span class="Special">])</span>
+    <span class="Function">cbind</span><span class="Special">(</span><span class="">toDataFrameDropping</span><span class="Special">(</span><span class="">calcDesign</span><span class="Special">(</span><span class="">p</span><span class="Special">))</span><span class="Special">,</span>
+          toDataFrameDropping<span class="Special">(</span><span class="">p</span><span class="Special">))</span><span class=""> </span><span class="Special">}</span><span class=""> </span><span class="Special">)</span>
+
+<span class="Comment">#0.635e-3</span>
+<span class="Function">plot</span><span class="Special">(</span>xyplot<span class="Special">(</span><span class=""> C.deltaP </span>+<span class=""> C.total </span><span class="Operator">+</span><span class=""> C.resin </span><span class="Operator">+</span><span class=""> seconds </span><span class="Operator">+</span>
+        seconds.mtz13 +<span class=""> fraction.recovery </span><span class="Operator">~</span><span class=""> dp </span><span class="Operator">/</span><span class=""> </span><span class="Number">0.635e-3</span><span class="Special">,</span>
+    p4s<span class="Special">,</span><span class=""> type</span>=<span class="String">'l'</span><span class="Special">,</span><span class=""> ylab</span><span class="Operator">=</span><span class="String">''</span><span class="Special">,</span>
+    <span class="Function">outer</span>=<span class="Constant">T</span><span class="Special">,</span><span class=""> scales</span><span class="Operator">=</span><span class="Type">list</span><span class="Special">(</span><span class="">y</span><span class="Operator">=</span><span class="Type">list</span><span class="Special">(</span><span class="">relation</span><span class="Operator">=</span><span class="String">'free'</span><span class="Special">)</span><span class="Special">,</span>
+                         x=<span class="Type">list</span><span class="Special">(</span><span class="Function">log</span><span class="Operator">=</span><span class="Constant">T</span><span class="Special">,</span><span class=""> equispaced.log</span><span class="Operator">=</span><span class="Constant">F</span><span class="Special">)</span><span class="Special">,</span>
+                         alternating=<span class="Constant">F</span><span class="Special">)</span>
+        <span class="Special">))</span>
+
+
+<span class="Comment">#' </span>
+</pre>
+</body>
+</html>
