@@ -1,0 +1,121 @@
+# Laminar flow heat transfer
+
+```{r, echo =F}
+library(pacman)
+# remotes::install_github("r-lib/textshaping")
+# remotes::install_github("AllanCameron/geomtextpath")
+p_load(tidyverse, ggplot2, glue, akima, quarto, knitr, RSQLite, geomtextpath)
+
+
+```
+
+
+## Define Cases
+
+The two cases are a 2 mm and 1.8 mm diameter extrusion.
+
+```{r}
+# m3 / s for a 0.8 mm extrusion diameter @ 100 mm/s
+volumetric_flow <- 100e-3 * pi * 0.8e-3^2 / 4
+
+# approximate thermal diffusivity m^2 / s
+alpha <- 1e-7
+
+tgrid <- expand_grid(d = c(2e-3, 1.8e-3)) %>%
+  mutate( ubar = volumetric_flow / (pi * d^2 / 4), Pe = round(ubar * d / alpha)
+  ) %>% print
+```
+
+
+## Solve
+
+Solve the [model](http://aavogt.github.io/laminar-ht/Pipe.html) for the two diameters.
+This writes laminarHT.db and returns the pars.id keys that were created (or
+already exist):
+
+```{r}
+ks <- system(glue("cd laminar-ht && cabal run laminar-ht -- -p {paste(tgrid$Pe, collapse=',')} "), intern = TRUE) %>%
+  last %>%
+  strsplit(",") %>%
+  pluck(1) %>%
+  as.integer %>%
+  print
+```
+
+
+## Load Results
+
+```{r}
+
+con <- DBI::dbConnect(RSQLite::SQLite(), "laminar-ht/laminarHT.db")
+
+pars <- tbl(con, "pars")
+spectrum <- tbl(con, "spectrum")
+temperatures <- tbl(con, "temperatures")
+
+# temperature
+tp <- temperatures %>% filter(par %in% ks) %>% left_join(pars, join_by(par == id)) %>%
+    left_join(tgrid, join_by(pe == Pe), copy=TRUE) %>%
+    mutate(d_um = d * 1e6, temp_clamp = pmax(0, pmin(1, temp))) %>%
+    print
+
+# temperature, good points only
+tpg <- tp %>% filter(temp_clamp == temp)
+
+# temperature absolute and relative diffference
+tpd <- tp %>%
+  pivot_wider(names_from = d_um, id_cols = -c('pe', 'temp_pm', 'd', 'ubar', 'par', 'temp_clamp'), values_from=temp, names_prefix = "temp.") %>%
+  mutate(dtemp = temp.1800 - temp.2000, dtemp_by_temp = dtemp / temp.2000)
+
+print(pars %>% right_join(tgrid, join_by(pe == Pe), copy=TRUE))
+
+```
+
+## Plots
+
+This plot is the same as above, except values outside of the 0-1 range are blank/white tiles:
+```{r}
+
+
+arrowoverlay <- function(z0=30) {
+  arrows <- tibble(rho=seq(0, 0.8, length.out=5), y0=z0, y1=z0 + 30*(1-rho^2)) %>% print
+  list(geom_line(aes(rho, z0 + 30*(1-rho^2)), col='black'),
+     geom_line(aes(rho, z0), col='black') ,
+     geom_segment(aes(x=rho, y=y0, yend=y1), data=arrows, col='black',
+                  arrow = arrow() ))
+}
+plot(ggplot(tpg, aes(rho, z)) +
+     geom_tile(aes(fill=temp)) + 
+     arrowoverlay() +
+     scale_fill_viridis_c() + facet_wrap(~d_um, labeller = label_both) + theme_minimal())
+
+```
+
+The 1.8 mm case (temp 1800) is consistently hotter but not by much.
+Temperatures are dimensionless where 0 is the initial and 1 is the final
+temperature.
+```{r}
+plot(ggplot(tpd, aes(temp.2000, temp.1800, col=rho, size=z>25)) + geom_point() + geom_abline(intercept=0, slope=1, col='red') + theme_minimal())
+```
+
+Values beyond 1 and below 0 are physically impossible. Including these distorts
+the color scale, making it hard to see the rest of the solution that does make
+sense:
+```{r}
+plot(ggplot(tp, aes(rho, z)) + 
+     geom_tile(aes(fill=temp)) +
+     arrowoverlay(70) +
+     geom_textcontour(aes(z=temp), col='red', straight=T, breaks = seq(0, 1, length.out=5)) + 
+     scale_fill_viridis_c() + facet_wrap(~d_um) + theme_minimal())
+```
+
+
+```{r}
+plot(ggplot(tpg, aes(z, temp, col = rho, group=interaction(rho, d_um), linetype=factor(d_um))) + geom_line() + theme_minimal())
+```
+
+
+```{r}
+plot(ggplot(tpg %>% filter(z > 20 & z < 100), aes(z, temp, col = rho, group=interaction(rho, d_um), linetype=factor(d_um))) + geom_line() + theme_minimal())
+```
+
