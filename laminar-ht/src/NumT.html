@@ -1,0 +1,713 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="annot"><span class="hs-comment">-- | numbers as functions of precision</span></span><span>
+</span><span id="line-2"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">NumT</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-3"></span><span>
+</span><span id="line-4"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/lens-5.3.2-6c27de1fd91456ddcb18120c6e36f4d0100ec5c2059ed2e408ac068c4f56f7d6/share/doc/html/src/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span>
+</span><span id="line-5"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">void</span></span><span class="hs-special">)</span><span>
+</span><span id="line-6"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Data</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Data</span></span><span class="hs-special">)</span><span>
+</span><span id="line-7"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/lens-5.3.2-6c27de1fd91456ddcb18120c6e36f4d0100ec5c2059ed2e408ac068c4f56f7d6/share/doc/html/src/Data.Data.Lens.html"><span class="hs-identifier">Data.Data.Lens</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/lens-5.3.2-6c27de1fd91456ddcb18120c6e36f4d0100ec5c2059ed2e408ac068c4f56f7d6/share/doc/html/src/Data.Data.Lens.html#template"><span class="hs-identifier">template</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-8"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.html"><span class="hs-identifier">Data.Number.Flint</span></a></span><span>
+</span><span id="line-9"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.Types.FFI.html#Acb"><span class="hs-identifier">Acb</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-10"></span><span>    </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.Types.FFI.html#CAcb"><span class="hs-identifier">CAcb</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-11"></span><span>    </span><span class="annot"><span class="hs-identifier">Ptr</span></span><span class="hs-special">,</span><span>
+</span><span id="line-12"></span><span>    </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#acb_abs"><span class="hs-identifier">acb_abs</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-13"></span><span>    </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#acb_acos"><span class="hs-identifier">acb_acos</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-14"></span><span>    </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#acb_acosh"><span class="hs-identifier">acb_acosh</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-15"></span><span>    </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#acb_add"><span class="hs-identifier">acb_add</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-16"></span><span>    </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#acb_asin"><span class="hs-identifier">acb_asin</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-17"></span><span>    </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#acb_asinh"><span class="hs-identifier">acb_asinh</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-18"></span><span>    </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#acb_atan"><span class="hs-identifier">acb_atan</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-19"></span><span>    </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#acb_atanh"><span class="hs-identifier">acb_atanh</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-20"></span><span>    </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#acb_const_pi"><span class="hs-identifier">acb_const_pi</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-21"></span><span>    </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#acb_cos"><span class="hs-identifier">acb_cos</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-22"></span><span>    </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#acb_cosh"><span class="hs-identifier">acb_cosh</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-23"></span><span>    </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#acb_div"><span class="hs-identifier">acb_div</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-24"></span><span>    </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#acb_exp"><span class="hs-identifier">acb_exp</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-25"></span><span>    </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#acb_log"><span class="hs-identifier">acb_log</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-26"></span><span>    </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#acb_mul"><span class="hs-identifier">acb_mul</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-27"></span><span>    </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#acb_pow"><span class="hs-identifier">acb_pow</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-28"></span><span>    </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#acb_set_arb"><span class="hs-identifier">acb_set_arb</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-29"></span><span>    </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#acb_set_d"><span class="hs-identifier">acb_set_d</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-30"></span><span>    </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#acb_set_d_d"><span class="hs-identifier">acb_set_d_d</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-31"></span><span>    </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#acb_sgn"><span class="hs-identifier">acb_sgn</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-32"></span><span>    </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#acb_sin"><span class="hs-identifier">acb_sin</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-33"></span><span>    </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#acb_sinh"><span class="hs-identifier">acb_sinh</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-34"></span><span>    </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#acb_sub"><span class="hs-identifier">acb_sub</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-35"></span><span>    </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Arb.FFI.html#arb_midref"><span class="hs-identifier">arb_midref</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-36"></span><span>    </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Arb.FFI.html#arb_printd"><span class="hs-identifier">arb_printd</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-37"></span><span>    </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Arb.FFI.html#arb_radref"><span class="hs-identifier">arb_radref</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-38"></span><span>    </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Arb.Arf.FFI.html#arf_printd"><span class="hs-identifier">arf_printd</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-39"></span><span>    </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Arb.Mag.FFI.html#mag_get_d"><span class="hs-identifier">mag_get_d</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-40"></span><span>    </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#newAcb"><span class="hs-identifier">newAcb</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-41"></span><span>    </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Arb.FFI.html#newArb"><span class="hs-identifier">newArb</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-42"></span><span>    </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#withAcb"><span class="hs-identifier">withAcb</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-43"></span><span>    </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#withAcbRe"><span class="hs-identifier">withAcbRe</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-44"></span><span>    </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Arb.FFI.html#withArb"><span class="hs-identifier">withArb</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-45"></span><span>  </span><span class="hs-special">)</span><span>
+</span><span id="line-46"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Foreign.C</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">CLong</span></span><span class="hs-special">)</span><span>
+</span><span id="line-47"></span><span>
+</span><span id="line-48"></span><span class="hs-comment">-- $todo</span><span>
+</span><span id="line-49"></span><span class="hs-comment">--</span><span>
+</span><span id="line-50"></span><span class="hs-comment">-- consider</span><span>
+</span><span id="line-51"></span><span class="hs-comment">--</span><span>
+</span><span id="line-52"></span><span class="hs-comment">-- &gt; Data.Number.Flint.Arb.FpWrap</span><span>
+</span><span id="line-53"></span><span class="hs-comment">-- &gt; Data.Number.Flint.Arb.Hypgeom.arb_hypergeom_1f1 since I</span><span>
+</span><span id="line-54"></span><span class="hs-comment">-- &gt; discard the imaginary parts without checking each time</span><span>
+</span><span id="line-55"></span><span>
+</span><span id="line-56"></span><span class="hs-keyword">type</span><span> </span><span id="T"><span class="annot"><a href="NumT.html#T"><span class="hs-identifier hs-var">T</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">CLong</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.Types.FFI.html#Acb"><span class="hs-identifier hs-type">Acb</span></a></span><span>
+</span><span id="line-57"></span><span>
+</span><span id="line-58"></span><span class="annot"><a href="NumT.html#t"><span class="hs-identifier hs-type">t</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.Types.FFI.html#Acb"><span class="hs-identifier hs-type">Acb</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="NumT.html#T"><span class="hs-identifier hs-type">T</span></a></span><span>
+</span><span id="line-59"></span><span id="t"><span class="annot"><span class="annottext">t :: Acb -&gt; T
+</span><a href="NumT.html#t"><span class="hs-identifier hs-var hs-var">t</span></a></span></span><span> </span><span id="local-6989586621679128050"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128050"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="annot"><span class="annottext">CLong
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Acb -&gt; IO Acb
+forall a. a -&gt; IO a
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128050"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-60"></span><span>
+</span><span id="line-61"></span><span class="hs-keyword">pattern</span><span> </span><span class="annot"><a href="NumT.html#T"><span class="hs-identifier hs-type">T</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="">?prec</span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">CLong</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.Types.FFI.html#Acb"><span class="hs-identifier hs-type">Acb</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="NumT.html#T"><span class="hs-identifier hs-type">T</span></a></span><span>
+</span><span id="line-62"></span><span class="hs-keyword">pattern</span><span> </span><span id="T"><span id="%24mT"><span id="%24bT"><span class="annot"><span class="annottext">$mT :: forall {r}.
+(?prec::CLong) =&gt;
+T -&gt; (IO Acb -&gt; r) -&gt; ((# #) -&gt; r) -&gt; r
+$bT :: (?prec::CLong) =&gt; IO Acb -&gt; T
+</span><a href="NumT.html#T"><span class="hs-identifier hs-var hs-var hs-var hs-var">T</span></a></span></span></span></span><span> </span><span class="annot"><a href="#local-6989586621679128054"><span class="hs-identifier hs-type">x</span></a></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679128056"><span class="annot"><span class="annottext">T
+</span><a href="#local-6989586621679128056"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">T
+</span><a href="#local-6989586621679128056"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">?prec::CLong
+CLong
+</span><a href="#local-6989586621679128055"><span class="hs-var">?prec</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span id="local-6989586621679128054"><span class="annot"><a href="#local-6989586621679128054"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span>
+</span><span id="line-63"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-64"></span><span>    </span><span class="annot"><a href="NumT.html#T"><span class="hs-identifier hs-var">T</span></a></span><span> </span><span id="local-6989586621679128057"><span class="annot"><span class="annottext">IO Acb
+</span><a href="#local-6989586621679128057"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="annot"><span class="annottext">CLong
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO Acb
+</span><a href="#local-6989586621679128057"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-65"></span><span>
+</span><span id="line-66"></span><span id="local-6989586621679127910"><span class="annot"><a href="NumT.html#withAcb_"><span class="hs-identifier hs-type">withAcb_</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.Types.FFI.html#Acb"><span class="hs-identifier hs-type">Acb</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ptr</span></span><span> </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.Types.FFI.html#CAcb"><span class="hs-identifier hs-type">CAcb</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="#local-6989586621679127910"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.Types.FFI.html#Acb"><span class="hs-identifier hs-type">Acb</span></a></span></span><span>
+</span><span id="line-67"></span><span id="withAcb_"><span class="annot"><span class="annottext">withAcb_ :: forall a. Acb -&gt; (Ptr CAcb -&gt; IO a) -&gt; IO Acb
+</span><a href="NumT.html#withAcb_"><span class="hs-identifier hs-var hs-var">withAcb_</span></a></span></span><span> </span><span id="local-6989586621679128060"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128060"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679128061"><span class="annot"><span class="annottext">Ptr CAcb -&gt; IO a
+</span><a href="#local-6989586621679128061"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Acb, a) -&gt; Acb
+forall a b. (a, b) -&gt; a
+</span><span class="hs-identifier hs-var">fst</span></span><span> </span><span class="annot"><span class="annottext">((Acb, a) -&gt; Acb) -&gt; IO (Acb, a) -&gt; IO Acb
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Acb -&gt; (Ptr CAcb -&gt; IO a) -&gt; IO (Acb, a)
+forall {a}. Acb -&gt; (Ptr CAcb -&gt; IO a) -&gt; IO (Acb, a)
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#withAcb"><span class="hs-identifier hs-var">withAcb</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128060"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CAcb -&gt; IO a
+</span><a href="#local-6989586621679128061"><span class="hs-identifier hs-var">f</span></a></span><span>
+</span><span id="line-68"></span><span>
+</span><span id="line-69"></span><span class="annot"><a href="NumT.html#withAcb__"><span class="hs-identifier hs-type">withAcb__</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.Types.FFI.html#Acb"><span class="hs-identifier hs-type">Acb</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ptr</span></span><span> </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.Types.FFI.html#CAcb"><span class="hs-identifier hs-type">CAcb</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-70"></span><span id="withAcb__"><span class="annot"><span class="annottext">withAcb__ :: Acb -&gt; (Ptr CAcb -&gt; IO ()) -&gt; IO ()
+</span><a href="NumT.html#withAcb__"><span class="hs-identifier hs-var hs-var">withAcb__</span></a></span></span><span> </span><span id="local-6989586621679128065"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128065"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679128066"><span class="annot"><span class="annottext">Ptr CAcb -&gt; IO ()
+</span><a href="#local-6989586621679128066"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Acb, ()) -&gt; ()
+forall a b. (a, b) -&gt; b
+</span><span class="hs-identifier hs-var">snd</span></span><span> </span><span class="annot"><span class="annottext">((Acb, ()) -&gt; ()) -&gt; IO (Acb, ()) -&gt; IO ()
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Acb -&gt; (Ptr CAcb -&gt; IO ()) -&gt; IO (Acb, ())
+forall {a}. Acb -&gt; (Ptr CAcb -&gt; IO a) -&gt; IO (Acb, a)
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#withAcb"><span class="hs-identifier hs-var">withAcb</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128065"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CAcb -&gt; IO ()
+</span><a href="#local-6989586621679128066"><span class="hs-identifier hs-var">f</span></a></span><span>
+</span><span id="line-71"></span><span>
+</span><span id="line-72"></span><span id="withAcbRe_"><span class="annot"><span class="annottext">withAcbRe_ :: Acb -&gt; (Ptr CArb -&gt; IO b) -&gt; IO b
+</span><a href="NumT.html#withAcbRe_"><span class="hs-identifier hs-var hs-var">withAcbRe_</span></a></span></span><span> </span><span id="local-6989586621679128070"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128070"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679128071"><span class="annot"><span class="annottext">Ptr CArb -&gt; IO b
+</span><a href="#local-6989586621679128071"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Acb, b) -&gt; b
+forall a b. (a, b) -&gt; b
+</span><span class="hs-identifier hs-var">snd</span></span><span> </span><span class="annot"><span class="annottext">((Acb, b) -&gt; b) -&gt; IO (Acb, b) -&gt; IO b
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Acb -&gt; (Ptr CArb -&gt; IO b) -&gt; IO (Acb, b)
+forall t. Acb -&gt; (Ptr CArb -&gt; IO t) -&gt; IO (Acb, t)
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#withAcbRe"><span class="hs-identifier hs-var">withAcbRe</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128070"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CArb -&gt; IO b
+</span><a href="#local-6989586621679128071"><span class="hs-identifier hs-var">f</span></a></span><span>
+</span><span id="line-73"></span><span>
+</span><span id="line-74"></span><span class="hs-comment">-- | evaluate numbers (T) at the given precision, without changing the type</span><span>
+</span><span id="line-75"></span><span class="hs-comment">-- further evaluate will not change the result</span><span>
+</span><span id="line-76"></span><span id="local-6989586621679127923"><span class="annot"><a href="NumT.html#evaluate"><span class="hs-identifier hs-type">evaluate</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Data</span></span><span> </span><span class="annot"><a href="#local-6989586621679127923"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="">?prec</span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">CLong</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679127923"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="#local-6989586621679127923"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-77"></span><span id="evaluate"><span class="annot"><span class="annottext">evaluate :: forall a. (Data a, ?prec::CLong) =&gt; a -&gt; IO a
+</span><a href="NumT.html#evaluate"><span class="hs-identifier hs-var hs-var">evaluate</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(T -&gt; IO T) -&gt; a -&gt; IO a
+forall s a. (Data s, Typeable a) =&gt; Traversal' s a
+Traversal' a T
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/lens-5.3.2-6c27de1fd91456ddcb18120c6e36f4d0100ec5c2059ed2e408ac068c4f56f7d6/share/doc/html/src/Data.Data.Lens.html#template"><span class="hs-identifier hs-var">template</span></a></span><span> </span><span class="annot"><span class="annottext">((T -&gt; IO T) -&gt; a -&gt; IO a) -&gt; (T -&gt; IO T) -&gt; a -&gt; IO a
+forall {k} (f :: k -&gt; *) s (t :: k) a (b :: k).
+LensLike f s t a b -&gt; LensLike f s t a b
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/lens-5.3.2-6c27de1fd91456ddcb18120c6e36f4d0100ec5c2059ed2e408ac068c4f56f7d6/share/doc/html/src/Control.Lens.Lens.html#%25%25~"><span class="hs-operator hs-var">%%~</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679128087"><span class="annot"><span class="annottext">T
+</span><a href="#local-6989586621679128087"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Acb -&gt; T
+</span><a href="NumT.html#t"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">(Acb -&gt; T) -&gt; IO Acb -&gt; IO T
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">T
+</span><a href="#local-6989586621679128087"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">?prec::CLong
+CLong
+</span><a href="#local-6989586621679128083"><span class="hs-var">?prec</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-78"></span><span>
+</span><span id="line-79"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679128094"><span id="local-6989586621679128101"><span id="local-6989586621679128106"><span id="local-6989586621679128111"><span id="local-6989586621679128114"><span id="local-6989586621679128117"><span id="local-6989586621679128120"><span id="local-6989586621679128123"><span id="local-6989586621679128126"><span id="local-6989586621679128131"><span id="local-6989586621679128136"><span class="annot"><span class="hs-identifier hs-type">Data</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">CLong</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.Types.FFI.html#Acb"><span class="hs-identifier hs-type">Acb</span></a></span><span class="hs-special">)</span></span></span></span></span></span></span></span></span></span></span></span><span> </span><span class="hs-comment">-- should not be necessary...</span><span>
+</span><span id="line-80"></span><span>
+</span><span id="line-81"></span><span class="annot"><span class="hs-comment">-- | alternative to Data.Number.Flint.Acb.ComplexField</span></span><span>
+</span><span id="line-82"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679128147"><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">CLong</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.Types.FFI.html#Acb"><span class="hs-identifier hs-type">Acb</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-83"></span><span>  </span><span id="local-6989586621679128158"><span class="annot"><span class="annottext">+ :: T -&gt; T -&gt; T
+</span><a href="#local-6989586621679128158"><span class="hs-operator hs-var hs-var hs-var hs-var">(+)</span></a></span></span><span> </span><span id="local-6989586621679128160"><span class="annot"><span class="annottext">T
+</span><a href="#local-6989586621679128160"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679128161"><span class="annot"><span class="annottext">T
+</span><a href="#local-6989586621679128161"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span id="local-6989586621679128162"><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128162"><span class="hs-identifier hs-var">prec</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-84"></span><span>    </span><span id="local-6989586621679128163"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128163"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">T
+</span><a href="#local-6989586621679128160"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128162"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-85"></span><span>    </span><span id="local-6989586621679128164"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128164"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">T
+</span><a href="#local-6989586621679128161"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128162"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-86"></span><span>    </span><span id="local-6989586621679128165"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128165"><span class="hs-identifier hs-var">result</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">IO Acb
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#newAcb"><span class="hs-identifier hs-var">newAcb</span></a></span><span>
+</span><span id="line-87"></span><span>    </span><span class="annot"><span class="annottext">Acb -&gt; (Ptr CAcb -&gt; IO ()) -&gt; IO Acb
+forall a. Acb -&gt; (Ptr CAcb -&gt; IO a) -&gt; IO Acb
+</span><a href="NumT.html#withAcb_"><span class="hs-identifier hs-var">withAcb_</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128165"><span class="hs-identifier hs-var">result</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679128166"><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128166"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Acb -&gt; (Ptr CAcb -&gt; IO ()) -&gt; IO ()
+</span><a href="NumT.html#withAcb__"><span class="hs-identifier hs-var">withAcb__</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128164"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679128167"><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128167"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Acb -&gt; (Ptr CAcb -&gt; IO ()) -&gt; IO ()
+</span><a href="NumT.html#withAcb__"><span class="hs-identifier hs-var">withAcb__</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128163"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679128168"><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128168"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Ptr CAcb -&gt; Ptr CAcb -&gt; Ptr CAcb -&gt; CLong -&gt; IO ()
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#acb_add"><span class="hs-identifier hs-var">acb_add</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128166"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128168"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128167"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128162"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-88"></span><span>
+</span><span id="line-89"></span><span>  </span><span id="local-6989586621679128173"><span class="hs-special">(</span><span class="hs-glyph">-</span><span class="hs-special">)</span></span><span> </span><span id="local-6989586621679128174"><span class="annot"><span class="annottext">T
+</span><a href="#local-6989586621679128174"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679128175"><span class="annot"><span class="annottext">T
+</span><a href="#local-6989586621679128175"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span id="local-6989586621679128176"><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128176"><span class="hs-identifier hs-var">prec</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-90"></span><span>    </span><span id="local-6989586621679128177"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128177"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">T
+</span><a href="#local-6989586621679128174"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128176"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-91"></span><span>    </span><span id="local-6989586621679128178"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128178"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">T
+</span><a href="#local-6989586621679128175"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128176"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-92"></span><span>    </span><span id="local-6989586621679128179"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128179"><span class="hs-identifier hs-var">result</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">IO Acb
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#newAcb"><span class="hs-identifier hs-var">newAcb</span></a></span><span>
+</span><span id="line-93"></span><span>    </span><span class="annot"><span class="annottext">Acb -&gt; (Ptr CAcb -&gt; IO ()) -&gt; IO Acb
+forall a. Acb -&gt; (Ptr CAcb -&gt; IO a) -&gt; IO Acb
+</span><a href="NumT.html#withAcb_"><span class="hs-identifier hs-var">withAcb_</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128179"><span class="hs-identifier hs-var">result</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679128180"><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128180"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Acb -&gt; (Ptr CAcb -&gt; IO ()) -&gt; IO ()
+</span><a href="NumT.html#withAcb__"><span class="hs-identifier hs-var">withAcb__</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128178"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679128181"><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128181"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Acb -&gt; (Ptr CAcb -&gt; IO ()) -&gt; IO ()
+</span><a href="NumT.html#withAcb__"><span class="hs-identifier hs-var">withAcb__</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128177"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679128182"><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128182"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Ptr CAcb -&gt; Ptr CAcb -&gt; Ptr CAcb -&gt; CLong -&gt; IO ()
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#acb_sub"><span class="hs-identifier hs-var">acb_sub</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128180"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128182"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128181"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128176"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-94"></span><span>
+</span><span id="line-95"></span><span>  </span><span id="local-6989586621679128187"><span class="annot"><span class="annottext">* :: T -&gt; T -&gt; T
+</span><a href="#local-6989586621679128187"><span class="hs-operator hs-var hs-var hs-var hs-var">(*)</span></a></span></span><span> </span><span id="local-6989586621679128189"><span class="annot"><span class="annottext">T
+</span><a href="#local-6989586621679128189"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679128190"><span class="annot"><span class="annottext">T
+</span><a href="#local-6989586621679128190"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span id="local-6989586621679128191"><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128191"><span class="hs-identifier hs-var">prec</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-96"></span><span>    </span><span id="local-6989586621679128192"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128192"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">T
+</span><a href="#local-6989586621679128189"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128191"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-97"></span><span>    </span><span id="local-6989586621679128193"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128193"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">T
+</span><a href="#local-6989586621679128190"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128191"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-98"></span><span>    </span><span id="local-6989586621679128194"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128194"><span class="hs-identifier hs-var">result</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">IO Acb
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#newAcb"><span class="hs-identifier hs-var">newAcb</span></a></span><span>
+</span><span id="line-99"></span><span>    </span><span class="annot"><span class="annottext">Acb -&gt; (Ptr CAcb -&gt; IO ()) -&gt; IO Acb
+forall a. Acb -&gt; (Ptr CAcb -&gt; IO a) -&gt; IO Acb
+</span><a href="NumT.html#withAcb_"><span class="hs-identifier hs-var">withAcb_</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128194"><span class="hs-identifier hs-var">result</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679128195"><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128195"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Acb -&gt; (Ptr CAcb -&gt; IO ()) -&gt; IO ()
+</span><a href="NumT.html#withAcb__"><span class="hs-identifier hs-var">withAcb__</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128193"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679128196"><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128196"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Acb -&gt; (Ptr CAcb -&gt; IO ()) -&gt; IO ()
+</span><a href="NumT.html#withAcb__"><span class="hs-identifier hs-var">withAcb__</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128192"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679128197"><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128197"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Ptr CAcb -&gt; Ptr CAcb -&gt; Ptr CAcb -&gt; CLong -&gt; IO ()
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#acb_mul"><span class="hs-identifier hs-var">acb_mul</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128195"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128197"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128196"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128191"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-100"></span><span>
+</span><span id="line-101"></span><span>  </span><span id="local-6989586621679128204"><span class="annot"><span class="annottext">fromInteger :: Integer -&gt; T
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">fromInteger</span></span></span><span> </span><span id="local-6989586621679128205"><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679128205"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621679128206"><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128206"><span class="hs-identifier hs-var">prec</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-102"></span><span>    </span><span id="local-6989586621679128207"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128207"><span class="hs-identifier hs-var">result</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">IO Acb
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#newAcb"><span class="hs-identifier hs-var">newAcb</span></a></span><span>
+</span><span id="line-103"></span><span>    </span><span class="annot"><span class="annottext">Acb -&gt; (Ptr CAcb -&gt; IO ()) -&gt; IO Acb
+forall a. Acb -&gt; (Ptr CAcb -&gt; IO a) -&gt; IO Acb
+</span><a href="NumT.html#withAcb_"><span class="hs-identifier hs-var">withAcb_</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128207"><span class="hs-identifier hs-var">result</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679128208"><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128208"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Ptr CAcb -&gt; CDouble -&gt; CDouble -&gt; IO ()
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#acb_set_d_d"><span class="hs-identifier hs-var">acb_set_d_d</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128208"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Integer -&gt; CDouble
+forall a b. (Integral a, Num b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">fromIntegral</span></span><span> </span><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679128205"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">CDouble
+</span><span class="hs-number">0</span></span><span>
+</span><span id="line-104"></span><span>
+</span><span id="line-105"></span><span>  </span><span id="local-6989586621679128214"><span class="annot"><span class="annottext">abs :: T -&gt; T
+</span><a href="#local-6989586621679128214"><span class="hs-identifier hs-var hs-var hs-var hs-var">abs</span></a></span></span><span> </span><span id="local-6989586621679128216"><span class="annot"><span class="annottext">T
+</span><a href="#local-6989586621679128216"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679128217"><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128217"><span class="hs-identifier hs-var">prec</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-106"></span><span>    </span><span id="local-6989586621679128218"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128218"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">T
+</span><a href="#local-6989586621679128216"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128217"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-107"></span><span>    </span><span id="local-6989586621679128219"><span class="annot"><span class="annottext">Arb
+</span><a href="#local-6989586621679128219"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">IO Arb
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Arb.FFI.html#newArb"><span class="hs-identifier hs-var">newArb</span></a></span><span>
+</span><span id="line-108"></span><span>    </span><span id="local-6989586621679128220"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128220"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">IO Acb
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#newAcb"><span class="hs-identifier hs-var">newAcb</span></a></span><span>
+</span><span id="line-109"></span><span>    </span><span class="annot"><span class="annottext">Acb -&gt; (Ptr CAcb -&gt; IO (Arb, ())) -&gt; IO Acb
+forall a. Acb -&gt; (Ptr CAcb -&gt; IO a) -&gt; IO Acb
+</span><a href="NumT.html#withAcb_"><span class="hs-identifier hs-var">withAcb_</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128220"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679128221"><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128221"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Arb -&gt; (Ptr CArb -&gt; IO ()) -&gt; IO (Arb, ())
+forall {a}. Arb -&gt; (Ptr CArb -&gt; IO a) -&gt; IO (Arb, a)
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Arb.FFI.html#withArb"><span class="hs-identifier hs-var">withArb</span></a></span><span> </span><span class="annot"><span class="annottext">Arb
+</span><a href="#local-6989586621679128219"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679128222"><span class="annot"><span class="annottext">Ptr CArb
+</span><a href="#local-6989586621679128222"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Acb -&gt; (Ptr CAcb -&gt; IO ()) -&gt; IO ()
+</span><a href="NumT.html#withAcb__"><span class="hs-identifier hs-var">withAcb__</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128218"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679128223"><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128223"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-110"></span><span>      </span><span class="annot"><span class="annottext">Ptr CArb -&gt; Ptr CAcb -&gt; CLong -&gt; IO ()
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#acb_abs"><span class="hs-identifier hs-var">acb_abs</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CArb
+</span><a href="#local-6989586621679128222"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128223"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128217"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-111"></span><span>      </span><span class="annot"><span class="annottext">Ptr CAcb -&gt; Ptr CArb -&gt; IO ()
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#acb_set_arb"><span class="hs-identifier hs-var">acb_set_arb</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128221"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CArb
+</span><a href="#local-6989586621679128222"><span class="hs-identifier hs-var">p</span></a></span><span>
+</span><span id="line-112"></span><span>
+</span><span id="line-113"></span><span>  </span><span id="local-6989586621679128227"><span class="annot"><span class="annottext">signum :: T -&gt; T
+</span><a href="#local-6989586621679128227"><span class="hs-identifier hs-var hs-var hs-var hs-var">signum</span></a></span></span><span> </span><span id="local-6989586621679128229"><span class="annot"><span class="annottext">T
+</span><a href="#local-6989586621679128229"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679128230"><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128230"><span class="hs-identifier hs-var">prec</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-114"></span><span>    </span><span id="local-6989586621679128231"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128231"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">T
+</span><a href="#local-6989586621679128229"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128230"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-115"></span><span>    </span><span id="local-6989586621679128232"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128232"><span class="hs-identifier hs-var">result</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">IO Acb
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#newAcb"><span class="hs-identifier hs-var">newAcb</span></a></span><span>
+</span><span id="line-116"></span><span>    </span><span class="annot"><span class="annottext">Acb -&gt; (Ptr CAcb -&gt; IO ()) -&gt; IO Acb
+forall a. Acb -&gt; (Ptr CAcb -&gt; IO a) -&gt; IO Acb
+</span><a href="NumT.html#withAcb_"><span class="hs-identifier hs-var">withAcb_</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128232"><span class="hs-identifier hs-var">result</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679128233"><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128233"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Acb -&gt; (Ptr CAcb -&gt; IO ()) -&gt; IO ()
+</span><a href="NumT.html#withAcb__"><span class="hs-identifier hs-var">withAcb__</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128231"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679128234"><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128234"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Ptr CAcb -&gt; Ptr CAcb -&gt; CLong -&gt; IO ()
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#acb_sgn"><span class="hs-identifier hs-var">acb_sgn</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128233"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128234"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128230"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-117"></span><span>
+</span><span id="line-118"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679128239"><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">CLong</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.Types.FFI.html#Acb"><span class="hs-identifier hs-type">Acb</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-119"></span><span>  </span><span id="local-6989586621679128248"><span class="annot"><span class="annottext">/ :: T -&gt; T -&gt; T
+</span><a href="#local-6989586621679128248"><span class="hs-operator hs-var hs-var hs-var hs-var">(/)</span></a></span></span><span> </span><span id="local-6989586621679128250"><span class="annot"><span class="annottext">T
+</span><a href="#local-6989586621679128250"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679128251"><span class="annot"><span class="annottext">T
+</span><a href="#local-6989586621679128251"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span id="local-6989586621679128252"><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128252"><span class="hs-identifier hs-var">prec</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-120"></span><span>    </span><span id="local-6989586621679128253"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128253"><span class="hs-identifier hs-var">x'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">T
+</span><a href="#local-6989586621679128250"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128252"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-121"></span><span>    </span><span id="local-6989586621679128254"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128254"><span class="hs-identifier hs-var">y'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">T
+</span><a href="#local-6989586621679128251"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128252"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-122"></span><span>    </span><span id="local-6989586621679128255"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128255"><span class="hs-identifier hs-var">result</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">IO Acb
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#newAcb"><span class="hs-identifier hs-var">newAcb</span></a></span><span>
+</span><span id="line-123"></span><span>    </span><span class="annot"><span class="annottext">Acb -&gt; (Ptr CAcb -&gt; IO ()) -&gt; IO Acb
+forall a. Acb -&gt; (Ptr CAcb -&gt; IO a) -&gt; IO Acb
+</span><a href="NumT.html#withAcb_"><span class="hs-identifier hs-var">withAcb_</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128255"><span class="hs-identifier hs-var">result</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679128256"><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128256"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Acb -&gt; (Ptr CAcb -&gt; IO ()) -&gt; IO ()
+</span><a href="NumT.html#withAcb__"><span class="hs-identifier hs-var">withAcb__</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128254"><span class="hs-identifier hs-var">y'</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679128257"><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128257"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Acb -&gt; (Ptr CAcb -&gt; IO ()) -&gt; IO ()
+</span><a href="NumT.html#withAcb__"><span class="hs-identifier hs-var">withAcb__</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128253"><span class="hs-identifier hs-var">x'</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679128258"><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128258"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Ptr CAcb -&gt; Ptr CAcb -&gt; Ptr CAcb -&gt; CLong -&gt; IO ()
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#acb_div"><span class="hs-identifier hs-var">acb_div</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128256"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128258"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128257"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128252"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-124"></span><span>
+</span><span id="line-125"></span><span>  </span><span id="local-6989586621679128262"><span class="annot"><span class="annottext">fromRational :: Rational -&gt; T
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">fromRational</span></span></span><span> </span><span id="local-6989586621679128263"><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679128263"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span id="local-6989586621679128264"><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128264"><span class="hs-identifier hs-var">prec</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-126"></span><span>    </span><span id="local-6989586621679128265"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128265"><span class="hs-identifier hs-var">result</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">IO Acb
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#newAcb"><span class="hs-identifier hs-var">newAcb</span></a></span><span>
+</span><span id="line-127"></span><span>    </span><span class="annot"><span class="annottext">Acb -&gt; (Ptr CAcb -&gt; IO ()) -&gt; IO Acb
+forall a. Acb -&gt; (Ptr CAcb -&gt; IO a) -&gt; IO Acb
+</span><a href="NumT.html#withAcb_"><span class="hs-identifier hs-var">withAcb_</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128265"><span class="hs-identifier hs-var">result</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679128266"><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128266"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Ptr CAcb -&gt; CDouble -&gt; IO ()
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#acb_set_d"><span class="hs-identifier hs-var">acb_set_d</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128266"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Rational -&gt; CDouble
+forall a. Fractional a =&gt; Rational -&gt; a
+</span><span class="hs-identifier hs-var">fromRational</span></span><span> </span><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679128263"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-128"></span><span>
+</span><span id="line-129"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679128273"><span id="local-6989586621679128278"><span id="local-6989586621679128283"><span id="local-6989586621679128291"><span id="local-6989586621679128297"><span id="local-6989586621679128300"><span id="local-6989586621679128303"><span id="local-6989586621679128306"><span class="annot"><span class="hs-identifier hs-type">Floating</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">CLong</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.Types.FFI.html#Acb"><span class="hs-identifier hs-type">Acb</span></a></span><span class="hs-special">)</span></span></span></span></span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-130"></span><span>  </span><span id="local-6989586621679128310"><span class="annot"><span class="annottext">pi :: T
+</span><a href="#local-6989586621679128310"><span class="hs-identifier hs-var hs-var hs-var hs-var">pi</span></a></span></span><span> </span><span id="local-6989586621679128312"><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128312"><span class="hs-identifier hs-var">prec</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-131"></span><span>    </span><span id="local-6989586621679128313"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128313"><span class="hs-identifier hs-var">result</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">IO Acb
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#newAcb"><span class="hs-identifier hs-var">newAcb</span></a></span><span>
+</span><span id="line-132"></span><span>    </span><span class="annot"><span class="annottext">Acb -&gt; (Ptr CAcb -&gt; IO ()) -&gt; IO Acb
+forall a. Acb -&gt; (Ptr CAcb -&gt; IO a) -&gt; IO Acb
+</span><a href="NumT.html#withAcb_"><span class="hs-identifier hs-var">withAcb_</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128313"><span class="hs-identifier hs-var">result</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679128314"><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128314"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Ptr CAcb -&gt; CLong -&gt; IO ()
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#acb_const_pi"><span class="hs-identifier hs-var">acb_const_pi</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128314"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128312"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-133"></span><span>
+</span><span id="line-134"></span><span>  </span><span id="local-6989586621679128318"><span class="annot"><span class="annottext">exp :: T -&gt; T
+</span><a href="#local-6989586621679128318"><span class="hs-identifier hs-var hs-var hs-var hs-var">exp</span></a></span></span><span> </span><span id="local-6989586621679128320"><span class="annot"><span class="annottext">T
+</span><a href="#local-6989586621679128320"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679128321"><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128321"><span class="hs-identifier hs-var">prec</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-135"></span><span>    </span><span id="local-6989586621679128322"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128322"><span class="hs-identifier hs-var">x'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">T
+</span><a href="#local-6989586621679128320"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128321"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-136"></span><span>    </span><span id="local-6989586621679128323"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128323"><span class="hs-identifier hs-var">result</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">IO Acb
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#newAcb"><span class="hs-identifier hs-var">newAcb</span></a></span><span>
+</span><span id="line-137"></span><span>    </span><span class="annot"><span class="annottext">Acb -&gt; (Ptr CAcb -&gt; IO ()) -&gt; IO Acb
+forall a. Acb -&gt; (Ptr CAcb -&gt; IO a) -&gt; IO Acb
+</span><a href="NumT.html#withAcb_"><span class="hs-identifier hs-var">withAcb_</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128323"><span class="hs-identifier hs-var">result</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679128324"><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128324"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Acb -&gt; (Ptr CAcb -&gt; IO ()) -&gt; IO ()
+</span><a href="NumT.html#withAcb__"><span class="hs-identifier hs-var">withAcb__</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128322"><span class="hs-identifier hs-var">x'</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679128325"><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128325"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Ptr CAcb -&gt; Ptr CAcb -&gt; CLong -&gt; IO ()
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#acb_exp"><span class="hs-identifier hs-var">acb_exp</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128324"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128325"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128321"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-138"></span><span>
+</span><span id="line-139"></span><span>  </span><span id="local-6989586621679128329"><span class="annot"><span class="annottext">log :: T -&gt; T
+</span><a href="#local-6989586621679128329"><span class="hs-identifier hs-var hs-var hs-var hs-var">log</span></a></span></span><span> </span><span id="local-6989586621679128331"><span class="annot"><span class="annottext">T
+</span><a href="#local-6989586621679128331"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679128332"><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128332"><span class="hs-identifier hs-var">prec</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-140"></span><span>    </span><span id="local-6989586621679128333"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128333"><span class="hs-identifier hs-var">x'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">T
+</span><a href="#local-6989586621679128331"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128332"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-141"></span><span>    </span><span id="local-6989586621679128334"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128334"><span class="hs-identifier hs-var">result</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">IO Acb
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#newAcb"><span class="hs-identifier hs-var">newAcb</span></a></span><span>
+</span><span id="line-142"></span><span>    </span><span class="annot"><span class="annottext">Acb -&gt; (Ptr CAcb -&gt; IO ()) -&gt; IO Acb
+forall a. Acb -&gt; (Ptr CAcb -&gt; IO a) -&gt; IO Acb
+</span><a href="NumT.html#withAcb_"><span class="hs-identifier hs-var">withAcb_</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128334"><span class="hs-identifier hs-var">result</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679128335"><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128335"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Acb -&gt; (Ptr CAcb -&gt; IO ()) -&gt; IO ()
+</span><a href="NumT.html#withAcb__"><span class="hs-identifier hs-var">withAcb__</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128333"><span class="hs-identifier hs-var">x'</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679128336"><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128336"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Ptr CAcb -&gt; Ptr CAcb -&gt; CLong -&gt; IO ()
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#acb_log"><span class="hs-identifier hs-var">acb_log</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128335"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128336"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128332"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-143"></span><span>
+</span><span id="line-144"></span><span>  </span><span id="local-6989586621679128340"><span class="annot"><span class="annottext">sin :: T -&gt; T
+</span><a href="#local-6989586621679128340"><span class="hs-identifier hs-var hs-var hs-var hs-var">sin</span></a></span></span><span> </span><span id="local-6989586621679128342"><span class="annot"><span class="annottext">T
+</span><a href="#local-6989586621679128342"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679128343"><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128343"><span class="hs-identifier hs-var">prec</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-145"></span><span>    </span><span id="local-6989586621679128344"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128344"><span class="hs-identifier hs-var">x'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">T
+</span><a href="#local-6989586621679128342"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128343"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-146"></span><span>    </span><span id="local-6989586621679128345"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128345"><span class="hs-identifier hs-var">result</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">IO Acb
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#newAcb"><span class="hs-identifier hs-var">newAcb</span></a></span><span>
+</span><span id="line-147"></span><span>    </span><span class="annot"><span class="annottext">Acb -&gt; (Ptr CAcb -&gt; IO ()) -&gt; IO Acb
+forall a. Acb -&gt; (Ptr CAcb -&gt; IO a) -&gt; IO Acb
+</span><a href="NumT.html#withAcb_"><span class="hs-identifier hs-var">withAcb_</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128345"><span class="hs-identifier hs-var">result</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679128346"><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128346"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Acb -&gt; (Ptr CAcb -&gt; IO ()) -&gt; IO ()
+</span><a href="NumT.html#withAcb__"><span class="hs-identifier hs-var">withAcb__</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128344"><span class="hs-identifier hs-var">x'</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679128347"><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128347"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Ptr CAcb -&gt; Ptr CAcb -&gt; CLong -&gt; IO ()
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#acb_sin"><span class="hs-identifier hs-var">acb_sin</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128346"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128347"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128343"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-148"></span><span>
+</span><span id="line-149"></span><span>  </span><span id="local-6989586621679128351"><span class="annot"><span class="annottext">cos :: T -&gt; T
+</span><a href="#local-6989586621679128351"><span class="hs-identifier hs-var hs-var hs-var hs-var">cos</span></a></span></span><span> </span><span id="local-6989586621679128353"><span class="annot"><span class="annottext">T
+</span><a href="#local-6989586621679128353"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679128354"><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128354"><span class="hs-identifier hs-var">prec</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-150"></span><span>    </span><span id="local-6989586621679128355"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128355"><span class="hs-identifier hs-var">x'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">T
+</span><a href="#local-6989586621679128353"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128354"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-151"></span><span>    </span><span id="local-6989586621679128356"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128356"><span class="hs-identifier hs-var">result</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">IO Acb
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#newAcb"><span class="hs-identifier hs-var">newAcb</span></a></span><span>
+</span><span id="line-152"></span><span>    </span><span class="annot"><span class="annottext">Acb -&gt; (Ptr CAcb -&gt; IO ()) -&gt; IO Acb
+forall a. Acb -&gt; (Ptr CAcb -&gt; IO a) -&gt; IO Acb
+</span><a href="NumT.html#withAcb_"><span class="hs-identifier hs-var">withAcb_</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128356"><span class="hs-identifier hs-var">result</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679128357"><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128357"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Acb -&gt; (Ptr CAcb -&gt; IO ()) -&gt; IO ()
+</span><a href="NumT.html#withAcb__"><span class="hs-identifier hs-var">withAcb__</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128355"><span class="hs-identifier hs-var">x'</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679128358"><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128358"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Ptr CAcb -&gt; Ptr CAcb -&gt; CLong -&gt; IO ()
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#acb_cos"><span class="hs-identifier hs-var">acb_cos</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128357"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128358"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128354"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-153"></span><span>
+</span><span id="line-154"></span><span>  </span><span id="local-6989586621679128362"><span class="annot"><span class="annottext">asin :: T -&gt; T
+</span><a href="#local-6989586621679128362"><span class="hs-identifier hs-var hs-var hs-var hs-var">asin</span></a></span></span><span> </span><span id="local-6989586621679128364"><span class="annot"><span class="annottext">T
+</span><a href="#local-6989586621679128364"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679128365"><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128365"><span class="hs-identifier hs-var">prec</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-155"></span><span>    </span><span id="local-6989586621679128366"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128366"><span class="hs-identifier hs-var">x'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">T
+</span><a href="#local-6989586621679128364"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128365"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-156"></span><span>    </span><span id="local-6989586621679128367"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128367"><span class="hs-identifier hs-var">result</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">IO Acb
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#newAcb"><span class="hs-identifier hs-var">newAcb</span></a></span><span>
+</span><span id="line-157"></span><span>    </span><span class="annot"><span class="annottext">Acb -&gt; (Ptr CAcb -&gt; IO ()) -&gt; IO Acb
+forall a. Acb -&gt; (Ptr CAcb -&gt; IO a) -&gt; IO Acb
+</span><a href="NumT.html#withAcb_"><span class="hs-identifier hs-var">withAcb_</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128367"><span class="hs-identifier hs-var">result</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679128368"><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128368"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Acb -&gt; (Ptr CAcb -&gt; IO ()) -&gt; IO ()
+</span><a href="NumT.html#withAcb__"><span class="hs-identifier hs-var">withAcb__</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128366"><span class="hs-identifier hs-var">x'</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679128369"><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128369"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Ptr CAcb -&gt; Ptr CAcb -&gt; CLong -&gt; IO ()
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#acb_asin"><span class="hs-identifier hs-var">acb_asin</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128368"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128369"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128365"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-158"></span><span>
+</span><span id="line-159"></span><span>  </span><span id="local-6989586621679128373"><span class="annot"><span class="annottext">acos :: T -&gt; T
+</span><a href="#local-6989586621679128373"><span class="hs-identifier hs-var hs-var hs-var hs-var">acos</span></a></span></span><span> </span><span id="local-6989586621679128375"><span class="annot"><span class="annottext">T
+</span><a href="#local-6989586621679128375"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679128376"><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128376"><span class="hs-identifier hs-var">prec</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-160"></span><span>    </span><span id="local-6989586621679128377"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128377"><span class="hs-identifier hs-var">x'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">T
+</span><a href="#local-6989586621679128375"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128376"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-161"></span><span>    </span><span id="local-6989586621679128378"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128378"><span class="hs-identifier hs-var">result</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">IO Acb
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#newAcb"><span class="hs-identifier hs-var">newAcb</span></a></span><span>
+</span><span id="line-162"></span><span>    </span><span class="annot"><span class="annottext">Acb -&gt; (Ptr CAcb -&gt; IO ()) -&gt; IO Acb
+forall a. Acb -&gt; (Ptr CAcb -&gt; IO a) -&gt; IO Acb
+</span><a href="NumT.html#withAcb_"><span class="hs-identifier hs-var">withAcb_</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128378"><span class="hs-identifier hs-var">result</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679128379"><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128379"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Acb -&gt; (Ptr CAcb -&gt; IO ()) -&gt; IO ()
+</span><a href="NumT.html#withAcb__"><span class="hs-identifier hs-var">withAcb__</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128377"><span class="hs-identifier hs-var">x'</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679128380"><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128380"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Ptr CAcb -&gt; Ptr CAcb -&gt; CLong -&gt; IO ()
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#acb_acos"><span class="hs-identifier hs-var">acb_acos</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128379"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128380"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128376"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-163"></span><span>
+</span><span id="line-164"></span><span>  </span><span id="local-6989586621679128384"><span class="annot"><span class="annottext">atan :: T -&gt; T
+</span><a href="#local-6989586621679128384"><span class="hs-identifier hs-var hs-var hs-var hs-var">atan</span></a></span></span><span> </span><span id="local-6989586621679128386"><span class="annot"><span class="annottext">T
+</span><a href="#local-6989586621679128386"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679128387"><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128387"><span class="hs-identifier hs-var">prec</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-165"></span><span>    </span><span id="local-6989586621679128388"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128388"><span class="hs-identifier hs-var">x'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">T
+</span><a href="#local-6989586621679128386"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128387"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-166"></span><span>    </span><span id="local-6989586621679128389"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128389"><span class="hs-identifier hs-var">result</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">IO Acb
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#newAcb"><span class="hs-identifier hs-var">newAcb</span></a></span><span>
+</span><span id="line-167"></span><span>    </span><span class="annot"><span class="annottext">Acb -&gt; (Ptr CAcb -&gt; IO ()) -&gt; IO Acb
+forall a. Acb -&gt; (Ptr CAcb -&gt; IO a) -&gt; IO Acb
+</span><a href="NumT.html#withAcb_"><span class="hs-identifier hs-var">withAcb_</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128389"><span class="hs-identifier hs-var">result</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679128390"><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128390"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Acb -&gt; (Ptr CAcb -&gt; IO ()) -&gt; IO ()
+</span><a href="NumT.html#withAcb__"><span class="hs-identifier hs-var">withAcb__</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128388"><span class="hs-identifier hs-var">x'</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679128391"><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128391"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Ptr CAcb -&gt; Ptr CAcb -&gt; CLong -&gt; IO ()
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#acb_atan"><span class="hs-identifier hs-var">acb_atan</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128390"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128391"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128387"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-168"></span><span>
+</span><span id="line-169"></span><span>  </span><span id="local-6989586621679128395"><span class="annot"><span class="annottext">sinh :: T -&gt; T
+</span><a href="#local-6989586621679128395"><span class="hs-identifier hs-var hs-var hs-var hs-var">sinh</span></a></span></span><span> </span><span id="local-6989586621679128397"><span class="annot"><span class="annottext">T
+</span><a href="#local-6989586621679128397"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679128398"><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128398"><span class="hs-identifier hs-var">prec</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-170"></span><span>    </span><span id="local-6989586621679128399"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128399"><span class="hs-identifier hs-var">x'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">T
+</span><a href="#local-6989586621679128397"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128398"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-171"></span><span>    </span><span id="local-6989586621679128400"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128400"><span class="hs-identifier hs-var">result</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">IO Acb
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#newAcb"><span class="hs-identifier hs-var">newAcb</span></a></span><span>
+</span><span id="line-172"></span><span>    </span><span class="annot"><span class="annottext">Acb -&gt; (Ptr CAcb -&gt; IO ()) -&gt; IO Acb
+forall a. Acb -&gt; (Ptr CAcb -&gt; IO a) -&gt; IO Acb
+</span><a href="NumT.html#withAcb_"><span class="hs-identifier hs-var">withAcb_</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128400"><span class="hs-identifier hs-var">result</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679128401"><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128401"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Acb -&gt; (Ptr CAcb -&gt; IO ()) -&gt; IO ()
+</span><a href="NumT.html#withAcb__"><span class="hs-identifier hs-var">withAcb__</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128399"><span class="hs-identifier hs-var">x'</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679128402"><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128402"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Ptr CAcb -&gt; Ptr CAcb -&gt; CLong -&gt; IO ()
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#acb_sinh"><span class="hs-identifier hs-var">acb_sinh</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128401"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128402"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128398"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-173"></span><span>
+</span><span id="line-174"></span><span>  </span><span id="local-6989586621679128406"><span class="annot"><span class="annottext">cosh :: T -&gt; T
+</span><a href="#local-6989586621679128406"><span class="hs-identifier hs-var hs-var hs-var hs-var">cosh</span></a></span></span><span> </span><span id="local-6989586621679128408"><span class="annot"><span class="annottext">T
+</span><a href="#local-6989586621679128408"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679128409"><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128409"><span class="hs-identifier hs-var">prec</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-175"></span><span>    </span><span id="local-6989586621679128410"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128410"><span class="hs-identifier hs-var">x'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">T
+</span><a href="#local-6989586621679128408"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128409"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-176"></span><span>    </span><span id="local-6989586621679128411"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128411"><span class="hs-identifier hs-var">result</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">IO Acb
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#newAcb"><span class="hs-identifier hs-var">newAcb</span></a></span><span>
+</span><span id="line-177"></span><span>    </span><span class="annot"><span class="annottext">Acb -&gt; (Ptr CAcb -&gt; IO ()) -&gt; IO Acb
+forall a. Acb -&gt; (Ptr CAcb -&gt; IO a) -&gt; IO Acb
+</span><a href="NumT.html#withAcb_"><span class="hs-identifier hs-var">withAcb_</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128411"><span class="hs-identifier hs-var">result</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679128412"><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128412"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Acb -&gt; (Ptr CAcb -&gt; IO ()) -&gt; IO ()
+</span><a href="NumT.html#withAcb__"><span class="hs-identifier hs-var">withAcb__</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128410"><span class="hs-identifier hs-var">x'</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679128413"><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128413"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Ptr CAcb -&gt; Ptr CAcb -&gt; CLong -&gt; IO ()
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#acb_cosh"><span class="hs-identifier hs-var">acb_cosh</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128412"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128413"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128409"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-178"></span><span>
+</span><span id="line-179"></span><span>  </span><span id="local-6989586621679128417"><span class="annot"><span class="annottext">asinh :: T -&gt; T
+</span><a href="#local-6989586621679128417"><span class="hs-identifier hs-var hs-var hs-var hs-var">asinh</span></a></span></span><span> </span><span id="local-6989586621679128419"><span class="annot"><span class="annottext">T
+</span><a href="#local-6989586621679128419"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679128420"><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128420"><span class="hs-identifier hs-var">prec</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-180"></span><span>    </span><span id="local-6989586621679128421"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128421"><span class="hs-identifier hs-var">x'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">T
+</span><a href="#local-6989586621679128419"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128420"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-181"></span><span>    </span><span id="local-6989586621679128422"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128422"><span class="hs-identifier hs-var">result</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">IO Acb
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#newAcb"><span class="hs-identifier hs-var">newAcb</span></a></span><span>
+</span><span id="line-182"></span><span>    </span><span class="annot"><span class="annottext">Acb -&gt; (Ptr CAcb -&gt; IO ()) -&gt; IO Acb
+forall a. Acb -&gt; (Ptr CAcb -&gt; IO a) -&gt; IO Acb
+</span><a href="NumT.html#withAcb_"><span class="hs-identifier hs-var">withAcb_</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128422"><span class="hs-identifier hs-var">result</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679128423"><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128423"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Acb -&gt; (Ptr CAcb -&gt; IO ()) -&gt; IO ()
+</span><a href="NumT.html#withAcb__"><span class="hs-identifier hs-var">withAcb__</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128421"><span class="hs-identifier hs-var">x'</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679128424"><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128424"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Ptr CAcb -&gt; Ptr CAcb -&gt; CLong -&gt; IO ()
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#acb_asinh"><span class="hs-identifier hs-var">acb_asinh</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128423"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128424"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128420"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-183"></span><span>
+</span><span id="line-184"></span><span>  </span><span id="local-6989586621679128428"><span class="annot"><span class="annottext">acosh :: T -&gt; T
+</span><a href="#local-6989586621679128428"><span class="hs-identifier hs-var hs-var hs-var hs-var">acosh</span></a></span></span><span> </span><span id="local-6989586621679128430"><span class="annot"><span class="annottext">T
+</span><a href="#local-6989586621679128430"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679128431"><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128431"><span class="hs-identifier hs-var">prec</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-185"></span><span>    </span><span id="local-6989586621679128432"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128432"><span class="hs-identifier hs-var">x'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">T
+</span><a href="#local-6989586621679128430"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128431"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-186"></span><span>    </span><span id="local-6989586621679128433"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128433"><span class="hs-identifier hs-var">result</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">IO Acb
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#newAcb"><span class="hs-identifier hs-var">newAcb</span></a></span><span>
+</span><span id="line-187"></span><span>    </span><span class="annot"><span class="annottext">Acb -&gt; (Ptr CAcb -&gt; IO ()) -&gt; IO Acb
+forall a. Acb -&gt; (Ptr CAcb -&gt; IO a) -&gt; IO Acb
+</span><a href="NumT.html#withAcb_"><span class="hs-identifier hs-var">withAcb_</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128433"><span class="hs-identifier hs-var">result</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679128434"><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128434"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Acb -&gt; (Ptr CAcb -&gt; IO ()) -&gt; IO ()
+</span><a href="NumT.html#withAcb__"><span class="hs-identifier hs-var">withAcb__</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128432"><span class="hs-identifier hs-var">x'</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679128435"><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128435"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Ptr CAcb -&gt; Ptr CAcb -&gt; CLong -&gt; IO ()
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#acb_acosh"><span class="hs-identifier hs-var">acb_acosh</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128434"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128435"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128431"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-188"></span><span>
+</span><span id="line-189"></span><span>  </span><span id="local-6989586621679128439"><span class="annot"><span class="annottext">atanh :: T -&gt; T
+</span><a href="#local-6989586621679128439"><span class="hs-identifier hs-var hs-var hs-var hs-var">atanh</span></a></span></span><span> </span><span id="local-6989586621679128441"><span class="annot"><span class="annottext">T
+</span><a href="#local-6989586621679128441"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679128442"><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128442"><span class="hs-identifier hs-var">prec</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-190"></span><span>    </span><span id="local-6989586621679128443"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128443"><span class="hs-identifier hs-var">x'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">T
+</span><a href="#local-6989586621679128441"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128442"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-191"></span><span>    </span><span id="local-6989586621679128444"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128444"><span class="hs-identifier hs-var">result</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">IO Acb
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#newAcb"><span class="hs-identifier hs-var">newAcb</span></a></span><span>
+</span><span id="line-192"></span><span>    </span><span class="annot"><span class="annottext">Acb -&gt; (Ptr CAcb -&gt; IO ()) -&gt; IO Acb
+forall a. Acb -&gt; (Ptr CAcb -&gt; IO a) -&gt; IO Acb
+</span><a href="NumT.html#withAcb_"><span class="hs-identifier hs-var">withAcb_</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128444"><span class="hs-identifier hs-var">result</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679128445"><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128445"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Acb -&gt; (Ptr CAcb -&gt; IO ()) -&gt; IO ()
+</span><a href="NumT.html#withAcb__"><span class="hs-identifier hs-var">withAcb__</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128443"><span class="hs-identifier hs-var">x'</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679128446"><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128446"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Ptr CAcb -&gt; Ptr CAcb -&gt; CLong -&gt; IO ()
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#acb_atanh"><span class="hs-identifier hs-var">acb_atanh</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128445"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128446"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128442"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-193"></span><span>
+</span><span id="line-194"></span><span>  </span><span id="local-6989586621679128451"><span class="annot"><span class="annottext">** :: T -&gt; T -&gt; T
+</span><a href="#local-6989586621679128451"><span class="hs-operator hs-var hs-var hs-var hs-var">(**)</span></a></span></span><span> </span><span id="local-6989586621679128453"><span class="annot"><span class="annottext">T
+</span><a href="#local-6989586621679128453"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679128454"><span class="annot"><span class="annottext">T
+</span><a href="#local-6989586621679128454"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span id="local-6989586621679128455"><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128455"><span class="hs-identifier hs-var">prec</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-195"></span><span>    </span><span id="local-6989586621679128456"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128456"><span class="hs-identifier hs-var">x'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">T
+</span><a href="#local-6989586621679128453"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128455"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-196"></span><span>    </span><span id="local-6989586621679128457"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128457"><span class="hs-identifier hs-var">y'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">T
+</span><a href="#local-6989586621679128454"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128455"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-197"></span><span>    </span><span id="local-6989586621679128458"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128458"><span class="hs-identifier hs-var">result</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">IO Acb
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#newAcb"><span class="hs-identifier hs-var">newAcb</span></a></span><span>
+</span><span id="line-198"></span><span>    </span><span class="annot"><span class="annottext">Acb -&gt; (Ptr CAcb -&gt; IO ()) -&gt; IO Acb
+forall a. Acb -&gt; (Ptr CAcb -&gt; IO a) -&gt; IO Acb
+</span><a href="NumT.html#withAcb_"><span class="hs-identifier hs-var">withAcb_</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128458"><span class="hs-identifier hs-var">result</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679128459"><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128459"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Acb -&gt; (Ptr CAcb -&gt; IO ()) -&gt; IO ()
+</span><a href="NumT.html#withAcb__"><span class="hs-identifier hs-var">withAcb__</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128457"><span class="hs-identifier hs-var">y'</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679128460"><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128460"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Acb -&gt; (Ptr CAcb -&gt; IO ()) -&gt; IO ()
+</span><a href="NumT.html#withAcb__"><span class="hs-identifier hs-var">withAcb__</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128456"><span class="hs-identifier hs-var">x'</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679128461"><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128461"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Ptr CAcb -&gt; Ptr CAcb -&gt; Ptr CAcb -&gt; CLong -&gt; IO ()
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#acb_pow"><span class="hs-identifier hs-var">acb_pow</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128459"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128461"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128460"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128455"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-199"></span></pre></body></html>

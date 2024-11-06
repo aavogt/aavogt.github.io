@@ -1,0 +1,365 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE OverloadedStrings #-}</span><span>
+</span><span id="line-2"></span><span>
+</span><span id="line-3"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Args.html"><span class="hs-identifier">Args</span></a></span><span>
+</span><span id="line-4"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Exception</span></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">evaluate</span></span><span class="hs-special">)</span><span>
+</span><span id="line-5"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/lens-5.3.2-6c27de1fd91456ddcb18120c6e36f4d0100ec5c2059ed2e408ac068c4f56f7d6/share/doc/html/src/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span>
+</span><span id="line-6"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">when</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">zipWithM_</span></span><span class="hs-special">)</span><span>
+</span><span id="line-7"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Data</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Data</span></span><span class="hs-special">)</span><span>
+</span><span id="line-8"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Foldable</span></span><span>
+</span><span id="line-9"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Int</span></span><span>
+</span><span id="line-10"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.List</span></span><span>
+</span><span id="line-11"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/sqlite-simple-0.4.19.0-84079c744b9b2430c35d587623ed961dfd03b0f9e5ab1e78d91683f05bdd96c2/share/doc/html/src/Database.SQLite.Simple.html"><span class="hs-identifier">Database.SQLite.Simple</span></a></span><span>
+</span><span id="line-12"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Foreign.C</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">CLong</span></span><span class="hs-special">)</span><span>
+</span><span id="line-13"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="NumMethods.html"><span class="hs-identifier">NumMethods</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="NumMethods.html#richardson"><span class="hs-identifier">richardson</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="NumT.html"><span class="hs-identifier">NumT</span></a></span><span>
+</span><span id="line-15"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="NumT.IO.html"><span class="hs-identifier">NumT.IO</span></a></span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Pipe.html"><span class="hs-identifier">Pipe</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Pipe.html#getTemperature"><span class="hs-identifier">getTemperature</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Pipe.html#lambda"><span class="hs-identifier">lambda</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Pipe.html#_Am"><span class="hs-identifier">_Am</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/cmdargs-0.10.22-2d54eecf4fba41884c6d9d5aab5c61f3eae11bc898563da57fd9730d118a386c/share/doc/html/src/System.Console.CmdArgs.html"><span class="hs-identifier">System.Console.CmdArgs</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/cmdargs-0.10.22-2d54eecf4fba41884c6d9d5aab5c61f3eae11bc898563da57fd9730d118a386c/share/doc/html/src/System.Console.CmdArgs.Verbosity.html#isNormal"><span class="hs-identifier">isNormal</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/cmdargs-0.10.22-2d54eecf4fba41884c6d9d5aab5c61f3eae11bc898563da57fd9730d118a386c/share/doc/html/src/System.Console.CmdArgs.Verbosity.html#whenLoud"><span class="hs-identifier">whenLoud</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/cmdargs-0.10.22-2d54eecf4fba41884c6d9d5aab5c61f3eae11bc898563da57fd9730d118a386c/share/doc/html/src/System.Console.CmdArgs.Verbosity.html#whenNormal"><span class="hs-identifier">whenNormal</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-18"></span><span>
+</span><span id="line-19"></span><span id="main"><span class="annot"><span class="annottext">IO ()
+</span><a href="Main.html#main"><span class="hs-identifier hs-var hs-var hs-var">main</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-20"></span><span>  </span><span id="local-6989586621679130033"><span class="annot"><span class="annottext">LaminarHT [Rational]
+</span><a href="#local-6989586621679130033"><span class="hs-identifier hs-var">lhts</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">IO (LaminarHT [Rational])
+</span><a href="Args.html#getArgs1"><span class="hs-identifier hs-var">getArgs1</span></a></span><span>
+</span><span id="line-21"></span><span>  </span><span id="local-6989586621679130035"><span class="annot"><span class="annottext">Connection
+</span><a href="#local-6989586621679130035"><span class="hs-identifier hs-var">con</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; IO Connection
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/sqlite-simple-0.4.19.0-84079c744b9b2430c35d587623ed961dfd03b0f9e5ab1e78d91683f05bdd96c2/share/doc/html/src/Database.SQLite.Simple.html#open"><span class="hs-identifier hs-var">open</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">LaminarHT [Rational] -&gt; [Char]
+forall a. LaminarHT a -&gt; [Char]
+</span><a href="Args.html#%24sel%3Aoutput_db%3ALaminarHT"><span class="hs-identifier hs-var">output_db</span></a></span><span> </span><span class="annot"><span class="annottext">LaminarHT [Rational]
+</span><a href="#local-6989586621679130033"><span class="hs-identifier hs-var">lhts</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-22"></span><span>  </span><span class="annot"><span class="annottext">Connection -&gt; IO ()
+</span><a href="Main.html#createTables"><span class="hs-identifier hs-var">createTables</span></a></span><span> </span><span class="annot"><span class="annottext">Connection
+</span><a href="#local-6989586621679130035"><span class="hs-identifier hs-var">con</span></a></span><span>
+</span><span id="line-23"></span><span>  </span><span id="local-6989586621679130039"><span class="annot"><span class="annottext">[Int64]
+</span><a href="#local-6989586621679130039"><span class="hs-identifier hs-var">keys</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">(LaminarHT2 -&gt; IO Int64) -&gt; [LaminarHT2] -&gt; IO [Int64]
+forall (t :: * -&gt; *) (m :: * -&gt; *) a b.
+(Traversable t, Monad m) =&gt;
+(a -&gt; m b) -&gt; t a -&gt; m (t b)
+forall (m :: * -&gt; *) a b. Monad m =&gt; (a -&gt; m b) -&gt; [a] -&gt; m [b]
+</span><span class="hs-identifier hs-var">mapM</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Connection -&gt; LaminarHT2 -&gt; IO Int64
+</span><a href="Main.html#solveToDb"><span class="hs-identifier hs-var">solveToDb</span></a></span><span> </span><span class="annot"><span class="annottext">Connection
+</span><a href="#local-6989586621679130035"><span class="hs-identifier hs-var">con</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">LaminarHT [Rational] -&gt; [LaminarHT2]
+</span><a href="Args.html#toLaminarHT2"><span class="hs-identifier hs-var">toLaminarHT2</span></a></span><span> </span><span class="annot"><span class="annottext">LaminarHT [Rational]
+</span><a href="#local-6989586621679130033"><span class="hs-identifier hs-var">lhts</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-24"></span><span>  </span><span class="annot"><span class="annottext">[Char] -&gt; IO ()
+</span><span class="hs-identifier hs-var">putStrLn</span></span><span> </span><span class="annot"><span class="annottext">([Char] -&gt; IO ()) -&gt; [Char] -&gt; IO ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; [[Char]] -&gt; [Char]
+forall a. [a] -&gt; [[a]] -&gt; [a]
+</span><span class="hs-identifier hs-var">intercalate</span></span><span> </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot;,&quot;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Int64 -&gt; [Char]) -&gt; [Int64] -&gt; [[Char]]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">Int64 -&gt; [Char]
+forall a. Show a =&gt; a -&gt; [Char]
+</span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><span class="annottext">[Int64]
+</span><a href="#local-6989586621679130039"><span class="hs-identifier hs-var">keys</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-25"></span><span>
+</span><span id="line-26"></span><span class="annot"><a href="Main.html#solveToDb"><span class="hs-identifier hs-type">solveToDb</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/sqlite-simple-0.4.19.0-84079c744b9b2430c35d587623ed961dfd03b0f9e5ab1e78d91683f05bdd96c2/share/doc/html/src/Database.SQLite.Simple.Internal.html#Connection"><span class="hs-identifier hs-type">Connection</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Args.html#LaminarHT2"><span class="hs-identifier hs-type">LaminarHT2</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int64</span></span><span>
+</span><span id="line-27"></span><span id="solveToDb"><span class="annot"><span class="annottext">solveToDb :: Connection -&gt; LaminarHT2 -&gt; IO Int64
+</span><a href="Main.html#solveToDb"><span class="hs-identifier hs-var hs-var">solveToDb</span></a></span></span><span> </span><span id="local-6989586621679130046"><span class="annot"><span class="annottext">Connection
+</span><a href="#local-6989586621679130046"><span class="hs-identifier hs-var">con</span></a></span></span><span> </span><span id="local-6989586621679130047"><span class="annot"><span class="annottext">lht :: LaminarHT2
+</span><a href="#local-6989586621679130047"><span class="hs-identifier hs-var">lht</span></a></span></span><span class="hs-glyph">@</span><span class="annot"><a href="Args.html#LaminarHT2"><span class="hs-identifier hs-type">LaminarHT2</span></a></span><span> </span><span class="hs-special">{</span><span id="local-6989586621679130049"><span id="local-6989586621679130050"><span id="local-6989586621679130051"><span id="local-6989586621679130052"><span id="local-6989586621679130053"><span id="local-6989586621679130054"><span id="local-6989586621679130055"><span id="local-6989586621679130056"><span id="local-6989586621679130057"><span class="annot"><span class="annottext">Int
+Integer
+[(T, T)]
+Rational
+CLong
+T
+Connection -&gt; IO (Maybe Int64)
+Connection -&gt; IO ()
+pe :: T
+rzs :: [(T, T)]
+nlambda :: Int
+lambdatol :: Rational
+h :: Rational
+sum_n :: Integer
+prec :: CLong
+insertPars :: Connection -&gt; IO ()
+lookupPars :: Connection -&gt; IO (Maybe Int64)
+$sel:pe:LaminarHT2 :: LaminarHT2 -&gt; T
+$sel:rzs:LaminarHT2 :: LaminarHT2 -&gt; [(T, T)]
+$sel:nlambda:LaminarHT2 :: LaminarHT2 -&gt; Int
+$sel:lambdatol:LaminarHT2 :: LaminarHT2 -&gt; Rational
+$sel:h:LaminarHT2 :: LaminarHT2 -&gt; Rational
+$sel:sum_n:LaminarHT2 :: LaminarHT2 -&gt; Integer
+$sel:prec:LaminarHT2 :: LaminarHT2 -&gt; CLong
+$sel:insertPars:LaminarHT2 :: LaminarHT2 -&gt; Connection -&gt; IO ()
+$sel:lookupPars:LaminarHT2 :: LaminarHT2 -&gt; Connection -&gt; IO (Maybe Int64)
+</span><a href="#local-6989586621679130049"><span class="hs-glyph hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">..</span></a></span></span></span></span></span></span></span></span></span></span><span class="hs-special">}</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-28"></span><span>  </span><span id="local-6989586621679130067"><span class="annot"><span class="annottext">Either Int64 Int64
+</span><a href="#local-6989586621679130067"><span class="hs-identifier hs-var">mpar</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Connection -&gt; LaminarHT2 -&gt; IO (Either Int64 Int64)
+</span><a href="Main.html#tryInsertedId"><span class="hs-identifier hs-var">tryInsertedId</span></a></span><span> </span><span class="annot"><span class="annottext">Connection
+</span><a href="#local-6989586621679130046"><span class="hs-identifier hs-var">con</span></a></span><span> </span><span class="annot"><span class="annottext">LaminarHT2
+</span><a href="#local-6989586621679130047"><span class="hs-identifier hs-var">lht</span></a></span><span>
+</span><span id="line-29"></span><span>  </span><span class="annot"><span class="annottext">Either Int64 Int64 -&gt; (Int64 -&gt; IO ()) -&gt; IO ()
+forall (t :: * -&gt; *) (f :: * -&gt; *) a b.
+(Foldable t, Applicative f) =&gt;
+t a -&gt; (a -&gt; f b) -&gt; f ()
+</span><span class="hs-identifier hs-var">for_</span></span><span> </span><span class="annot"><span class="annottext">Either Int64 Int64
+</span><a href="#local-6989586621679130067"><span class="hs-identifier hs-var">mpar</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679130072"><span class="annot"><span class="annottext">Int64
+</span><a href="#local-6989586621679130072"><span class="hs-identifier hs-var">par</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-30"></span><span>    </span><span id="local-6989586621679130073"><span class="annot"><span class="annottext">[T]
+</span><a href="#local-6989586621679130073"><span class="hs-identifier hs-var">lambdas</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[T] -&gt; IO [T]
+forall a. (Data a, ?prec::CLong) =&gt; a -&gt; IO a
+</span><a href="NumT.html#evaluate"><span class="hs-identifier hs-var">evaluate</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">T -&gt; Int -&gt; CDouble -&gt; T
+</span><a href="Pipe.html#lambda"><span class="hs-identifier hs-var">lambda</span></a></span><span> </span><span class="annot"><span class="annottext">T
+</span><a href="#local-6989586621679130049"><span class="hs-identifier hs-var">pe</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679130077"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Rational -&gt; CDouble
+forall a b. (Real a, Fractional b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">realToFrac</span></span><span> </span><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679130052"><span class="hs-identifier hs-var">lambdatol</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">|</span><span> </span><span id="local-6989586621679130077"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679130077"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">0</span></span><span> </span><span class="hs-glyph">..</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679130051"><span class="hs-identifier hs-var">nlambda</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">1</span></span><span class="hs-special">]</span><span class="hs-special">]</span><span>
+</span><span id="line-31"></span><span>    </span><span class="annot"><span class="annottext">IO () -&gt; IO ()
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/cmdargs-0.10.22-2d54eecf4fba41884c6d9d5aab5c61f3eae11bc898563da57fd9730d118a386c/share/doc/html/src/System.Console.CmdArgs.Verbosity.html#whenNormal"><span class="hs-identifier hs-var">whenNormal</span></a></span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-32"></span><span>      </span><span class="annot"><span class="annottext">[Char] -&gt; IO ()
+</span><span class="hs-identifier hs-var">putStrLn</span></span><span> </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot;\neigenvalues are:&quot;</span></span><span>
+</span><span id="line-33"></span><span>      </span><span class="annot"><span class="annottext">(?prec::CLong) =&gt; [T] -&gt; IO ()
+[T] -&gt; IO ()
+</span><a href="NumT.IO.html#printRealparts"><span class="hs-identifier hs-var">printRealparts</span></a></span><span> </span><span class="annot"><span class="annottext">[T]
+</span><a href="#local-6989586621679130073"><span class="hs-identifier hs-var">lambdas</span></a></span><span>
+</span><span id="line-34"></span><span>
+</span><span id="line-35"></span><span>    </span><span id="local-6989586621679130083"><span class="annot"><span class="annottext">[T]
+</span><a href="#local-6989586621679130083"><span class="hs-identifier hs-var">_Ams</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[T] -&gt; IO [T]
+forall a. (Data a, ?prec::CLong) =&gt; a -&gt; IO a
+</span><a href="NumT.html#evaluate"><span class="hs-identifier hs-var">evaluate</span></a></span><span> </span><span class="annot"><span class="annottext">([T] -&gt; IO [T]) -&gt; [T] -&gt; IO [T]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(T -&gt; T) -&gt; [T] -&gt; [T]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679130086"><span class="annot"><span class="annottext">T
+</span><a href="#local-6989586621679130086"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(Rational -&gt; T) -&gt; Rational -&gt; T
+</span><a href="NumMethods.html#richardson"><span class="hs-identifier hs-var">richardson</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">T -&gt; T -&gt; Rational -&gt; T
+</span><a href="Pipe.html#_Am"><span class="hs-identifier hs-var">_Am</span></a></span><span> </span><span class="annot"><span class="annottext">T
+</span><a href="#local-6989586621679130049"><span class="hs-identifier hs-var">pe</span></a></span><span> </span><span class="annot"><span class="annottext">T
+</span><a href="#local-6989586621679130086"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679130053"><span class="hs-identifier hs-var">h</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[T]
+</span><a href="#local-6989586621679130073"><span class="hs-identifier hs-var">lambdas</span></a></span><span>
+</span><span id="line-36"></span><span>    </span><span class="annot"><span class="annottext">IO () -&gt; IO ()
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/cmdargs-0.10.22-2d54eecf4fba41884c6d9d5aab5c61f3eae11bc898563da57fd9730d118a386c/share/doc/html/src/System.Console.CmdArgs.Verbosity.html#whenNormal"><span class="hs-identifier hs-var">whenNormal</span></a></span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-37"></span><span>      </span><span class="annot"><span class="annottext">[Char] -&gt; IO ()
+</span><span class="hs-identifier hs-var">putStrLn</span></span><span> </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot;\n\nAm are&quot;</span></span><span>
+</span><span id="line-38"></span><span>      </span><span class="annot"><span class="annottext">(?prec::CLong) =&gt; [T] -&gt; IO ()
+[T] -&gt; IO ()
+</span><a href="NumT.IO.html#printRealparts"><span class="hs-identifier hs-var">printRealparts</span></a></span><span> </span><span class="annot"><span class="annottext">[T]
+</span><a href="#local-6989586621679130083"><span class="hs-identifier hs-var">_Ams</span></a></span><span>
+</span><span id="line-39"></span><span>
+</span><span id="line-40"></span><span>    </span><span class="annot"><span class="annottext">[(Int, T, T)] -&gt; ((Int, T, T) -&gt; IO ()) -&gt; IO ()
+forall (t :: * -&gt; *) (f :: * -&gt; *) a b.
+(Foldable t, Applicative f) =&gt;
+t a -&gt; (a -&gt; f b) -&gt; f ()
+</span><span class="hs-identifier hs-var">for_</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[Int] -&gt; [T] -&gt; [T] -&gt; [(Int, T, T)]
+forall a b c. [a] -&gt; [b] -&gt; [c] -&gt; [(a, b, c)]
+</span><span class="hs-identifier hs-var">zip3</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">0</span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">..</span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">[T]
+</span><a href="#local-6989586621679130073"><span class="hs-identifier hs-var">lambdas</span></a></span><span> </span><span class="annot"><span class="annottext">[T]
+</span><a href="#local-6989586621679130083"><span class="hs-identifier hs-var">_Ams</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621679130091"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679130091"><span class="hs-identifier hs-var">m</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679130092"><span class="annot"><span class="annottext">T
+</span><a href="#local-6989586621679130092"><span class="hs-identifier hs-var">l</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679130093"><span class="annot"><span class="annottext">T
+</span><a href="#local-6989586621679130093"><span class="hs-identifier hs-var">a</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-41"></span><span>      </span><span class="hs-special">[</span><span id="local-6989586621679130094"><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679130094"><span class="hs-identifier hs-var">av</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679130095"><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679130095"><span class="hs-identifier hs-var">apm</span></a></span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">(?prec::CLong) =&gt; T -&gt; IO [Double]
+T -&gt; IO [Double]
+</span><a href="NumT.IO.html#midRad"><span class="hs-identifier hs-var">midRad</span></a></span><span> </span><span class="annot"><span class="annottext">T
+</span><a href="#local-6989586621679130093"><span class="hs-identifier hs-var">a</span></a></span><span>
+</span><span id="line-42"></span><span>      </span><span class="hs-special">[</span><span id="local-6989586621679130098"><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679130098"><span class="hs-identifier hs-var">lv</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679130099"><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679130099"><span class="hs-identifier hs-var">lpm</span></a></span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">(?prec::CLong) =&gt; T -&gt; IO [Double]
+T -&gt; IO [Double]
+</span><a href="NumT.IO.html#midRad"><span class="hs-identifier hs-var">midRad</span></a></span><span> </span><span class="annot"><span class="annottext">T
+</span><a href="#local-6989586621679130092"><span class="hs-identifier hs-var">l</span></a></span><span>
+</span><span id="line-43"></span><span>      </span><span class="annot"><span class="annottext">Connection
+-&gt; Query -&gt; (Int64, Int, Double, Double, Double, Double) -&gt; IO ()
+forall q. ToRow q =&gt; Connection -&gt; Query -&gt; q -&gt; IO ()
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/sqlite-simple-0.4.19.0-84079c744b9b2430c35d587623ed961dfd03b0f9e5ab1e78d91683f05bdd96c2/share/doc/html/src/Database.SQLite.Simple.html#execute"><span class="hs-identifier hs-var">execute</span></a></span><span> </span><span class="annot"><span class="annottext">Connection
+</span><a href="#local-6989586621679130046"><span class="hs-identifier hs-var">con</span></a></span><span> </span><span class="annot"><span class="annottext">Query
+</span><span class="hs-string">&quot;INSERT INTO spectrum (par, m, lambda, lambdapm, a, apm) VALUES (?, ?, ?, ?, ?, ?)&quot;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int64
+</span><a href="#local-6989586621679130072"><span class="hs-identifier hs-var">par</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679130091"><span class="hs-identifier hs-var">m</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679130098"><span class="hs-identifier hs-var">lv</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679130099"><span class="hs-identifier hs-var">lpm</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679130094"><span class="hs-identifier hs-var">av</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679130095"><span class="hs-identifier hs-var">apm</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-44"></span><span>
+</span><span id="line-45"></span><span>    </span><span id="local-6989586621679130103"><span class="annot"><span class="annottext">[T]
+</span><a href="#local-6989586621679130103"><span class="hs-identifier hs-var">temps</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Integer -&gt; T -&gt; [(T, T)] -&gt; [(T, T)] -&gt; IO [T]
+</span><a href="Pipe.html#getTemperature"><span class="hs-identifier hs-var">getTemperature</span></a></span><span> </span><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679130054"><span class="hs-identifier hs-var">sum_n</span></a></span><span> </span><span class="annot"><span class="annottext">T
+</span><a href="#local-6989586621679130049"><span class="hs-identifier hs-var">pe</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[T] -&gt; [T] -&gt; [(T, T)]
+forall a b. [a] -&gt; [b] -&gt; [(a, b)]
+</span><span class="hs-identifier hs-var">zip</span></span><span> </span><span class="annot"><span class="annottext">[T]
+</span><a href="#local-6989586621679130073"><span class="hs-identifier hs-var">lambdas</span></a></span><span> </span><span class="annot"><span class="annottext">[T]
+</span><a href="#local-6989586621679130083"><span class="hs-identifier hs-var">_Ams</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[(T, T)]
+</span><a href="#local-6989586621679130050"><span class="hs-identifier hs-var">rzs</span></a></span><span>
+</span><span id="line-46"></span><span>
+</span><span id="line-47"></span><span>    </span><span class="annot"><span class="annottext">[((T, T), T)] -&gt; (((T, T), T) -&gt; IO ()) -&gt; IO ()
+forall (t :: * -&gt; *) (f :: * -&gt; *) a b.
+(Foldable t, Applicative f) =&gt;
+t a -&gt; (a -&gt; f b) -&gt; f ()
+</span><span class="hs-identifier hs-var">for_</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[(T, T)] -&gt; [T] -&gt; [((T, T), T)]
+forall a b. [a] -&gt; [b] -&gt; [(a, b)]
+</span><span class="hs-identifier hs-var">zip</span></span><span> </span><span class="annot"><span class="annottext">[(T, T)]
+</span><a href="#local-6989586621679130050"><span class="hs-identifier hs-var">rzs</span></a></span><span> </span><span class="annot"><span class="annottext">[T]
+</span><a href="#local-6989586621679130103"><span class="hs-identifier hs-var">temps</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="hs-special">(</span><span id="local-6989586621679130106"><span class="annot"><span class="annottext">T
+</span><a href="#local-6989586621679130106"><span class="hs-identifier hs-var">r</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679130107"><span class="annot"><span class="annottext">T
+</span><a href="#local-6989586621679130107"><span class="hs-identifier hs-var">z</span></a></span></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span id="local-6989586621679130108"><span class="annot"><span class="annottext">T
+</span><a href="#local-6989586621679130108"><span class="hs-identifier hs-var">tpm</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-48"></span><span>      </span><span class="hs-special">[</span><span id="local-6989586621679130109"><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679130109"><span class="hs-identifier hs-var">t</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679130110"><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679130110"><span class="hs-identifier hs-var">pm</span></a></span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">(?prec::CLong) =&gt; T -&gt; IO [Double]
+T -&gt; IO [Double]
+</span><a href="NumT.IO.html#midRad"><span class="hs-identifier hs-var">midRad</span></a></span><span> </span><span class="annot"><span class="annottext">T
+</span><a href="#local-6989586621679130108"><span class="hs-identifier hs-var">tpm</span></a></span><span>
+</span><span id="line-49"></span><span>      </span><span class="hs-special">[</span><span id="local-6989586621679130112"><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679130112"><span class="hs-identifier hs-var">r</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Double
+</span><span class="hs-identifier">_</span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">(?prec::CLong) =&gt; T -&gt; IO [Double]
+T -&gt; IO [Double]
+</span><a href="NumT.IO.html#midRad"><span class="hs-identifier hs-var">midRad</span></a></span><span> </span><span class="annot"><span class="annottext">T
+</span><a href="#local-6989586621679130106"><span class="hs-identifier hs-var">r</span></a></span><span>
+</span><span id="line-50"></span><span>      </span><span class="hs-special">[</span><span id="local-6989586621679130114"><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679130114"><span class="hs-identifier hs-var">z</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Double
+</span><span class="hs-identifier">_</span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">(?prec::CLong) =&gt; T -&gt; IO [Double]
+T -&gt; IO [Double]
+</span><a href="NumT.IO.html#midRad"><span class="hs-identifier hs-var">midRad</span></a></span><span> </span><span class="annot"><span class="annottext">T
+</span><a href="#local-6989586621679130107"><span class="hs-identifier hs-var">z</span></a></span><span>
+</span><span id="line-51"></span><span>      </span><span class="annot"><span class="annottext">Connection
+-&gt; Query -&gt; (Int64, Double, Double, Double, Double) -&gt; IO ()
+forall q. ToRow q =&gt; Connection -&gt; Query -&gt; q -&gt; IO ()
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/sqlite-simple-0.4.19.0-84079c744b9b2430c35d587623ed961dfd03b0f9e5ab1e78d91683f05bdd96c2/share/doc/html/src/Database.SQLite.Simple.html#execute"><span class="hs-identifier hs-var">execute</span></a></span><span> </span><span class="annot"><span class="annottext">Connection
+</span><a href="#local-6989586621679130046"><span class="hs-identifier hs-var">con</span></a></span><span> </span><span class="annot"><span class="annottext">Query
+</span><span class="hs-string">&quot;INSERT INTO temperatures (par, rho, z, temp, temp_pm) VALUES (?, ?, ?, ?, ?)&quot;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int64
+</span><a href="#local-6989586621679130072"><span class="hs-identifier hs-var">par</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679130112"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679130114"><span class="hs-identifier hs-var">z</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679130109"><span class="hs-identifier hs-var">t</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679130110"><span class="hs-identifier hs-var">pm</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-52"></span><span>  </span><span class="hs-identifier">return</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Int64 -&gt; Int64) -&gt; (Int64 -&gt; Int64) -&gt; Either Int64 Int64 -&gt; Int64
+forall a c b. (a -&gt; c) -&gt; (b -&gt; c) -&gt; Either a b -&gt; c
+</span><span class="hs-identifier hs-var">either</span></span><span> </span><span class="annot"><span class="annottext">Int64 -&gt; Int64
+forall a. a -&gt; a
+</span><span class="hs-identifier hs-var">id</span></span><span> </span><span class="annot"><span class="annottext">Int64 -&gt; Int64
+forall a. a -&gt; a
+</span><span class="hs-identifier hs-var">id</span></span><span> </span><span class="annot"><span class="annottext">Either Int64 Int64
+</span><a href="#local-6989586621679130067"><span class="hs-identifier hs-var">mpar</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-53"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-54"></span><span>    </span><span class="hs-comment">-- TODO catch errors and remove par?</span><span>
+</span><span id="line-55"></span><span>
+</span><span id="line-56"></span><span>    </span><span class="">?prec</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">?prec::CLong
+CLong
+</span><a href="#local-6989586621679130055"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-57"></span><span>
+</span><span id="line-58"></span><span class="hs-comment">-- | @tryInsertedId con f@ runs @f con@ and returns the id of the inserted row if there was no constraint violation.</span><span>
+</span><span id="line-59"></span><span class="hs-comment">--</span><span>
+</span><span id="line-60"></span><span class="hs-comment">-- I also want to get the id of the row that already exists.</span><span>
+</span><span id="line-61"></span><span class="annot"><a href="Main.html#tryInsertedId"><span class="hs-identifier hs-type">tryInsertedId</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/sqlite-simple-0.4.19.0-84079c744b9b2430c35d587623ed961dfd03b0f9e5ab1e78d91683f05bdd96c2/share/doc/html/src/Database.SQLite.Simple.Internal.html#Connection"><span class="hs-identifier hs-type">Connection</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Args.html#LaminarHT2"><span class="hs-identifier hs-type">LaminarHT2</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int64</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int64</span></span><span class="hs-special">)</span><span>
+</span><span id="line-62"></span><span id="tryInsertedId"><span class="annot"><span class="annottext">tryInsertedId :: Connection -&gt; LaminarHT2 -&gt; IO (Either Int64 Int64)
+</span><a href="Main.html#tryInsertedId"><span class="hs-identifier hs-var hs-var">tryInsertedId</span></a></span></span><span> </span><span id="local-6989586621679130172"><span class="annot"><span class="annottext">Connection
+</span><a href="#local-6989586621679130172"><span class="hs-identifier hs-var">con</span></a></span></span><span> </span><span class="annot"><a href="Args.html#LaminarHT2"><span class="hs-identifier hs-type">LaminarHT2</span></a></span><span> </span><span class="hs-special">{</span><span id="local-6989586621679130173"><span id="local-6989586621679130174"><span id="local-6989586621679130175"><span id="local-6989586621679130176"><span id="local-6989586621679130177"><span id="local-6989586621679130178"><span id="local-6989586621679130179"><span id="local-6989586621679130180"><span id="local-6989586621679130181"><span class="annot"><span class="annottext">Int
+Integer
+[(T, T)]
+Rational
+CLong
+T
+Connection -&gt; IO (Maybe Int64)
+Connection -&gt; IO ()
+$sel:pe:LaminarHT2 :: LaminarHT2 -&gt; T
+$sel:rzs:LaminarHT2 :: LaminarHT2 -&gt; [(T, T)]
+$sel:nlambda:LaminarHT2 :: LaminarHT2 -&gt; Int
+$sel:lambdatol:LaminarHT2 :: LaminarHT2 -&gt; Rational
+$sel:h:LaminarHT2 :: LaminarHT2 -&gt; Rational
+$sel:sum_n:LaminarHT2 :: LaminarHT2 -&gt; Integer
+$sel:prec:LaminarHT2 :: LaminarHT2 -&gt; CLong
+$sel:insertPars:LaminarHT2 :: LaminarHT2 -&gt; Connection -&gt; IO ()
+$sel:lookupPars:LaminarHT2 :: LaminarHT2 -&gt; Connection -&gt; IO (Maybe Int64)
+pe :: T
+rzs :: [(T, T)]
+nlambda :: Int
+lambdatol :: Rational
+h :: Rational
+sum_n :: Integer
+prec :: CLong
+insertPars :: Connection -&gt; IO ()
+lookupPars :: Connection -&gt; IO (Maybe Int64)
+</span><a href="Args.html#%24sel%3Ape%3ALaminarHT2"><span class="hs-glyph hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">..</span></a></span></span></span></span></span></span></span></span></span></span><span class="hs-special">}</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-63"></span><span>  </span><span id="local-6989586621679130182"><span class="annot"><span class="annottext">Maybe Int64
+</span><a href="#local-6989586621679130182"><span class="hs-identifier hs-var">mj</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span>
+</span><span id="line-64"></span><span>    </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Maybe Int64
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span> </span><span class="annot"><span class="annottext">Maybe Int64 -&gt; IO () -&gt; IO (Maybe Int64)
+forall a b. a -&gt; IO b -&gt; IO a
+forall (f :: * -&gt; *) a b. Functor f =&gt; a -&gt; f b -&gt; f a
+</span><span class="hs-operator hs-var">&lt;$</span></span><span> </span><span class="annot"><span class="annottext">Connection -&gt; IO ()
+</span><a href="#local-6989586621679130180"><span class="hs-identifier hs-var">insertPars</span></a></span><span> </span><span class="annot"><span class="annottext">Connection
+</span><a href="#local-6989586621679130172"><span class="hs-identifier hs-var">con</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">IO (Maybe Int64)
+-&gt; (SQLError -&gt; IO (Maybe Int64)) -&gt; IO (Maybe Int64)
+forall e a. Exception e =&gt; IO a -&gt; (e -&gt; IO a) -&gt; IO a
+</span><span class="hs-operator hs-var">`catch`</span></span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-65"></span><span>      </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/direct-sqlite-2.3.29-435a5da698b3dfd23a59e8faabf622fd5d7573efb663bd2b402183e63df7cb3c/share/doc/html/src/Database.SQLite3.html#SQLError"><span class="hs-identifier hs-type">SQLError</span></a></span><span> </span><span class="hs-special">{</span><span class="annot"><span class="annottext">sqlError :: SQLError -&gt; Error
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/direct-sqlite-2.3.29-435a5da698b3dfd23a59e8faabf622fd5d7573efb663bd2b402183e63df7cb3c/share/doc/html/src/Database.SQLite3.html#sqlError"><span class="hs-identifier hs-var">sqlError</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Error
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/direct-sqlite-2.3.29-435a5da698b3dfd23a59e8faabf622fd5d7573efb663bd2b402183e63df7cb3c/share/doc/html/src/Database.SQLite3.Bindings.Types.html#ErrorConstraint"><span class="hs-identifier hs-var">ErrorConstraint</span></a></span><span class="hs-special">}</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-66"></span><span>        </span><span class="annot"><span class="annottext">IO () -&gt; IO ()
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/cmdargs-0.10.22-2d54eecf4fba41884c6d9d5aab5c61f3eae11bc898563da57fd9730d118a386c/share/doc/html/src/System.Console.CmdArgs.Verbosity.html#whenLoud"><span class="hs-identifier hs-var">whenLoud</span></a></span><span> </span><span class="annot"><span class="annottext">(IO () -&gt; IO ()) -&gt; IO () -&gt; IO ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; IO ()
+</span><span class="hs-identifier hs-var">putStrLn</span></span><span> </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot;pars already in db, skipping...&quot;</span></span><span>
+</span><span id="line-67"></span><span>        </span><span class="annot"><span class="annottext">Connection -&gt; IO (Maybe Int64)
+</span><a href="#local-6989586621679130181"><span class="hs-identifier hs-var">lookupPars</span></a></span><span> </span><span class="annot"><span class="annottext">Connection
+</span><a href="#local-6989586621679130172"><span class="hs-identifier hs-var">con</span></a></span><span>
+</span><span id="line-68"></span><span>      </span><span id="local-6989586621679130188"><span class="annot"><span class="annottext">SQLError
+</span><a href="#local-6989586621679130188"><span class="hs-identifier hs-var">e</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">SQLError -&gt; IO (Maybe Int64)
+forall e a. Exception e =&gt; e -&gt; IO a
+</span><span class="hs-identifier hs-var">throwIO</span></span><span> </span><span class="annot"><span class="annottext">SQLError
+</span><a href="#local-6989586621679130188"><span class="hs-identifier hs-var">e</span></a></span><span>
+</span><span id="line-69"></span><span>  </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Maybe Int64
+</span><a href="#local-6989586621679130182"><span class="hs-identifier hs-var">mj</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-70"></span><span>    </span><span class="annot"><span class="annottext">Maybe Int64
+</span><span class="hs-identifier hs-var">Nothing</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int64 -&gt; Either Int64 Int64
+forall a b. b -&gt; Either a b
+</span><span class="hs-identifier hs-var">Right</span></span><span> </span><span class="annot"><span class="annottext">(Int64 -&gt; Either Int64 Int64)
+-&gt; IO Int64 -&gt; IO (Either Int64 Int64)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Connection -&gt; IO Int64
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/sqlite-simple-0.4.19.0-84079c744b9b2430c35d587623ed961dfd03b0f9e5ab1e78d91683f05bdd96c2/share/doc/html/src/Database.SQLite.Simple.html#lastInsertRowId"><span class="hs-identifier hs-var">lastInsertRowId</span></a></span><span> </span><span class="annot"><span class="annottext">Connection
+</span><a href="#local-6989586621679130172"><span class="hs-identifier hs-var">con</span></a></span><span>
+</span><span id="line-71"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679130192"><span class="annot"><span class="annottext">Int64
+</span><a href="#local-6989586621679130192"><span class="hs-identifier hs-var">j</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Either Int64 Int64 -&gt; IO (Either Int64 Int64)
+forall a. a -&gt; IO a
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int64 -&gt; Either Int64 Int64
+forall a b. a -&gt; Either a b
+</span><span class="hs-identifier hs-var">Left</span></span><span> </span><span class="annot"><span class="annottext">Int64
+</span><a href="#local-6989586621679130192"><span class="hs-identifier hs-var">j</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-72"></span><span>
+</span><span id="line-73"></span><span id="createTables"><span class="annot"><span class="annottext">createTables :: Connection -&gt; IO ()
+</span><a href="Main.html#createTables"><span class="hs-identifier hs-var hs-var">createTables</span></a></span></span><span> </span><span id="local-6989586621679130199"><span class="annot"><span class="annottext">Connection
+</span><a href="#local-6989586621679130199"><span class="hs-identifier hs-var">con</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-74"></span><span>  </span><span class="annot"><span class="annottext">Connection -&gt; Query -&gt; IO ()
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/sqlite-simple-0.4.19.0-84079c744b9b2430c35d587623ed961dfd03b0f9e5ab1e78d91683f05bdd96c2/share/doc/html/src/Database.SQLite.Simple.html#execute_"><span class="hs-identifier hs-var">execute_</span></a></span><span>
+</span><span id="line-75"></span><span>    </span><span class="annot"><span class="annottext">Connection
+</span><a href="#local-6989586621679130199"><span class="hs-identifier hs-var">con</span></a></span><span>
+</span><span id="line-76"></span><span>    </span><span class="annot"><span class="annottext">Query
+</span><span class="hs-string">&quot;CREATE TABLE IF NOT EXISTS pars (id INTEGER PRIMARY KEY, pe REAL, nlambda INTEGER, lambdatol REAL, h REAL, sum_n INTEGER, prec INTEGER,\
+    \ UNIQUE(pe, nlambda, lambdatol, h, sum_n, prec))&quot;</span></span><span>
+</span><span id="line-78"></span><span>
+</span><span id="line-79"></span><span>  </span><span class="annot"><span class="annottext">Connection -&gt; Query -&gt; IO ()
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/sqlite-simple-0.4.19.0-84079c744b9b2430c35d587623ed961dfd03b0f9e5ab1e78d91683f05bdd96c2/share/doc/html/src/Database.SQLite.Simple.html#execute_"><span class="hs-identifier hs-var">execute_</span></a></span><span>
+</span><span id="line-80"></span><span>    </span><span class="annot"><span class="annottext">Connection
+</span><a href="#local-6989586621679130199"><span class="hs-identifier hs-var">con</span></a></span><span>
+</span><span id="line-81"></span><span>    </span><span class="annot"><span class="annottext">Query
+</span><span class="hs-string">&quot;CREATE TABLE IF NOT EXISTS spectrum (par INTEGER, m INTEGER, lambda REAL, lambdapm REAL, a REAL, apm REAL, \
+    \ FOREIGN KEY (par) REFERENCES pars(id))&quot;</span></span><span>
+</span><span id="line-83"></span><span>
+</span><span id="line-84"></span><span>  </span><span class="annot"><span class="annottext">Connection -&gt; Query -&gt; IO ()
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/sqlite-simple-0.4.19.0-84079c744b9b2430c35d587623ed961dfd03b0f9e5ab1e78d91683f05bdd96c2/share/doc/html/src/Database.SQLite.Simple.html#execute_"><span class="hs-identifier hs-var">execute_</span></a></span><span>
+</span><span id="line-85"></span><span>    </span><span class="annot"><span class="annottext">Connection
+</span><a href="#local-6989586621679130199"><span class="hs-identifier hs-var">con</span></a></span><span>
+</span><span id="line-86"></span><span>    </span><span class="annot"><span class="annottext">Query
+</span><span class="hs-string">&quot;CREATE TABLE IF NOT EXISTS temperatures (par INTEGER, rho REAL, z REAL, temp REAL, temp_pm REAL,\
+    \ FOREIGN KEY (par) REFERENCES pars(id))&quot;</span></span><span>
+</span><span id="line-88"></span></pre></body></html>

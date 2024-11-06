@@ -1,0 +1,174 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="annot"><span class="hs-comment">-- | converting 'T' into Double and String</span></span><span>
+</span><span id="line-2"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">NumT.IO</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-3"></span><span>
+</span><span id="line-4"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/lens-5.3.2-6c27de1fd91456ddcb18120c6e36f4d0100ec5c2059ed2e408ac068c4f56f7d6/share/doc/html/src/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span>
+</span><span id="line-5"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad</span></span><span>
+</span><span id="line-6"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.List</span></span><span>
+</span><span id="line-7"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.html"><span class="hs-identifier">Data.Number.Flint</span></a></span><span>
+</span><span id="line-8"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Foreign.C</span></span><span>
+</span><span id="line-9"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">GHC.IO.Handle</span></span><span>
+</span><span id="line-10"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="NumT.html"><span class="hs-identifier">NumT</span></a></span><span>
+</span><span id="line-11"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">System.IO</span></span><span>
+</span><span id="line-12"></span><span>
+</span><span id="line-13"></span><span class="hs-comment">-- | redirect stdout to replace file contents with an action's stdout,</span><span>
+</span><span id="line-14"></span><span class="hs-comment">--</span><span>
+</span><span id="line-15"></span><span class="hs-comment">-- this shouldn't be necessary but I would have to use/find the variation on</span><span>
+</span><span id="line-16"></span><span class="hs-comment">-- 'arb_printd' which writes to a buffer or file</span><span>
+</span><span id="line-17"></span><span class="annot"><a href="NumT.IO.html#captureOutputToFile"><span class="hs-identifier hs-type">captureOutputToFile</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-18"></span><span id="captureOutputToFile"><span class="annot"><span class="annottext">captureOutputToFile :: FilePath -&gt; IO () -&gt; IO ()
+</span><a href="NumT.IO.html#captureOutputToFile"><span class="hs-identifier hs-var hs-var">captureOutputToFile</span></a></span></span><span> </span><span id="local-6989586621679128901"><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679128901"><span class="hs-identifier hs-var">filePath</span></a></span></span><span> </span><span id="local-6989586621679128902"><span class="annot"><span class="annottext">IO ()
+</span><a href="#local-6989586621679128902"><span class="hs-identifier hs-var">action</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-19"></span><span>  </span><span class="annot"><span class="annottext">FilePath -&gt; IOMode -&gt; (Handle -&gt; IO ()) -&gt; IO ()
+forall r. FilePath -&gt; IOMode -&gt; (Handle -&gt; IO r) -&gt; IO r
+</span><span class="hs-identifier hs-var">withFile</span></span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679128901"><span class="hs-identifier hs-var">filePath</span></a></span><span> </span><span class="annot"><span class="annottext">IOMode
+</span><span class="hs-identifier hs-var">WriteMode</span></span><span> </span><span class="annot"><span class="annottext">((Handle -&gt; IO ()) -&gt; IO ()) -&gt; (Handle -&gt; IO ()) -&gt; IO ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679128905"><span class="annot"><span class="annottext">Handle
+</span><a href="#local-6989586621679128905"><span class="hs-identifier hs-var">handle</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-20"></span><span>    </span><span id="local-6989586621679128906"><span class="annot"><span class="annottext">Handle
+</span><a href="#local-6989586621679128906"><span class="hs-identifier hs-var">originalStdout</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Handle -&gt; IO Handle
+</span><span class="hs-identifier hs-var">hDuplicate</span></span><span> </span><span class="annot"><span class="annottext">Handle
+</span><span class="hs-identifier hs-var">stdout</span></span><span>
+</span><span id="line-21"></span><span>    </span><span class="annot"><span class="annottext">Handle -&gt; Handle -&gt; IO ()
+</span><span class="hs-identifier hs-var">hDuplicateTo</span></span><span> </span><span class="annot"><span class="annottext">Handle
+</span><a href="#local-6989586621679128905"><span class="hs-identifier hs-var">handle</span></a></span><span> </span><span class="annot"><span class="annottext">Handle
+</span><span class="hs-identifier hs-var">stdout</span></span><span>
+</span><span id="line-22"></span><span>    </span><span class="annot"><span class="annottext">IO ()
+</span><a href="#local-6989586621679128902"><span class="hs-identifier hs-var">action</span></a></span><span>
+</span><span id="line-23"></span><span>    </span><span class="annot"><span class="annottext">Handle -&gt; Handle -&gt; IO ()
+</span><span class="hs-identifier hs-var">hDuplicateTo</span></span><span> </span><span class="annot"><span class="annottext">Handle
+</span><a href="#local-6989586621679128906"><span class="hs-identifier hs-var">originalStdout</span></a></span><span> </span><span class="annot"><span class="annottext">Handle
+</span><span class="hs-identifier hs-var">stdout</span></span><span>
+</span><span id="line-24"></span><span>
+</span><span id="line-25"></span><span class="annot"><span class="hs-comment">-- | print the real part with error ie. 1.46137951490312385997144178344 +/- 5.1012e-21</span></span><span>
+</span><span id="line-26"></span><span class="annot"><a href="NumT.IO.html#printRealparts"><span class="hs-identifier hs-type">printRealparts</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="">?prec</span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">CLong</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="NumT.html#T"><span class="hs-identifier hs-type">T</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-27"></span><span id="printRealparts"><span class="annot"><span class="annottext">printRealparts :: (?prec::CLong) =&gt; [T] -&gt; IO ()
+</span><a href="NumT.IO.html#printRealparts"><span class="hs-identifier hs-var hs-var">printRealparts</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-28"></span><span>  </span><span class="annot"><span class="annottext">(T -&gt; IO (Acb, ())) -&gt; [T] -&gt; IO ()
+forall (t :: * -&gt; *) (m :: * -&gt; *) a b.
+(Foldable t, Monad m) =&gt;
+(a -&gt; m b) -&gt; t a -&gt; m ()
+</span><span class="hs-identifier hs-var">mapM_</span></span><span>
+</span><span id="line-29"></span><span>    </span><span class="hs-special">(</span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679128922"><span class="annot"><span class="annottext">T
+</span><a href="#local-6989586621679128922"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-30"></span><span>        </span><span id="local-6989586621679128923"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128923"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">T
+</span><a href="#local-6989586621679128922"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">?prec::CLong
+CLong
+</span><a href="#local-6989586621679128918"><span class="hs-var">?prec</span></a></span><span>
+</span><span id="line-31"></span><span>        </span><span class="annot"><span class="annottext">FilePath -&gt; IO ()
+</span><span class="hs-identifier hs-var">putStrLn</span></span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><span class="hs-string">&quot;&quot;</span></span><span>
+</span><span id="line-32"></span><span>        </span><span class="annot"><span class="annottext">Acb -&gt; (Ptr CArb -&gt; IO ()) -&gt; IO (Acb, ())
+forall t. Acb -&gt; (Ptr CArb -&gt; IO t) -&gt; IO (Acb, t)
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#withAcbRe"><span class="hs-identifier hs-var">withAcbRe</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128923"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Ptr CArb -&gt; CLong -&gt; IO ()
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Arb.FFI.html#arb_printd"><span class="hs-operator hs-var">`arb_printd`</span></a></span><span> </span><span class="annot"><span class="annottext">CLong
+</span><span class="hs-number">30</span></span><span class="hs-special">)</span><span>
+</span><span id="line-33"></span><span>    </span><span class="hs-special">)</span><span>
+</span><span id="line-34"></span><span>
+</span><span id="line-35"></span><span class="annot"><span class="hs-comment">-- | printRow (a,b,c) prints value a,error a,value b,error b,value c,error c</span></span><span>
+</span><span id="line-36"></span><span id="local-6989586621679128853"><span class="annot"><a href="NumT.IO.html#printRow"><span class="hs-identifier hs-type">printRow</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/lens-5.3.2-6c27de1fd91456ddcb18120c6e36f4d0100ec5c2059ed2e408ac068c4f56f7d6/share/doc/html/src/Control.Lens.Each.html#Each"><span class="hs-identifier hs-type">Each</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679128853"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679128853"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="NumT.html#T"><span class="hs-identifier hs-type">T</span></a></span><span> </span><span class="annot"><a href="NumT.html#T"><span class="hs-identifier hs-type">T</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="">?prec</span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">CLong</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679128853"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-37"></span><span id="printRow"><span class="annot"><span class="annottext">printRow :: forall s. (Each s s T T, ?prec::CLong) =&gt; s -&gt; IO ()
+</span><a href="NumT.IO.html#printRow"><span class="hs-identifier hs-var hs-var">printRow</span></a></span></span><span> </span><span id="local-6989586621679128949"><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679128949"><span class="hs-identifier hs-var">row</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-38"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span class="annot"><a href="#local-6989586621679128950"><span class="hs-identifier hs-type">printCols</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span class="hs-special">]</span><span>
+</span><span id="line-39"></span><span>      </span><span id="local-6989586621679128950"><span class="annot"><span class="annottext">printCols :: [IO ()]
+</span><a href="#local-6989586621679128950"><span class="hs-identifier hs-var hs-var">printCols</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-40"></span><span>        </span><span class="annot"><span class="annottext">Getting (Endo [T]) s T -&gt; s -&gt; [T]
+forall a s. Getting (Endo [a]) s a -&gt; s -&gt; [a]
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/lens-5.3.2-6c27de1fd91456ddcb18120c6e36f4d0100ec5c2059ed2e408ac068c4f56f7d6/share/doc/html/src/Control.Lens.Fold.html#toListOf"><span class="hs-identifier hs-var">toListOf</span></a></span><span> </span><span class="annot"><span class="annottext">Getting (Endo [T]) s T
+forall s t a b. Each s t a b =&gt; Traversal s t a b
+Traversal s s T T
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/lens-5.3.2-6c27de1fd91456ddcb18120c6e36f4d0100ec5c2059ed2e408ac068c4f56f7d6/share/doc/html/src/Control.Lens.Each.html#each"><span class="hs-identifier hs-var">each</span></a></span><span> </span><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679128949"><span class="hs-identifier hs-var">row</span></a></span><span> </span><span class="annot"><span class="annottext">[T] -&gt; (T -&gt; IO ()) -&gt; [IO ()]
+forall (f :: * -&gt; *) a b. Functor f =&gt; f a -&gt; (a -&gt; b) -&gt; f b
+</span><span class="hs-operator hs-var">&lt;&amp;&gt;</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679128954"><span class="annot"><span class="annottext">T
+</span><a href="#local-6989586621679128954"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">IO (Acb, ()) -&gt; IO ()
+forall (f :: * -&gt; *) a. Functor f =&gt; f a -&gt; f ()
+</span><span class="hs-identifier hs-var">void</span></span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-41"></span><span>          </span><span id="local-6989586621679128956"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128956"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">T
+</span><a href="#local-6989586621679128954"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">?prec::CLong
+CLong
+</span><a href="#local-6989586621679128937"><span class="hs-var">?prec</span></a></span><span>
+</span><span id="line-42"></span><span>          </span><span class="annot"><span class="annottext">Acb -&gt; (Ptr CArb -&gt; IO ()) -&gt; IO (Acb, ())
+forall t. Acb -&gt; (Ptr CArb -&gt; IO t) -&gt; IO (Acb, t)
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#withAcbRe"><span class="hs-identifier hs-var">withAcbRe</span></a></span><span>
+</span><span id="line-43"></span><span>            </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128956"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-44"></span><span>            </span><span class="hs-special">(</span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679128957"><span class="annot"><span class="annottext">Ptr CArb
+</span><a href="#local-6989586621679128957"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-45"></span><span>                </span><span class="annot"><span class="annottext">Ptr CArf -&gt; CLong -&gt; IO ()
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Arb.Arf.FFI.html#arf_printd"><span class="hs-identifier hs-var">arf_printd</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Ptr CArb -&gt; Ptr CArf
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Arb.FFI.html#arb_midref"><span class="hs-identifier hs-var">arb_midref</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CArb
+</span><a href="#local-6989586621679128957"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">CLong
+</span><span class="hs-number">30</span></span><span>
+</span><span id="line-46"></span><span>                </span><span class="annot"><span class="annottext">FilePath -&gt; IO ()
+</span><span class="hs-identifier hs-var">putStr</span></span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><span class="hs-string">&quot;,&quot;</span></span><span>
+</span><span id="line-47"></span><span>                </span><span class="annot"><span class="annottext">FilePath -&gt; IO ()
+</span><span class="hs-identifier hs-var">putStr</span></span><span> </span><span class="annot"><span class="annottext">(FilePath -&gt; IO ()) -&gt; (CDouble -&gt; FilePath) -&gt; CDouble -&gt; IO ()
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">CDouble -&gt; FilePath
+forall a. Show a =&gt; a -&gt; FilePath
+</span><span class="hs-identifier hs-var">show</span></span><span> </span><span class="annot"><span class="annottext">(CDouble -&gt; IO ()) -&gt; IO CDouble -&gt; IO ()
+forall (m :: * -&gt; *) a b. Monad m =&gt; (a -&gt; m b) -&gt; m a -&gt; m b
+</span><span class="hs-operator hs-var">=&lt;&lt;</span></span><span> </span><span class="annot"><span class="annottext">Ptr CMag -&gt; IO CDouble
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Arb.Mag.FFI.html#mag_get_d"><span class="hs-identifier hs-var">mag_get_d</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Ptr CArb -&gt; Ptr CMag
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Arb.FFI.html#arb_radref"><span class="hs-identifier hs-var">arb_radref</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CArb
+</span><a href="#local-6989586621679128957"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-48"></span><span>            </span><span class="hs-special">)</span><span>
+</span><span id="line-49"></span><span>  </span><span class="annot"><span class="annottext">FilePath -&gt; IO ()
+</span><span class="hs-identifier hs-var">putStrLn</span></span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><span class="hs-string">&quot;&quot;</span></span><span>
+</span><span id="line-50"></span><span>  </span><span class="annot"><span class="annottext">[IO ()] -&gt; IO ()
+forall (t :: * -&gt; *) (m :: * -&gt; *) a.
+(Foldable t, Monad m) =&gt;
+t (m a) -&gt; m ()
+</span><span class="hs-identifier hs-var">sequence_</span></span><span> </span><span class="annot"><span class="annottext">([IO ()] -&gt; IO ()) -&gt; [IO ()] -&gt; IO ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">IO () -&gt; [IO ()] -&gt; [IO ()]
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-identifier hs-var">intersperse</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">FilePath -&gt; IO ()
+</span><span class="hs-identifier hs-var">putStr</span></span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><span class="hs-string">&quot;,&quot;</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[IO ()]
+</span><a href="#local-6989586621679128950"><span class="hs-identifier hs-var">printCols</span></a></span><span>
+</span><span id="line-51"></span><span>
+</span><span id="line-52"></span><span class="annot"><a href="NumT.IO.html#midRad"><span class="hs-identifier hs-type">midRad</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="">?prec</span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">CLong</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="NumT.html#T"><span class="hs-identifier hs-type">T</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span class="hs-special">]</span><span>
+</span><span id="line-53"></span><span id="midRad"><span class="annot"><span class="annottext">midRad :: (?prec::CLong) =&gt; T -&gt; IO [Double]
+</span><a href="NumT.IO.html#midRad"><span class="hs-identifier hs-var hs-var">midRad</span></a></span></span><span> </span><span id="local-6989586621679128975"><span class="annot"><span class="annottext">T
+</span><a href="#local-6989586621679128975"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-54"></span><span>  </span><span id="local-6989586621679128976"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128976"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">T
+</span><a href="#local-6989586621679128975"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">?prec::CLong
+CLong
+</span><a href="#local-6989586621679128971"><span class="hs-var">?prec</span></a></span><span>
+</span><span id="line-55"></span><span>  </span><span class="annot"><span class="annottext">Acb -&gt; (Ptr CArb -&gt; IO [Double]) -&gt; IO [Double]
+forall {b}. Acb -&gt; (Ptr CArb -&gt; IO b) -&gt; IO b
+</span><a href="NumT.html#withAcbRe_"><span class="hs-identifier hs-var">withAcbRe_</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128976"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">((Ptr CArb -&gt; IO [Double]) -&gt; IO [Double])
+-&gt; (Ptr CArb -&gt; IO [Double]) -&gt; IO [Double]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679128978"><span class="annot"><span class="annottext">Ptr CArb
+</span><a href="#local-6989586621679128978"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-56"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">CDouble</span></span><span> </span><span id="local-6989586621679128980"><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679128980"><span class="hs-identifier hs-var">mid</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Ptr CArf -&gt; ArfRnd -&gt; IO CDouble
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Arb.Arf.FFI.html#arf_get_d"><span class="hs-identifier hs-var">arf_get_d</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Ptr CArb -&gt; Ptr CArf
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Arb.FFI.html#arb_midref"><span class="hs-identifier hs-var">arb_midref</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CArb
+</span><a href="#local-6989586621679128978"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">ArfRnd
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Arb.Types.FFI.html#arf_rnd_near"><span class="hs-identifier hs-var">arf_rnd_near</span></a></span><span>
+</span><span id="line-57"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">CDouble</span></span><span> </span><span id="local-6989586621679128983"><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679128983"><span class="hs-identifier hs-var">rad</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Ptr CMag -&gt; IO CDouble
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Arb.Mag.FFI.html#mag_get_d"><span class="hs-identifier hs-var">mag_get_d</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Ptr CArb -&gt; Ptr CMag
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Arb.FFI.html#arb_radref"><span class="hs-identifier hs-var">arb_radref</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CArb
+</span><a href="#local-6989586621679128978"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-58"></span><span>    </span><span class="annot"><span class="annottext">[Double] -&gt; IO [Double]
+forall a. a -&gt; IO a
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679128980"><span class="hs-identifier hs-var">mid</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679128983"><span class="hs-identifier hs-var">rad</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-59"></span></pre></body></html>

@@ -1,0 +1,910 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span id="local-6989586621679129190"><span id="local-6989586621679129191"></span></span><span class="hs-pragma">{-# LANGUAGE OverloadedStrings #-}</span><span>
+</span><span id="line-2"></span><span>
+</span><span id="line-3"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Args</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-4"></span><span>
+</span><span id="line-5"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/lens-5.3.2-6c27de1fd91456ddcb18120c6e36f4d0100ec5c2059ed2e408ac068c4f56f7d6/share/doc/html/src/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span>
+</span><span id="line-6"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Data</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Data</span></span><span class="hs-special">)</span><span>
+</span><span id="line-7"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Int</span></span><span>
+</span><span id="line-8"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">fromMaybe</span></span><span class="hs-special">)</span><span>
+</span><span id="line-9"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/sqlite-simple-0.4.19.0-84079c744b9b2430c35d587623ed961dfd03b0f9e5ab1e78d91683f05bdd96c2/share/doc/html/src/Database.SQLite.Simple.html"><span class="hs-identifier">Database.SQLite.Simple</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/sqlite-simple-0.4.19.0-84079c744b9b2430c35d587623ed961dfd03b0f9e5ab1e78d91683f05bdd96c2/share/doc/html/src/Database.SQLite.Simple.Internal.html#Connection"><span class="hs-identifier">Connection</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Only-0.1-e74c0bb07d3da76985fb36a81e046fc2ec14fd71e6c549259af101d2d719f1e7/share/doc/html/src/Data.Tuple.Only.html#Only"><span class="hs-identifier">Only</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/direct-sqlite-2.3.29-435a5da698b3dfd23a59e8faabf622fd5d7573efb663bd2b402183e63df7cb3c/share/doc/html/src/Database.SQLite3.html#SQLData"><span class="hs-identifier">SQLData</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/sqlite-simple-0.4.19.0-84079c744b9b2430c35d587623ed961dfd03b0f9e5ab1e78d91683f05bdd96c2/share/doc/html/src/Database.SQLite.Simple.html#execute"><span class="hs-identifier">execute</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/sqlite-simple-0.4.19.0-84079c744b9b2430c35d587623ed961dfd03b0f9e5ab1e78d91683f05bdd96c2/share/doc/html/src/Database.SQLite.Simple.html#execute_"><span class="hs-identifier">execute_</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/sqlite-simple-0.4.19.0-84079c744b9b2430c35d587623ed961dfd03b0f9e5ab1e78d91683f05bdd96c2/share/doc/html/src/Database.SQLite.Simple.html#query"><span class="hs-identifier">query</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-10"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/sqlite-simple-0.4.19.0-84079c744b9b2430c35d587623ed961dfd03b0f9e5ab1e78d91683f05bdd96c2/share/doc/html/src/Database.SQLite.Simple.ToField.html"><span class="hs-identifier">Database.SQLite.Simple.ToField</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/sqlite-simple-0.4.19.0-84079c744b9b2430c35d587623ed961dfd03b0f9e5ab1e78d91683f05bdd96c2/share/doc/html/src/Database.SQLite.Simple.ToField.html#ToField"><span class="hs-identifier">ToField</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/sqlite-simple-0.4.19.0-84079c744b9b2430c35d587623ed961dfd03b0f9e5ab1e78d91683f05bdd96c2/share/doc/html/src/Database.SQLite.Simple.ToField.html#toField"><span class="hs-identifier">toField</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-11"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Foreign.C</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">CLong</span></span><span class="hs-special">)</span><span>
+</span><span id="line-12"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="NumT.html"><span class="hs-identifier">NumT</span></a></span><span>
+</span><span id="line-13"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="NumT.IO.html"><span class="hs-identifier">NumT.IO</span></a></span><span>
+</span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/cmdargs-0.10.22-2d54eecf4fba41884c6d9d5aab5c61f3eae11bc898563da57fd9730d118a386c/share/doc/html/src/System.Console.CmdArgs.html"><span class="hs-identifier">System.Console.CmdArgs</span></a></span><span>
+</span><span id="line-15"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Text.Read</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">readMaybe</span></span><span class="hs-special">)</span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/regex-applicative-0.3.4-b1e68dd65c812ecaddd3b654a066f2734827a922b9628088616b3a0de26aaaa3/share/doc/html/src/Text.Regex.Applicative.html"><span class="hs-identifier">Text.Regex.Applicative</span></a></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/regex-applicative-0.3.4-b1e68dd65c812ecaddd3b654a066f2734827a922b9628088616b3a0de26aaaa3/share/doc/html/src/Text.Regex.Applicative.Common.html"><span class="hs-identifier">Text.Regex.Applicative.Common</span></a></span><span>
+</span><span id="line-18"></span><span>
+</span><span id="line-19"></span><span id="getArgs1"><span class="annot"><span class="annottext">getArgs1 :: IO (LaminarHT [Rational])
+</span><a href="Args.html#getArgs1"><span class="hs-identifier hs-var hs-var">getArgs1</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">([Char] -&gt; [Rational]) -&gt; LaminarHT [Char] -&gt; LaminarHT [Rational]
+forall a b. (a -&gt; b) -&gt; LaminarHT a -&gt; LaminarHT b
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; [Rational]
+</span><a href="Args.html#parse"><span class="hs-identifier hs-var">parse</span></a></span><span> </span><span class="annot"><span class="annottext">(LaminarHT [Char] -&gt; LaminarHT [Rational])
+-&gt; IO (LaminarHT [Char]) -&gt; IO (LaminarHT [Rational])
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">LaminarHT [Char] -&gt; IO (LaminarHT [Char])
+forall a. Data a =&gt; a -&gt; IO a
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/cmdargs-0.10.22-2d54eecf4fba41884c6d9d5aab5c61f3eae11bc898563da57fd9730d118a386c/share/doc/html/src/System.Console.CmdArgs.Implicit.html#cmdArgs"><span class="hs-identifier hs-var">cmdArgs</span></a></span><span> </span><span class="annot"><span class="annottext">LaminarHT [Char]
+</span><a href="Args.html#laminarHT"><span class="hs-identifier hs-var">laminarHT</span></a></span><span>
+</span><span id="line-20"></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">data</span><span> </span><span id="LaminarHT"><span class="annot"><a href="Args.html#LaminarHT"><span class="hs-identifier hs-var">LaminarHT</span></a></span></span><span> </span><span id="local-6989586621679129031"><span class="annot"><a href="#local-6989586621679129031"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="LaminarHT"><span class="annot"><a href="Args.html#LaminarHT"><span class="hs-identifier hs-var">LaminarHT</span></a></span></span><span>
+</span><span id="line-22"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="%24sel%3Apes%3ALaminarHT"><span class="annot"><span class="annottext">forall a. LaminarHT a -&gt; a
+</span><a href="Args.html#%24sel%3Apes%3ALaminarHT"><span class="hs-identifier hs-var hs-var">pes</span></a></span></span><span class="hs-special">,</span><span> </span><span id="%24sel%3Arhos%3ALaminarHT"><span class="annot"><span class="annottext">forall a. LaminarHT a -&gt; a
+</span><a href="Args.html#%24sel%3Arhos%3ALaminarHT"><span class="hs-identifier hs-var hs-var">rhos</span></a></span></span><span class="hs-special">,</span><span> </span><span id="%24sel%3Azs%3ALaminarHT"><span class="annot"><span class="annottext">forall a. LaminarHT a -&gt; a
+</span><a href="Args.html#%24sel%3Azs%3ALaminarHT"><span class="hs-identifier hs-var hs-var">zs</span></a></span></span><span class="hs-special">,</span><span> </span><span id="%24sel%3Anlambdas%3ALaminarHT"><span class="annot"><span class="annottext">forall a. LaminarHT a -&gt; a
+</span><a href="Args.html#%24sel%3Anlambdas%3ALaminarHT"><span class="hs-identifier hs-var hs-var">nlambdas</span></a></span></span><span class="hs-special">,</span><span> </span><span id="%24sel%3Alambdatols%3ALaminarHT"><span class="annot"><span class="annottext">forall a. LaminarHT a -&gt; a
+</span><a href="Args.html#%24sel%3Alambdatols%3ALaminarHT"><span class="hs-identifier hs-var hs-var">lambdatols</span></a></span></span><span class="hs-special">,</span><span> </span><span id="%24sel%3Ahs%3ALaminarHT"><span class="annot"><span class="annottext">forall a. LaminarHT a -&gt; a
+</span><a href="Args.html#%24sel%3Ahs%3ALaminarHT"><span class="hs-identifier hs-var hs-var">hs</span></a></span></span><span class="hs-special">,</span><span> </span><span id="%24sel%3Asum_ns%3ALaminarHT"><span class="annot"><span class="annottext">forall a. LaminarHT a -&gt; a
+</span><a href="Args.html#%24sel%3Asum_ns%3ALaminarHT"><span class="hs-identifier hs-var hs-var">sum_ns</span></a></span></span><span class="hs-special">,</span><span> </span><span id="%24sel%3Aacb_precs%3ALaminarHT"><span class="annot"><span class="annottext">forall a. LaminarHT a -&gt; a
+</span><a href="Args.html#%24sel%3Aacb_precs%3ALaminarHT"><span class="hs-identifier hs-var hs-var">acb_precs</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679129031"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-23"></span><span>    </span><span id="%24sel%3Aoutput_db%3ALaminarHT"><span class="annot"><span class="annottext">forall a. LaminarHT a -&gt; [Char]
+</span><a href="Args.html#%24sel%3Aoutput_db%3ALaminarHT"><span class="hs-identifier hs-var hs-var">output_db</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
+</span><span id="line-24"></span><span>  </span><span class="hs-special">}</span><span>
+</span><span id="line-25"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679129352"><span id="local-6989586621679129364"><span id="local-6989586621679129376"><span id="local-6989586621679129378"><span id="local-6989586621679129380"><span id="local-6989586621679129386"><span id="local-6989586621679129391"><span id="local-6989586621679129394"><span id="local-6989586621679129397"><span id="local-6989586621679129400"><span id="local-6989586621679129403"><span id="local-6989586621679129406"><span id="local-6989586621679129411"><span id="local-6989586621679129416"><span class="annot"><span class="annottext">Typeable (LaminarHT a)
+Typeable (LaminarHT a) =&gt;
+(forall (c :: * -&gt; *).
+ (forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+ -&gt; (forall g. g -&gt; c g) -&gt; LaminarHT a -&gt; c (LaminarHT a))
+-&gt; (forall (c :: * -&gt; *).
+    (forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+    -&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c (LaminarHT a))
+-&gt; (LaminarHT a -&gt; Constr)
+-&gt; (LaminarHT a -&gt; DataType)
+-&gt; (forall (t :: * -&gt; *) (c :: * -&gt; *).
+    Typeable t =&gt;
+    (forall d. Data d =&gt; c (t d)) -&gt; Maybe (c (LaminarHT a)))
+-&gt; (forall (t :: * -&gt; * -&gt; *) (c :: * -&gt; *).
+    Typeable t =&gt;
+    (forall d e. (Data d, Data e) =&gt; c (t d e))
+    -&gt; Maybe (c (LaminarHT a)))
+-&gt; ((forall b. Data b =&gt; b -&gt; b) -&gt; LaminarHT a -&gt; LaminarHT a)
+-&gt; (forall r r'.
+    (r -&gt; r' -&gt; r)
+    -&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; LaminarHT a -&gt; r)
+-&gt; (forall r r'.
+    (r' -&gt; r -&gt; r)
+    -&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; LaminarHT a -&gt; r)
+-&gt; (forall u. (forall d. Data d =&gt; d -&gt; u) -&gt; LaminarHT a -&gt; [u])
+-&gt; (forall u.
+    Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; LaminarHT a -&gt; u)
+-&gt; (forall (m :: * -&gt; *).
+    Monad m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; LaminarHT a -&gt; m (LaminarHT a))
+-&gt; (forall (m :: * -&gt; *).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; LaminarHT a -&gt; m (LaminarHT a))
+-&gt; (forall (m :: * -&gt; *).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; LaminarHT a -&gt; m (LaminarHT a))
+-&gt; Data (LaminarHT a)
+LaminarHT a -&gt; Constr
+LaminarHT a -&gt; DataType
+(forall b. Data b =&gt; b -&gt; b) -&gt; LaminarHT a -&gt; LaminarHT a
+forall a. Data a =&gt; Typeable (LaminarHT a)
+forall a. Data a =&gt; LaminarHT a -&gt; Constr
+forall a. Data a =&gt; LaminarHT a -&gt; DataType
+forall a.
+Data a =&gt;
+(forall b. Data b =&gt; b -&gt; b) -&gt; LaminarHT a -&gt; LaminarHT a
+forall a u.
+Data a =&gt;
+Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; LaminarHT a -&gt; u
+forall a u.
+Data a =&gt;
+(forall d. Data d =&gt; d -&gt; u) -&gt; LaminarHT a -&gt; [u]
+forall a r r'.
+Data a =&gt;
+(r -&gt; r' -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; LaminarHT a -&gt; r
+forall a r r'.
+Data a =&gt;
+(r' -&gt; r -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; LaminarHT a -&gt; r
+forall a (m :: * -&gt; *).
+(Data a, Monad m) =&gt;
+(forall d. Data d =&gt; d -&gt; m d) -&gt; LaminarHT a -&gt; m (LaminarHT a)
+forall a (m :: * -&gt; *).
+(Data a, MonadPlus m) =&gt;
+(forall d. Data d =&gt; d -&gt; m d) -&gt; LaminarHT a -&gt; m (LaminarHT a)
+forall a (c :: * -&gt; *).
+Data a =&gt;
+(forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+-&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c (LaminarHT a)
+forall a (c :: * -&gt; *).
+Data a =&gt;
+(forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+-&gt; (forall g. g -&gt; c g) -&gt; LaminarHT a -&gt; c (LaminarHT a)
+forall a (t :: * -&gt; *) (c :: * -&gt; *).
+(Data a, Typeable t) =&gt;
+(forall d. Data d =&gt; c (t d)) -&gt; Maybe (c (LaminarHT a))
+forall a (t :: * -&gt; * -&gt; *) (c :: * -&gt; *).
+(Data a, Typeable t) =&gt;
+(forall d e. (Data d, Data e) =&gt; c (t d e))
+-&gt; Maybe (c (LaminarHT a))
+forall a.
+Typeable a =&gt;
+(forall (c :: * -&gt; *).
+ (forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+ -&gt; (forall g. g -&gt; c g) -&gt; a -&gt; c a)
+-&gt; (forall (c :: * -&gt; *).
+    (forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+    -&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c a)
+-&gt; (a -&gt; Constr)
+-&gt; (a -&gt; DataType)
+-&gt; (forall (t :: * -&gt; *) (c :: * -&gt; *).
+    Typeable t =&gt;
+    (forall d. Data d =&gt; c (t d)) -&gt; Maybe (c a))
+-&gt; (forall (t :: * -&gt; * -&gt; *) (c :: * -&gt; *).
+    Typeable t =&gt;
+    (forall d e. (Data d, Data e) =&gt; c (t d e)) -&gt; Maybe (c a))
+-&gt; ((forall b. Data b =&gt; b -&gt; b) -&gt; a -&gt; a)
+-&gt; (forall r r'.
+    (r -&gt; r' -&gt; r) -&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; a -&gt; r)
+-&gt; (forall r r'.
+    (r' -&gt; r -&gt; r) -&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; a -&gt; r)
+-&gt; (forall u. (forall d. Data d =&gt; d -&gt; u) -&gt; a -&gt; [u])
+-&gt; (forall u. Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; a -&gt; u)
+-&gt; (forall (m :: * -&gt; *).
+    Monad m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; a -&gt; m a)
+-&gt; (forall (m :: * -&gt; *).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; a -&gt; m a)
+-&gt; (forall (m :: * -&gt; *).
+    MonadPlus m =&gt;
+    (forall d. Data d =&gt; d -&gt; m d) -&gt; a -&gt; m a)
+-&gt; Data a
+forall u. Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; LaminarHT a -&gt; u
+forall u. (forall d. Data d =&gt; d -&gt; u) -&gt; LaminarHT a -&gt; [u]
+forall r r'.
+(r -&gt; r' -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; LaminarHT a -&gt; r
+forall r r'.
+(r' -&gt; r -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; LaminarHT a -&gt; r
+forall (m :: * -&gt; *).
+Monad m =&gt;
+(forall d. Data d =&gt; d -&gt; m d) -&gt; LaminarHT a -&gt; m (LaminarHT a)
+forall (m :: * -&gt; *).
+MonadPlus m =&gt;
+(forall d. Data d =&gt; d -&gt; m d) -&gt; LaminarHT a -&gt; m (LaminarHT a)
+forall (c :: * -&gt; *).
+(forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+-&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c (LaminarHT a)
+forall (c :: * -&gt; *).
+(forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+-&gt; (forall g. g -&gt; c g) -&gt; LaminarHT a -&gt; c (LaminarHT a)
+forall (t :: * -&gt; *) (c :: * -&gt; *).
+Typeable t =&gt;
+(forall d. Data d =&gt; c (t d)) -&gt; Maybe (c (LaminarHT a))
+forall (t :: * -&gt; * -&gt; *) (c :: * -&gt; *).
+Typeable t =&gt;
+(forall d e. (Data d, Data e) =&gt; c (t d e))
+-&gt; Maybe (c (LaminarHT a))
+$cgfoldl :: forall a (c :: * -&gt; *).
+Data a =&gt;
+(forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+-&gt; (forall g. g -&gt; c g) -&gt; LaminarHT a -&gt; c (LaminarHT a)
+gfoldl :: forall (c :: * -&gt; *).
+(forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
+-&gt; (forall g. g -&gt; c g) -&gt; LaminarHT a -&gt; c (LaminarHT a)
+$cgunfold :: forall a (c :: * -&gt; *).
+Data a =&gt;
+(forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+-&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c (LaminarHT a)
+gunfold :: forall (c :: * -&gt; *).
+(forall b r. Data b =&gt; c (b -&gt; r) -&gt; c r)
+-&gt; (forall r. r -&gt; c r) -&gt; Constr -&gt; c (LaminarHT a)
+$ctoConstr :: forall a. Data a =&gt; LaminarHT a -&gt; Constr
+toConstr :: LaminarHT a -&gt; Constr
+$cdataTypeOf :: forall a. Data a =&gt; LaminarHT a -&gt; DataType
+dataTypeOf :: LaminarHT a -&gt; DataType
+$cdataCast1 :: forall a (t :: * -&gt; *) (c :: * -&gt; *).
+(Data a, Typeable t) =&gt;
+(forall d. Data d =&gt; c (t d)) -&gt; Maybe (c (LaminarHT a))
+dataCast1 :: forall (t :: * -&gt; *) (c :: * -&gt; *).
+Typeable t =&gt;
+(forall d. Data d =&gt; c (t d)) -&gt; Maybe (c (LaminarHT a))
+$cdataCast2 :: forall a (t :: * -&gt; * -&gt; *) (c :: * -&gt; *).
+(Data a, Typeable t) =&gt;
+(forall d e. (Data d, Data e) =&gt; c (t d e))
+-&gt; Maybe (c (LaminarHT a))
+dataCast2 :: forall (t :: * -&gt; * -&gt; *) (c :: * -&gt; *).
+Typeable t =&gt;
+(forall d e. (Data d, Data e) =&gt; c (t d e))
+-&gt; Maybe (c (LaminarHT a))
+$cgmapT :: forall a.
+Data a =&gt;
+(forall b. Data b =&gt; b -&gt; b) -&gt; LaminarHT a -&gt; LaminarHT a
+gmapT :: (forall b. Data b =&gt; b -&gt; b) -&gt; LaminarHT a -&gt; LaminarHT a
+$cgmapQl :: forall a r r'.
+Data a =&gt;
+(r -&gt; r' -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; LaminarHT a -&gt; r
+gmapQl :: forall r r'.
+(r -&gt; r' -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; LaminarHT a -&gt; r
+$cgmapQr :: forall a r r'.
+Data a =&gt;
+(r' -&gt; r -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; LaminarHT a -&gt; r
+gmapQr :: forall r r'.
+(r' -&gt; r -&gt; r)
+-&gt; r -&gt; (forall d. Data d =&gt; d -&gt; r') -&gt; LaminarHT a -&gt; r
+$cgmapQ :: forall a u.
+Data a =&gt;
+(forall d. Data d =&gt; d -&gt; u) -&gt; LaminarHT a -&gt; [u]
+gmapQ :: forall u. (forall d. Data d =&gt; d -&gt; u) -&gt; LaminarHT a -&gt; [u]
+$cgmapQi :: forall a u.
+Data a =&gt;
+Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; LaminarHT a -&gt; u
+gmapQi :: forall u. Int -&gt; (forall d. Data d =&gt; d -&gt; u) -&gt; LaminarHT a -&gt; u
+$cgmapM :: forall a (m :: * -&gt; *).
+(Data a, Monad m) =&gt;
+(forall d. Data d =&gt; d -&gt; m d) -&gt; LaminarHT a -&gt; m (LaminarHT a)
+gmapM :: forall (m :: * -&gt; *).
+Monad m =&gt;
+(forall d. Data d =&gt; d -&gt; m d) -&gt; LaminarHT a -&gt; m (LaminarHT a)
+$cgmapMp :: forall a (m :: * -&gt; *).
+(Data a, MonadPlus m) =&gt;
+(forall d. Data d =&gt; d -&gt; m d) -&gt; LaminarHT a -&gt; m (LaminarHT a)
+gmapMp :: forall (m :: * -&gt; *).
+MonadPlus m =&gt;
+(forall d. Data d =&gt; d -&gt; m d) -&gt; LaminarHT a -&gt; m (LaminarHT a)
+$cgmapMo :: forall a (m :: * -&gt; *).
+(Data a, MonadPlus m) =&gt;
+(forall d. Data d =&gt; d -&gt; m d) -&gt; LaminarHT a -&gt; m (LaminarHT a)
+gmapMo :: forall (m :: * -&gt; *).
+MonadPlus m =&gt;
+(forall d. Data d =&gt; d -&gt; m d) -&gt; LaminarHT a -&gt; m (LaminarHT a)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Data</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679129423"><span id="local-6989586621679129425"><span class="annot"><span class="annottext">(forall a b. (a -&gt; b) -&gt; LaminarHT a -&gt; LaminarHT b)
+-&gt; (forall a b. a -&gt; LaminarHT b -&gt; LaminarHT a)
+-&gt; Functor LaminarHT
+forall a b. a -&gt; LaminarHT b -&gt; LaminarHT a
+forall a b. (a -&gt; b) -&gt; LaminarHT a -&gt; LaminarHT b
+forall (f :: * -&gt; *).
+(forall a b. (a -&gt; b) -&gt; f a -&gt; f b)
+-&gt; (forall a b. a -&gt; f b -&gt; f a) -&gt; Functor f
+$cfmap :: forall a b. (a -&gt; b) -&gt; LaminarHT a -&gt; LaminarHT b
+fmap :: forall a b. (a -&gt; b) -&gt; LaminarHT a -&gt; LaminarHT b
+$c&lt;$ :: forall a b. a -&gt; LaminarHT b -&gt; LaminarHT a
+&lt;$ :: forall a b. a -&gt; LaminarHT b -&gt; LaminarHT a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679129428"><span id="local-6989586621679129434"><span id="local-6989586621679129444"><span id="local-6989586621679129449"><span id="local-6989586621679129451"><span id="local-6989586621679129454"><span id="local-6989586621679129457"><span id="local-6989586621679129460"><span id="local-6989586621679129463"><span id="local-6989586621679129466"><span id="local-6989586621679129469"><span id="local-6989586621679129471"><span id="local-6989586621679129474"><span id="local-6989586621679129479"><span id="local-6989586621679129484"><span id="local-6989586621679129489"><span id="local-6989586621679129494"><span class="annot"><span class="annottext">(forall m. Monoid m =&gt; LaminarHT m -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; LaminarHT a -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; LaminarHT a -&gt; m)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; LaminarHT a -&gt; b)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; LaminarHT a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; LaminarHT a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; LaminarHT a -&gt; b)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; LaminarHT a -&gt; a)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; LaminarHT a -&gt; a)
+-&gt; (forall a. LaminarHT a -&gt; [a])
+-&gt; (forall a. LaminarHT a -&gt; Bool)
+-&gt; (forall a. LaminarHT a -&gt; Int)
+-&gt; (forall a. Eq a =&gt; a -&gt; LaminarHT a -&gt; Bool)
+-&gt; (forall a. Ord a =&gt; LaminarHT a -&gt; a)
+-&gt; (forall a. Ord a =&gt; LaminarHT a -&gt; a)
+-&gt; (forall a. Num a =&gt; LaminarHT a -&gt; a)
+-&gt; (forall a. Num a =&gt; LaminarHT a -&gt; a)
+-&gt; Foldable LaminarHT
+forall a. Eq a =&gt; a -&gt; LaminarHT a -&gt; Bool
+forall a. Num a =&gt; LaminarHT a -&gt; a
+forall a. Ord a =&gt; LaminarHT a -&gt; a
+forall m. Monoid m =&gt; LaminarHT m -&gt; m
+forall a. LaminarHT a -&gt; Bool
+forall a. LaminarHT a -&gt; Int
+forall a. LaminarHT a -&gt; [a]
+forall a. (a -&gt; a -&gt; a) -&gt; LaminarHT a -&gt; a
+forall m a. Monoid m =&gt; (a -&gt; m) -&gt; LaminarHT a -&gt; m
+forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; LaminarHT a -&gt; b
+forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; LaminarHT a -&gt; b
+forall (t :: * -&gt; *).
+(forall m. Monoid m =&gt; t m -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; t a -&gt; a)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; t a -&gt; a)
+-&gt; (forall a. t a -&gt; [a])
+-&gt; (forall a. t a -&gt; Bool)
+-&gt; (forall a. t a -&gt; Int)
+-&gt; (forall a. Eq a =&gt; a -&gt; t a -&gt; Bool)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Num a =&gt; t a -&gt; a)
+-&gt; (forall a. Num a =&gt; t a -&gt; a)
+-&gt; Foldable t
+$cfold :: forall m. Monoid m =&gt; LaminarHT m -&gt; m
+fold :: forall m. Monoid m =&gt; LaminarHT m -&gt; m
+$cfoldMap :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; LaminarHT a -&gt; m
+foldMap :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; LaminarHT a -&gt; m
+$cfoldMap' :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; LaminarHT a -&gt; m
+foldMap' :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; LaminarHT a -&gt; m
+$cfoldr :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; LaminarHT a -&gt; b
+foldr :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; LaminarHT a -&gt; b
+$cfoldr' :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; LaminarHT a -&gt; b
+foldr' :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; LaminarHT a -&gt; b
+$cfoldl :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; LaminarHT a -&gt; b
+foldl :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; LaminarHT a -&gt; b
+$cfoldl' :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; LaminarHT a -&gt; b
+foldl' :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; LaminarHT a -&gt; b
+$cfoldr1 :: forall a. (a -&gt; a -&gt; a) -&gt; LaminarHT a -&gt; a
+foldr1 :: forall a. (a -&gt; a -&gt; a) -&gt; LaminarHT a -&gt; a
+$cfoldl1 :: forall a. (a -&gt; a -&gt; a) -&gt; LaminarHT a -&gt; a
+foldl1 :: forall a. (a -&gt; a -&gt; a) -&gt; LaminarHT a -&gt; a
+$ctoList :: forall a. LaminarHT a -&gt; [a]
+toList :: forall a. LaminarHT a -&gt; [a]
+$cnull :: forall a. LaminarHT a -&gt; Bool
+null :: forall a. LaminarHT a -&gt; Bool
+$clength :: forall a. LaminarHT a -&gt; Int
+length :: forall a. LaminarHT a -&gt; Int
+$celem :: forall a. Eq a =&gt; a -&gt; LaminarHT a -&gt; Bool
+elem :: forall a. Eq a =&gt; a -&gt; LaminarHT a -&gt; Bool
+$cmaximum :: forall a. Ord a =&gt; LaminarHT a -&gt; a
+maximum :: forall a. Ord a =&gt; LaminarHT a -&gt; a
+$cminimum :: forall a. Ord a =&gt; LaminarHT a -&gt; a
+minimum :: forall a. Ord a =&gt; LaminarHT a -&gt; a
+$csum :: forall a. Num a =&gt; LaminarHT a -&gt; a
+sum :: forall a. Num a =&gt; LaminarHT a -&gt; a
+$cproduct :: forall a. Num a =&gt; LaminarHT a -&gt; a
+product :: forall a. Num a =&gt; LaminarHT a -&gt; a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Foldable</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679129504"><span id="local-6989586621679129514"><span id="local-6989586621679129520"><span id="local-6989586621679129525"><span class="annot"><span class="annottext">Functor LaminarHT
+Foldable LaminarHT
+(Functor LaminarHT, Foldable LaminarHT) =&gt;
+(forall (f :: * -&gt; *) a b.
+ Applicative f =&gt;
+ (a -&gt; f b) -&gt; LaminarHT a -&gt; f (LaminarHT b))
+-&gt; (forall (f :: * -&gt; *) a.
+    Applicative f =&gt;
+    LaminarHT (f a) -&gt; f (LaminarHT a))
+-&gt; (forall (m :: * -&gt; *) a b.
+    Monad m =&gt;
+    (a -&gt; m b) -&gt; LaminarHT a -&gt; m (LaminarHT b))
+-&gt; (forall (m :: * -&gt; *) a.
+    Monad m =&gt;
+    LaminarHT (m a) -&gt; m (LaminarHT a))
+-&gt; Traversable LaminarHT
+forall (t :: * -&gt; *).
+(Functor t, Foldable t) =&gt;
+(forall (f :: * -&gt; *) a b.
+ Applicative f =&gt;
+ (a -&gt; f b) -&gt; t a -&gt; f (t b))
+-&gt; (forall (f :: * -&gt; *) a. Applicative f =&gt; t (f a) -&gt; f (t a))
+-&gt; (forall (m :: * -&gt; *) a b.
+    Monad m =&gt;
+    (a -&gt; m b) -&gt; t a -&gt; m (t b))
+-&gt; (forall (m :: * -&gt; *) a. Monad m =&gt; t (m a) -&gt; m (t a))
+-&gt; Traversable t
+forall (m :: * -&gt; *) a.
+Monad m =&gt;
+LaminarHT (m a) -&gt; m (LaminarHT a)
+forall (f :: * -&gt; *) a.
+Applicative f =&gt;
+LaminarHT (f a) -&gt; f (LaminarHT a)
+forall (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m b) -&gt; LaminarHT a -&gt; m (LaminarHT b)
+forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; LaminarHT a -&gt; f (LaminarHT b)
+$ctraverse :: forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; LaminarHT a -&gt; f (LaminarHT b)
+traverse :: forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; LaminarHT a -&gt; f (LaminarHT b)
+$csequenceA :: forall (f :: * -&gt; *) a.
+Applicative f =&gt;
+LaminarHT (f a) -&gt; f (LaminarHT a)
+sequenceA :: forall (f :: * -&gt; *) a.
+Applicative f =&gt;
+LaminarHT (f a) -&gt; f (LaminarHT a)
+$cmapM :: forall (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m b) -&gt; LaminarHT a -&gt; m (LaminarHT b)
+mapM :: forall (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m b) -&gt; LaminarHT a -&gt; m (LaminarHT b)
+$csequence :: forall (m :: * -&gt; *) a.
+Monad m =&gt;
+LaminarHT (m a) -&gt; m (LaminarHT a)
+sequence :: forall (m :: * -&gt; *) a.
+Monad m =&gt;
+LaminarHT (m a) -&gt; m (LaminarHT a)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Traversable</span></span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-26"></span><span>
+</span><span id="line-27"></span><span id="laminarHT"><span class="annot"><span class="annottext">laminarHT :: LaminarHT [Char]
+</span><a href="Args.html#laminarHT"><span class="hs-identifier hs-var hs-var">laminarHT</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-28"></span><span>  </span><span class="annot"><a href="Args.html#LaminarHT"><span class="hs-identifier hs-type">LaminarHT</span></a></span><span>
+</span><span id="line-29"></span><span>    </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">$sel:pes:LaminarHT :: [Char]
+</span><a href="Args.html#%24sel%3Apes%3ALaminarHT"><span class="hs-identifier hs-var">pes</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot;200,500&quot;</span></span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; Ann -&gt; [Char]
+forall val. Data val =&gt; val -&gt; Ann -&gt; val
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/cmdargs-0.10.22-2d54eecf4fba41884c6d9d5aab5c61f3eae11bc898563da57fd9730d118a386c/share/doc/html/src/System.Console.CmdArgs.Implicit.html#%26%3D"><span class="hs-operator hs-var">&amp;=</span></a></span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; Ann
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/cmdargs-0.10.22-2d54eecf4fba41884c6d9d5aab5c61f3eae11bc898563da57fd9730d118a386c/share/doc/html/src/System.Console.CmdArgs.Implicit.UI.html#help"><span class="hs-identifier hs-var">help</span></a></span><span> </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot;Peclet number: 200,500&quot;</span></span><span class="hs-special">,</span><span>
+</span><span id="line-30"></span><span>      </span><span class="annot"><span class="annottext">$sel:rhos:LaminarHT :: [Char]
+</span><a href="Args.html#%24sel%3Arhos%3ALaminarHT"><span class="hs-identifier hs-var">rhos</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot;0,0.05..1&quot;</span></span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; Ann -&gt; [Char]
+forall val. Data val =&gt; val -&gt; Ann -&gt; val
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/cmdargs-0.10.22-2d54eecf4fba41884c6d9d5aab5c61f3eae11bc898563da57fd9730d118a386c/share/doc/html/src/System.Console.CmdArgs.Implicit.html#%26%3D"><span class="hs-operator hs-var">&amp;=</span></a></span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; Ann
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/cmdargs-0.10.22-2d54eecf4fba41884c6d9d5aab5c61f3eae11bc898563da57fd9730d118a386c/share/doc/html/src/System.Console.CmdArgs.Implicit.UI.html#help"><span class="hs-identifier hs-var">help</span></a></span><span> </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot;radius rho: 0,0.05..1&quot;</span></span><span class="hs-special">,</span><span>
+</span><span id="line-31"></span><span>      </span><span class="annot"><span class="annottext">$sel:zs:LaminarHT :: [Char]
+</span><a href="Args.html#%24sel%3Azs%3ALaminarHT"><span class="hs-identifier hs-var">zs</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot;0,2..100&quot;</span></span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; Ann -&gt; [Char]
+forall val. Data val =&gt; val -&gt; Ann -&gt; val
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/cmdargs-0.10.22-2d54eecf4fba41884c6d9d5aab5c61f3eae11bc898563da57fd9730d118a386c/share/doc/html/src/System.Console.CmdArgs.Implicit.html#%26%3D"><span class="hs-operator hs-var">&amp;=</span></a></span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; Ann
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/cmdargs-0.10.22-2d54eecf4fba41884c6d9d5aab5c61f3eae11bc898563da57fd9730d118a386c/share/doc/html/src/System.Console.CmdArgs.Implicit.UI.html#help"><span class="hs-identifier hs-var">help</span></a></span><span> </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot;distance z: 0,2..100&quot;</span></span><span class="hs-special">,</span><span>
+</span><span id="line-32"></span><span>      </span><span class="annot"><span class="annottext">$sel:nlambdas:LaminarHT :: [Char]
+</span><a href="Args.html#%24sel%3Anlambdas%3ALaminarHT"><span class="hs-identifier hs-var">nlambdas</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot;6&quot;</span></span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; Ann -&gt; [Char]
+forall val. Data val =&gt; val -&gt; Ann -&gt; val
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/cmdargs-0.10.22-2d54eecf4fba41884c6d9d5aab5c61f3eae11bc898563da57fd9730d118a386c/share/doc/html/src/System.Console.CmdArgs.Implicit.html#%26%3D"><span class="hs-operator hs-var">&amp;=</span></a></span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; Ann
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/cmdargs-0.10.22-2d54eecf4fba41884c6d9d5aab5c61f3eae11bc898563da57fd9730d118a386c/share/doc/html/src/System.Console.CmdArgs.Implicit.UI.html#help"><span class="hs-identifier hs-var">help</span></a></span><span> </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot;number of eigenvalues: 6&quot;</span></span><span class="hs-special">,</span><span>
+</span><span id="line-33"></span><span>      </span><span class="annot"><span class="annottext">$sel:lambdatols:LaminarHT :: [Char]
+</span><a href="Args.html#%24sel%3Alambdatols%3ALaminarHT"><span class="hs-identifier hs-var">lambdatols</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot;1e-20&quot;</span></span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; Ann -&gt; [Char]
+forall val. Data val =&gt; val -&gt; Ann -&gt; val
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/cmdargs-0.10.22-2d54eecf4fba41884c6d9d5aab5c61f3eae11bc898563da57fd9730d118a386c/share/doc/html/src/System.Console.CmdArgs.Implicit.html#%26%3D"><span class="hs-operator hs-var">&amp;=</span></a></span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; Ann
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/cmdargs-0.10.22-2d54eecf4fba41884c6d9d5aab5c61f3eae11bc898563da57fd9730d118a386c/share/doc/html/src/System.Console.CmdArgs.Implicit.UI.html#help"><span class="hs-identifier hs-var">help</span></a></span><span> </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot;xtolerance for eigenvalue secant method: 1e-20&quot;</span></span><span class="hs-special">,</span><span>
+</span><span id="line-34"></span><span>      </span><span class="annot"><span class="annottext">$sel:hs:LaminarHT :: [Char]
+</span><a href="Args.html#%24sel%3Ahs%3ALaminarHT"><span class="hs-identifier hs-var">hs</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot;1e-2&quot;</span></span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; Ann -&gt; [Char]
+forall val. Data val =&gt; val -&gt; Ann -&gt; val
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/cmdargs-0.10.22-2d54eecf4fba41884c6d9d5aab5c61f3eae11bc898563da57fd9730d118a386c/share/doc/html/src/System.Console.CmdArgs.Implicit.html#%26%3D"><span class="hs-operator hs-var">&amp;=</span></a></span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; Ann
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/cmdargs-0.10.22-2d54eecf4fba41884c6d9d5aab5c61f3eae11bc898563da57fd9730d118a386c/share/doc/html/src/System.Console.CmdArgs.Implicit.UI.html#help"><span class="hs-identifier hs-var">help</span></a></span><span> </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot;finite difference step size h: 1e-4&quot;</span></span><span class="hs-special">,</span><span>
+</span><span id="line-35"></span><span>      </span><span class="annot"><span class="annottext">$sel:sum_ns:LaminarHT :: [Char]
+</span><a href="Args.html#%24sel%3Asum_ns%3ALaminarHT"><span class="hs-identifier hs-var">sum_ns</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot;3&quot;</span></span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; Ann -&gt; [Char]
+forall val. Data val =&gt; val -&gt; Ann -&gt; val
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/cmdargs-0.10.22-2d54eecf4fba41884c6d9d5aab5c61f3eae11bc898563da57fd9730d118a386c/share/doc/html/src/System.Console.CmdArgs.Implicit.html#%26%3D"><span class="hs-operator hs-var">&amp;=</span></a></span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; Ann
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/cmdargs-0.10.22-2d54eecf4fba41884c6d9d5aab5c61f3eae11bc898563da57fd9730d118a386c/share/doc/html/src/System.Console.CmdArgs.Implicit.UI.html#help"><span class="hs-identifier hs-var">help</span></a></span><span> </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot;number of terms in Richardson extrapolation of the eigenvalue sum (currently unused): 3&quot;</span></span><span class="hs-special">,</span><span>
+</span><span id="line-36"></span><span>      </span><span class="annot"><span class="annottext">$sel:acb_precs:LaminarHT :: [Char]
+</span><a href="Args.html#%24sel%3Aacb_precs%3ALaminarHT"><span class="hs-identifier hs-var">acb_precs</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot;2048&quot;</span></span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; Ann -&gt; [Char]
+forall val. Data val =&gt; val -&gt; Ann -&gt; val
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/cmdargs-0.10.22-2d54eecf4fba41884c6d9d5aab5c61f3eae11bc898563da57fd9730d118a386c/share/doc/html/src/System.Console.CmdArgs.Implicit.html#%26%3D"><span class="hs-operator hs-var">&amp;=</span></a></span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; Ann
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/cmdargs-0.10.22-2d54eecf4fba41884c6d9d5aab5c61f3eae11bc898563da57fd9730d118a386c/share/doc/html/src/System.Console.CmdArgs.Implicit.UI.html#help"><span class="hs-identifier hs-var">help</span></a></span><span> </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot;Flint2 acb precision: 2048&quot;</span></span><span class="hs-special">,</span><span>
+</span><span id="line-37"></span><span>      </span><span class="annot"><span class="annottext">$sel:output_db:LaminarHT :: [Char]
+</span><a href="Args.html#%24sel%3Aoutput_db%3ALaminarHT"><span class="hs-identifier hs-var">output_db</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot;laminarHT.db&quot;</span></span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; Ann -&gt; [Char]
+forall val. Data val =&gt; val -&gt; Ann -&gt; val
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/cmdargs-0.10.22-2d54eecf4fba41884c6d9d5aab5c61f3eae11bc898563da57fd9730d118a386c/share/doc/html/src/System.Console.CmdArgs.Implicit.html#%26%3D"><span class="hs-operator hs-var">&amp;=</span></a></span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; Ann
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/cmdargs-0.10.22-2d54eecf4fba41884c6d9d5aab5c61f3eae11bc898563da57fd9730d118a386c/share/doc/html/src/System.Console.CmdArgs.Implicit.UI.html#help"><span class="hs-identifier hs-var">help</span></a></span><span> </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot;sqlite output file: laminarHT.db&quot;</span></span><span>
+</span><span id="line-38"></span><span>    </span><span class="hs-special">}</span><span>
+</span><span id="line-39"></span><span>    </span><span class="annot"><span class="annottext">LaminarHT [Char] -&gt; Ann -&gt; LaminarHT [Char]
+forall val. Data val =&gt; val -&gt; Ann -&gt; val
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/cmdargs-0.10.22-2d54eecf4fba41884c6d9d5aab5c61f3eae11bc898563da57fd9730d118a386c/share/doc/html/src/System.Console.CmdArgs.Implicit.html#%26%3D"><span class="hs-operator hs-var">&amp;=</span></a></span><span> </span><span class="annot"><span class="annottext">Ann
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/cmdargs-0.10.22-2d54eecf4fba41884c6d9d5aab5c61f3eae11bc898563da57fd9730d118a386c/share/doc/html/src/System.Console.CmdArgs.Implicit.UI.html#verbosity"><span class="hs-identifier hs-var">verbosity</span></a></span><span>
+</span><span id="line-40"></span><span>    </span><span class="annot"><span class="annottext">LaminarHT [Char] -&gt; Ann -&gt; LaminarHT [Char]
+forall val. Data val =&gt; val -&gt; Ann -&gt; val
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/cmdargs-0.10.22-2d54eecf4fba41884c6d9d5aab5c61f3eae11bc898563da57fd9730d118a386c/share/doc/html/src/System.Console.CmdArgs.Implicit.html#%26%3D"><span class="hs-operator hs-var">&amp;=</span></a></span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; Ann
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/cmdargs-0.10.22-2d54eecf4fba41884c6d9d5aab5c61f3eae11bc898563da57fd9730d118a386c/share/doc/html/src/System.Console.CmdArgs.Implicit.UI.html#help"><span class="hs-identifier hs-var">help</span></a></span><span>
+</span><span id="line-41"></span><span>      </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot;Solve the laminar flow heat transfer problem with constant wall temperatures,\
+      \ and store the results in an sqlite database.\
+      \ Flags can have multiple values with first,step..last or a,b,c,d interpreted as usual,\
+      \ and all possible combinations (cartesian product) are solved.\
+      \ Results already in the database are not recomputed.&quot;</span></span><span>
+</span><span id="line-46"></span><span>    </span><span class="annot"><span class="annottext">LaminarHT [Char] -&gt; Ann -&gt; LaminarHT [Char]
+forall val. Data val =&gt; val -&gt; Ann -&gt; val
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/cmdargs-0.10.22-2d54eecf4fba41884c6d9d5aab5c61f3eae11bc898563da57fd9730d118a386c/share/doc/html/src/System.Console.CmdArgs.Implicit.html#%26%3D"><span class="hs-operator hs-var">&amp;=</span></a></span><span> </span><span class="annot"><span class="annottext">[[Char]] -&gt; Ann
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/cmdargs-0.10.22-2d54eecf4fba41884c6d9d5aab5c61f3eae11bc898563da57fd9730d118a386c/share/doc/html/src/System.Console.CmdArgs.Implicit.UI.html#details"><span class="hs-identifier hs-var">details</span></a></span><span>
+</span><span id="line-47"></span><span>      </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot;The schema is&quot;</span></span><span class="hs-special">,</span><span>
+</span><span id="line-48"></span><span>        </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot;    CREATE TABLE pars (id INTEGER PRIMARY KEY, pe REAL, nlambda INTEGER, lambdatol REAL, h REAL, sum_n INTEGER, prec INTEGER, UNIQUE(pe, nlambda, lambdatol, h, sum_n, prec));&quot;</span></span><span class="hs-special">,</span><span>
+</span><span id="line-49"></span><span>        </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot;&quot;</span></span><span class="hs-special">,</span><span>
+</span><span id="line-50"></span><span>        </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot;    CREATE TABLE spectrum (par INTEGER, m INTEGER, lambda REAL, lambdapm REAL, a REAL, apm REAL,  FOREIGN KEY (par) REFERENCES pars(id));&quot;</span></span><span class="hs-special">,</span><span>
+</span><span id="line-51"></span><span>        </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot;&quot;</span></span><span class="hs-special">,</span><span>
+</span><span id="line-52"></span><span>        </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot;    CREATE TABLE temperatures (par INTEGER, rho REAL, z REAL, temp REAL, temp_pm REAL, FOREIGN KEY (par) REFERENCES pars(id)); &quot;</span></span><span class="hs-special">,</span><span>
+</span><span id="line-53"></span><span>        </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot;&quot;</span></span><span class="hs-special">,</span><span>
+</span><span id="line-54"></span><span>        </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot; `pars` stores command line arguments other than rhos and zs&quot;</span></span><span class="hs-special">,</span><span>
+</span><span id="line-55"></span><span>        </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot; `spectrum` stores intermediate values&quot;</span></span><span class="hs-special">,</span><span>
+</span><span id="line-56"></span><span>        </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot; `temperatures` which stores the T(rho, z)&quot;</span></span><span class="hs-special">,</span><span>
+</span><span id="line-57"></span><span>        </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot;&quot;</span></span><span class="hs-special">,</span><span>
+</span><span id="line-58"></span><span>        </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot; A trailing \&quot;pm\&quot; means it is the radius of the interval&quot;</span></span><span>
+</span><span id="line-59"></span><span>      </span><span class="hs-special">]</span><span>
+</span><span id="line-60"></span><span>
+</span><span id="line-61"></span><span class="annot"><span class="hs-comment">-- | with regex-applicative, turn a string with commas and .. into calls to enumFrom, enumFromThenTo etc.</span></span><span>
+</span><span id="line-62"></span><span class="annot"><a href="Args.html#parse"><span class="hs-identifier hs-type">parse</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Rational</span></span><span class="hs-special">]</span><span>
+</span><span id="line-63"></span><span id="parse"><span class="annot"><span class="annottext">parse :: [Char] -&gt; [Rational]
+</span><a href="Args.html#parse"><span class="hs-identifier hs-var hs-var">parse</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-64"></span><span>  </span><span class="annot"><span class="annottext">[Rational]
+-&gt; (([Rational], [Char]) -&gt; [Rational])
+-&gt; Maybe ([Rational], [Char])
+-&gt; [Rational]
+forall b a. b -&gt; (a -&gt; b) -&gt; Maybe a -&gt; b
+</span><span class="hs-identifier hs-var">maybe</span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">([Rational], [Char]) -&gt; [Rational]
+forall a b. (a, b) -&gt; a
+</span><span class="hs-identifier hs-var">fst</span></span><span> </span><span class="annot"><span class="annottext">(Maybe ([Rational], [Char]) -&gt; [Rational])
+-&gt; ([Char] -&gt; Maybe ([Rational], [Char])) -&gt; [Char] -&gt; [Rational]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">RE Char [Rational] -&gt; [Char] -&gt; Maybe ([Rational], [Char])
+forall s a. RE s a -&gt; [s] -&gt; Maybe (a, [s])
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/regex-applicative-0.3.4-b1e68dd65c812ecaddd3b654a066f2734827a922b9628088616b3a0de26aaaa3/share/doc/html/src/Text.Regex.Applicative.Interface.html#findLongestPrefix"><span class="hs-identifier hs-var">findLongestPrefix</span></a></span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-65"></span><span>    </span><span id="local-6989586621679129566"><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679129566"><span class="hs-identifier hs-var">start</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">RE Char Rational
+</span><a href="#local-6989586621679129567"><span class="hs-identifier hs-var">float</span></a></span><span>
+</span><span id="line-66"></span><span>    </span><span id="local-6989586621679129568"><span class="annot"><span class="annottext">[Rational]
+</span><a href="#local-6989586621679129568"><span class="hs-identifier hs-var">next</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">RE Char Rational -&gt; RE Char [Rational]
+forall a. RE Char a -&gt; RE Char [a]
+forall (f :: * -&gt; *) a. Alternative f =&gt; f a -&gt; f [a]
+</span><span class="hs-identifier hs-var">many</span></span><span> </span><span class="annot"><span class="annottext">(RE Char Rational -&gt; RE Char [Rational])
+-&gt; RE Char Rational -&gt; RE Char [Rational]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Char -&gt; RE Char Char
+forall s. Eq s =&gt; s -&gt; RE s s
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/regex-applicative-0.3.4-b1e68dd65c812ecaddd3b654a066f2734827a922b9628088616b3a0de26aaaa3/share/doc/html/src/Text.Regex.Applicative.Types.html#sym"><span class="hs-identifier hs-var">sym</span></a></span><span> </span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">','</span></span><span> </span><span class="annot"><span class="annottext">RE Char Char -&gt; RE Char Rational -&gt; RE Char Rational
+forall a b. RE Char a -&gt; RE Char b -&gt; RE Char b
+forall (f :: * -&gt; *) a b. Applicative f =&gt; f a -&gt; f b -&gt; f b
+</span><span class="hs-operator hs-var">*&gt;</span></span><span> </span><span class="annot"><span class="annottext">RE Char Rational
+</span><a href="#local-6989586621679129567"><span class="hs-identifier hs-var">float</span></a></span><span>
+</span><span id="line-67"></span><span>    </span><span id="local-6989586621679129571"><span class="annot"><span class="annottext">Maybe Rational
+</span><a href="#local-6989586621679129571"><span class="hs-identifier hs-var">upto</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">RE Char Rational -&gt; RE Char (Maybe Rational)
+forall (f :: * -&gt; *) a. Alternative f =&gt; f a -&gt; f (Maybe a)
+</span><span class="hs-identifier hs-var">optional</span></span><span> </span><span class="annot"><span class="annottext">(RE Char Rational -&gt; RE Char (Maybe Rational))
+-&gt; RE Char Rational -&gt; RE Char (Maybe Rational)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; RE Char [Char]
+forall a. Eq a =&gt; [a] -&gt; RE a [a]
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/regex-applicative-0.3.4-b1e68dd65c812ecaddd3b654a066f2734827a922b9628088616b3a0de26aaaa3/share/doc/html/src/Text.Regex.Applicative.Types.html#string"><span class="hs-identifier hs-var">string</span></a></span><span> </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot;..&quot;</span></span><span> </span><span class="annot"><span class="annottext">RE Char [Char] -&gt; RE Char Rational -&gt; RE Char Rational
+forall a b. RE Char a -&gt; RE Char b -&gt; RE Char b
+forall (f :: * -&gt; *) a b. Applicative f =&gt; f a -&gt; f b -&gt; f b
+</span><span class="hs-operator hs-var">*&gt;</span></span><span> </span><span class="annot"><span class="annottext">RE Char Rational
+</span><a href="#local-6989586621679129567"><span class="hs-identifier hs-var">float</span></a></span><span>
+</span><span id="line-68"></span><span>    </span><span class="hs-identifier">pure</span><span> </span><span class="hs-operator">$</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679129566"><span class="hs-identifier hs-var">start</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[Rational]
+</span><a href="#local-6989586621679129568"><span class="hs-identifier hs-var">next</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Maybe Rational
+</span><a href="#local-6989586621679129571"><span class="hs-identifier hs-var">upto</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-69"></span><span>      </span><span class="hs-special">(</span><span id="local-6989586621679129574"><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679129574"><span class="hs-identifier hs-var">a</span></a></span></span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span id="local-6989586621679129575"><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679129575"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">]</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679129576"><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679129576"><span class="hs-identifier hs-var">c</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Rational -&gt; Rational -&gt; [Rational]
+forall a. Enum a =&gt; a -&gt; a -&gt; a -&gt; [a]
+</span><span class="hs-identifier hs-var">enumFromThenTo</span></span><span> </span><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679129574"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679129575"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679129576"><span class="hs-identifier hs-var">c</span></a></span><span>
+</span><span id="line-70"></span><span>      </span><span class="hs-special">(</span><span id="local-6989586621679129577"><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679129577"><span class="hs-identifier hs-var">a</span></a></span></span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679129578"><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679129578"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Rational -&gt; [Rational]
+forall a. Enum a =&gt; a -&gt; a -&gt; [a]
+</span><span class="hs-identifier hs-var">enumFromTo</span></span><span> </span><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679129577"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679129578"><span class="hs-identifier hs-var">b</span></a></span><span>
+</span><span id="line-71"></span><span>      </span><span class="hs-special">(</span><span id="local-6989586621679129579"><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679129579"><span class="hs-identifier hs-var">a</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679129580"><span class="annot"><span class="annottext">[Rational]
+</span><a href="#local-6989586621679129580"><span class="hs-identifier hs-var">bs</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Maybe Rational
+</span><span class="hs-identifier hs-var">Nothing</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679129579"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">Rational -&gt; [Rational] -&gt; [Rational]
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">[Rational]
+</span><a href="#local-6989586621679129580"><span class="hs-identifier hs-var">bs</span></a></span><span>
+</span><span id="line-72"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-73"></span><span>    </span><span class="annot"><a href="#local-6989586621679129567"><span class="hs-identifier hs-type">float</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/regex-applicative-0.3.4-b1e68dd65c812ecaddd3b654a066f2734827a922b9628088616b3a0de26aaaa3/share/doc/html/src/Text.Regex.Applicative.Types.html#RE"><span class="hs-identifier hs-type">RE</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Char</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Rational</span></span><span>
+</span><span id="line-74"></span><span>    </span><span id="local-6989586621679129567"><span class="annot"><span class="annottext">float :: RE Char Rational
+</span><a href="#local-6989586621679129567"><span class="hs-identifier hs-var hs-var">float</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-75"></span><span>      </span><span id="local-6989586621679129581"><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679129581"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">RE Char Rational -&gt; RE Char Rational
+forall a. Num a =&gt; RE Char a -&gt; RE Char a
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/regex-applicative-0.3.4-b1e68dd65c812ecaddd3b654a066f2734827a922b9628088616b3a0de26aaaa3/share/doc/html/src/Text.Regex.Applicative.Common.html#signed"><span class="hs-identifier hs-var">signed</span></a></span><span> </span><span class="annot"><span class="annottext">RE Char Rational
+forall a. Num a =&gt; RE Char a
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/regex-applicative-0.3.4-b1e68dd65c812ecaddd3b654a066f2734827a922b9628088616b3a0de26aaaa3/share/doc/html/src/Text.Regex.Applicative.Common.html#decimal"><span class="hs-identifier hs-var">decimal</span></a></span><span>
+</span><span id="line-76"></span><span>      </span><span id="local-6989586621679129584"><span class="annot"><span class="annottext">Maybe (Rational, [Char])
+</span><a href="#local-6989586621679129584"><span class="hs-identifier hs-var">bblen</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">RE Char (Rational, [Char]) -&gt; RE Char (Maybe (Rational, [Char]))
+forall (f :: * -&gt; *) a. Alternative f =&gt; f a -&gt; f (Maybe a)
+</span><span class="hs-identifier hs-var">optional</span></span><span> </span><span class="annot"><span class="annottext">(RE Char (Rational, [Char]) -&gt; RE Char (Maybe (Rational, [Char])))
+-&gt; RE Char (Rational, [Char]) -&gt; RE Char (Maybe (Rational, [Char]))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Char -&gt; RE Char Char
+forall s. Eq s =&gt; s -&gt; RE s s
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/regex-applicative-0.3.4-b1e68dd65c812ecaddd3b654a066f2734827a922b9628088616b3a0de26aaaa3/share/doc/html/src/Text.Regex.Applicative.Types.html#sym"><span class="hs-identifier hs-var">sym</span></a></span><span> </span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'.'</span></span><span> </span><span class="annot"><span class="annottext">RE Char Char
+-&gt; RE Char (Rational, [Char]) -&gt; RE Char (Rational, [Char])
+forall a b. RE Char a -&gt; RE Char b -&gt; RE Char b
+forall (f :: * -&gt; *) a b. Applicative f =&gt; f a -&gt; f b -&gt; f b
+</span><span class="hs-operator hs-var">*&gt;</span></span><span> </span><span class="annot"><span class="annottext">RE Char Rational -&gt; RE Char (Rational, [Char])
+forall s a. RE s a -&gt; RE s (a, [s])
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/regex-applicative-0.3.4-b1e68dd65c812ecaddd3b654a066f2734827a922b9628088616b3a0de26aaaa3/share/doc/html/src/Text.Regex.Applicative.Interface.html#withMatched"><span class="hs-identifier hs-var">withMatched</span></a></span><span> </span><span class="annot"><span class="annottext">RE Char Rational
+forall a. Num a =&gt; RE Char a
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/regex-applicative-0.3.4-b1e68dd65c812ecaddd3b654a066f2734827a922b9628088616b3a0de26aaaa3/share/doc/html/src/Text.Regex.Applicative.Common.html#decimal"><span class="hs-identifier hs-var">decimal</span></a></span><span>
+</span><span id="line-77"></span><span>      </span><span id="local-6989586621679129586"><span class="annot"><span class="annottext">Maybe Integer
+</span><a href="#local-6989586621679129586"><span class="hs-identifier hs-var">e</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">RE Char Integer -&gt; RE Char (Maybe Integer)
+forall (f :: * -&gt; *) a. Alternative f =&gt; f a -&gt; f (Maybe a)
+</span><span class="hs-identifier hs-var">optional</span></span><span> </span><span class="annot"><span class="annottext">(RE Char Integer -&gt; RE Char (Maybe Integer))
+-&gt; RE Char Integer -&gt; RE Char (Maybe Integer)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(Char -&gt; Bool) -&gt; RE Char Char
+forall s. (s -&gt; Bool) -&gt; RE s s
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/regex-applicative-0.3.4-b1e68dd65c812ecaddd3b654a066f2734827a922b9628088616b3a0de26aaaa3/share/doc/html/src/Text.Regex.Applicative.Types.html#psym"><span class="hs-identifier hs-var">psym</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char -&gt; [Char] -&gt; Bool
+forall a. Eq a =&gt; a -&gt; [a] -&gt; Bool
+forall (t :: * -&gt; *) a. (Foldable t, Eq a) =&gt; a -&gt; t a -&gt; Bool
+</span><span class="hs-operator hs-var">`elem`</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot;Ee&quot;</span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">RE Char Char -&gt; RE Char Integer -&gt; RE Char Integer
+forall a b. RE Char a -&gt; RE Char b -&gt; RE Char b
+forall (f :: * -&gt; *) a b. Applicative f =&gt; f a -&gt; f b -&gt; f b
+</span><span class="hs-operator hs-var">*&gt;</span></span><span> </span><span class="annot"><span class="annottext">RE Char Integer -&gt; RE Char Integer
+forall a. Num a =&gt; RE Char a -&gt; RE Char a
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/regex-applicative-0.3.4-b1e68dd65c812ecaddd3b654a066f2734827a922b9628088616b3a0de26aaaa3/share/doc/html/src/Text.Regex.Applicative.Common.html#signed"><span class="hs-identifier hs-var">signed</span></a></span><span> </span><span class="annot"><span class="annottext">RE Char Integer
+forall a. Num a =&gt; RE Char a
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/regex-applicative-0.3.4-b1e68dd65c812ecaddd3b654a066f2734827a922b9628088616b3a0de26aaaa3/share/doc/html/src/Text.Regex.Applicative.Common.html#decimal"><span class="hs-identifier hs-var">decimal</span></a></span><span>
+</span><span id="line-78"></span><span>      </span><span class="hs-identifier">pure</span><span> </span><span class="hs-operator">$</span><span>
+</span><span id="line-79"></span><span>        </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679129596"><span class="annot"><span class="annottext">dec :: Rational
+</span><a href="#local-6989586621679129596"><span class="hs-identifier hs-var hs-var">dec</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Rational
+-&gt; ((Rational, [Char]) -&gt; Rational)
+-&gt; Maybe (Rational, [Char])
+-&gt; Rational
+forall b a. b -&gt; (a -&gt; b) -&gt; Maybe a -&gt; b
+</span><span class="hs-identifier hs-var">maybe</span></span><span> </span><span class="annot"><span class="annottext">Rational
+</span><span class="hs-number">0</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621679129597"><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679129597"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679129598"><span class="annot"><span class="annottext">[Char]
+</span><a href="#local-6989586621679129598"><span class="hs-identifier hs-var">blen</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679129597"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Rational -&gt; Rational
+forall a. Fractional a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">/</span></span><span> </span><span class="annot"><span class="annottext">Rational
+</span><span class="hs-number">10</span></span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Int -&gt; Rational
+forall a b. (Num a, Integral b) =&gt; a -&gt; b -&gt; a
+</span><span class="hs-operator hs-var">^</span></span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; Int
+forall a. [a] -&gt; Int
+forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Int
+</span><span class="hs-identifier hs-var">length</span></span><span> </span><span class="annot"><span class="annottext">[Char]
+</span><a href="#local-6989586621679129598"><span class="hs-identifier hs-var">blen</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Maybe (Rational, [Char])
+</span><a href="#local-6989586621679129584"><span class="hs-identifier hs-var">bblen</span></a></span><span>
+</span><span id="line-80"></span><span>         </span><span class="hs-keyword">in</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679129581"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Rational -&gt; Rational
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679129596"><span class="hs-identifier hs-var">dec</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Rational -&gt; Rational
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">Rational -&gt; (Integer -&gt; Rational) -&gt; Maybe Integer -&gt; Rational
+forall b a. b -&gt; (a -&gt; b) -&gt; Maybe a -&gt; b
+</span><span class="hs-identifier hs-var">maybe</span></span><span> </span><span class="annot"><span class="annottext">Rational
+</span><span class="hs-number">1</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Rational
+</span><span class="hs-number">10</span></span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Integer -&gt; Rational
+forall a b. (Fractional a, Integral b) =&gt; a -&gt; b -&gt; a
+</span><span class="hs-operator hs-var">^^</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Maybe Integer
+</span><a href="#local-6989586621679129586"><span class="hs-identifier hs-var">e</span></a></span><span>
+</span><span id="line-81"></span><span>
+</span><span id="line-82"></span><span class="hs-keyword">data</span><span> </span><span id="LaminarHT2"><span class="annot"><a href="Args.html#LaminarHT2"><span class="hs-identifier hs-var">LaminarHT2</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="LaminarHT2"><span class="annot"><a href="Args.html#LaminarHT2"><span class="hs-identifier hs-var">LaminarHT2</span></a></span></span><span>
+</span><span id="line-83"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="%24sel%3Ape%3ALaminarHT2"><span class="annot"><span class="annottext">LaminarHT2 -&gt; T
+</span><a href="Args.html#%24sel%3Ape%3ALaminarHT2"><span class="hs-identifier hs-var hs-var">pe</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="NumT.html#T"><span class="hs-identifier hs-type">T</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-84"></span><span>    </span><span id="%24sel%3Arzs%3ALaminarHT2"><span class="annot"><span class="annottext">LaminarHT2 -&gt; [(T, T)]
+</span><a href="Args.html#%24sel%3Arzs%3ALaminarHT2"><span class="hs-identifier hs-var hs-var">rzs</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><a href="NumT.html#T"><span class="hs-identifier hs-type">T</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="NumT.html#T"><span class="hs-identifier hs-type">T</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span class="hs-special">,</span><span>
+</span><span id="line-85"></span><span>    </span><span id="%24sel%3Anlambda%3ALaminarHT2"><span class="annot"><span class="annottext">LaminarHT2 -&gt; Int
+</span><a href="Args.html#%24sel%3Anlambda%3ALaminarHT2"><span class="hs-identifier hs-var hs-var">nlambda</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">,</span><span>
+</span><span id="line-86"></span><span>    </span><span id="%24sel%3Alambdatol%3ALaminarHT2"><span class="annot"><span class="annottext">LaminarHT2 -&gt; Rational
+</span><a href="Args.html#%24sel%3Alambdatol%3ALaminarHT2"><span class="hs-identifier hs-var hs-var">lambdatol</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Rational</span></span><span class="hs-special">,</span><span>
+</span><span id="line-87"></span><span>    </span><span id="%24sel%3Ah%3ALaminarHT2"><span class="annot"><span class="annottext">LaminarHT2 -&gt; Rational
+</span><a href="Args.html#%24sel%3Ah%3ALaminarHT2"><span class="hs-identifier hs-var hs-var">h</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Rational</span></span><span class="hs-special">,</span><span>
+</span><span id="line-88"></span><span>    </span><span id="%24sel%3Asum_n%3ALaminarHT2"><span class="annot"><span class="annottext">LaminarHT2 -&gt; Integer
+</span><a href="Args.html#%24sel%3Asum_n%3ALaminarHT2"><span class="hs-identifier hs-var hs-var">sum_n</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Integer</span></span><span class="hs-special">,</span><span>
+</span><span id="line-89"></span><span>    </span><span id="%24sel%3Aprec%3ALaminarHT2"><span class="annot"><span class="annottext">LaminarHT2 -&gt; CLong
+</span><a href="Args.html#%24sel%3Aprec%3ALaminarHT2"><span class="hs-identifier hs-var hs-var">prec</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">CLong</span></span><span class="hs-special">,</span><span>
+</span><span id="line-90"></span><span>    </span><span id="%24sel%3AinsertPars%3ALaminarHT2"><span class="annot"><span class="annottext">LaminarHT2 -&gt; Connection -&gt; IO ()
+</span><a href="Args.html#%24sel%3AinsertPars%3ALaminarHT2"><span class="hs-identifier hs-var hs-var">insertPars</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/sqlite-simple-0.4.19.0-84079c744b9b2430c35d587623ed961dfd03b0f9e5ab1e78d91683f05bdd96c2/share/doc/html/src/Database.SQLite.Simple.Internal.html#Connection"><span class="hs-identifier hs-type">Connection</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-91"></span><span>    </span><span id="%24sel%3AlookupPars%3ALaminarHT2"><span class="annot"><span class="annottext">LaminarHT2 -&gt; Connection -&gt; IO (Maybe Int64)
+</span><a href="Args.html#%24sel%3AlookupPars%3ALaminarHT2"><span class="hs-identifier hs-var hs-var">lookupPars</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/sqlite-simple-0.4.19.0-84079c744b9b2430c35d587623ed961dfd03b0f9e5ab1e78d91683f05bdd96c2/share/doc/html/src/Database.SQLite.Simple.Internal.html#Connection"><span class="hs-identifier hs-type">Connection</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int64</span></span><span class="hs-special">)</span><span>
+</span><span id="line-92"></span><span>  </span><span class="hs-special">}</span><span>
+</span><span id="line-93"></span><span>
+</span><span id="line-94"></span><span class="annot"><a href="Args.html#toLaminarHT2"><span class="hs-identifier hs-type">toLaminarHT2</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Args.html#LaminarHT"><span class="hs-identifier hs-type">LaminarHT</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Rational</span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Args.html#LaminarHT2"><span class="hs-identifier hs-type">LaminarHT2</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-95"></span><span id="toLaminarHT2"><span class="annot"><span class="annottext">toLaminarHT2 :: LaminarHT [Rational] -&gt; [LaminarHT2]
+</span><a href="Args.html#toLaminarHT2"><span class="hs-identifier hs-var hs-var">toLaminarHT2</span></a></span></span><span> </span><span class="annot"><a href="Args.html#LaminarHT"><span class="hs-identifier hs-type">LaminarHT</span></a></span><span> </span><span class="hs-special">{</span><span id="local-6989586621679129616"><span id="local-6989586621679129617"><span id="local-6989586621679129618"><span id="local-6989586621679129619"><span id="local-6989586621679129620"><span id="local-6989586621679129621"><span id="local-6989586621679129622"><span id="local-6989586621679129623"><span id="local-6989586621679129624"><span class="annot"><span class="annottext">[Char]
+[Rational]
+$sel:pes:LaminarHT :: forall a. LaminarHT a -&gt; a
+$sel:rhos:LaminarHT :: forall a. LaminarHT a -&gt; a
+$sel:zs:LaminarHT :: forall a. LaminarHT a -&gt; a
+$sel:nlambdas:LaminarHT :: forall a. LaminarHT a -&gt; a
+$sel:lambdatols:LaminarHT :: forall a. LaminarHT a -&gt; a
+$sel:hs:LaminarHT :: forall a. LaminarHT a -&gt; a
+$sel:sum_ns:LaminarHT :: forall a. LaminarHT a -&gt; a
+$sel:acb_precs:LaminarHT :: forall a. LaminarHT a -&gt; a
+$sel:output_db:LaminarHT :: forall a. LaminarHT a -&gt; [Char]
+pes :: [Rational]
+rhos :: [Rational]
+zs :: [Rational]
+nlambdas :: [Rational]
+lambdatols :: [Rational]
+hs :: [Rational]
+sum_ns :: [Rational]
+acb_precs :: [Rational]
+output_db :: [Char]
+</span><a href="Args.html#%24sel%3Apes%3ALaminarHT"><span class="hs-glyph hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">..</span></a></span></span></span></span></span></span></span></span></span></span><span class="hs-special">}</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-96"></span><span>  </span><span class="hs-special">[</span><span> </span><span class="annot"><a href="Args.html#LaminarHT2"><span class="hs-identifier hs-type">LaminarHT2</span></a></span><span>
+</span><span id="line-97"></span><span>      </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">$sel:pe:LaminarHT2 :: T
+</span><a href="Args.html#%24sel%3Ape%3ALaminarHT2"><span class="hs-identifier hs-var">pe</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Rational -&gt; T
+forall a. Fractional a =&gt; Rational -&gt; a
+</span><span class="hs-identifier hs-var">fromRational</span></span><span> </span><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679129625"><span class="hs-identifier hs-var">pe</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-98"></span><span>        </span><span class="annot"><span class="annottext">$sel:rzs:LaminarHT2 :: [(T, T)]
+</span><a href="Args.html#%24sel%3Arzs%3ALaminarHT2"><span class="hs-identifier hs-var">rzs</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Rational -&gt; Rational -&gt; (T, T))
+-&gt; [Rational] -&gt; [Rational] -&gt; [(T, T)]
+forall a b c. (a -&gt; b -&gt; c) -&gt; [a] -&gt; [b] -&gt; [c]
+forall (f :: * -&gt; *) a b c.
+Applicative f =&gt;
+(a -&gt; b -&gt; c) -&gt; f a -&gt; f b -&gt; f c
+</span><span class="hs-identifier hs-var">liftA2</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679129627"><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679129627"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621679129628"><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679129628"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Rational -&gt; T
+forall a. Fractional a =&gt; Rational -&gt; a
+</span><span class="hs-identifier hs-var">fromRational</span></span><span> </span><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679129627"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Rational -&gt; T
+forall a. Fractional a =&gt; Rational -&gt; a
+</span><span class="hs-identifier hs-var">fromRational</span></span><span> </span><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679129628"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[Rational]
+</span><a href="#local-6989586621679129617"><span class="hs-identifier hs-var">rhos</span></a></span><span> </span><span class="annot"><span class="annottext">[Rational]
+</span><a href="#local-6989586621679129618"><span class="hs-identifier hs-var">zs</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-99"></span><span>        </span><span class="annot"><span class="annottext">$sel:nlambda:LaminarHT2 :: Int
+</span><a href="Args.html#%24sel%3Anlambda%3ALaminarHT2"><span class="hs-identifier hs-var">nlambda</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Int
+forall b. Integral b =&gt; Rational -&gt; b
+forall a b. (RealFrac a, Integral b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">round</span></span><span> </span><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679129630"><span class="hs-identifier hs-var">nlambda</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-100"></span><span>        </span><span class="annot"><span class="annottext">$sel:lambdatol:LaminarHT2 :: Rational
+</span><a href="Args.html#%24sel%3Alambdatol%3ALaminarHT2"><span class="hs-identifier hs-var">lambdatol</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679129631"><span class="hs-identifier hs-var">lambdatol</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-101"></span><span>        </span><span class="annot"><span class="annottext">$sel:h:LaminarHT2 :: Rational
+</span><a href="Args.html#%24sel%3Ah%3ALaminarHT2"><span class="hs-identifier hs-var">h</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679129632"><span class="hs-identifier hs-var">h</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-102"></span><span>        </span><span class="annot"><span class="annottext">$sel:sum_n:LaminarHT2 :: Integer
+</span><a href="Args.html#%24sel%3Asum_n%3ALaminarHT2"><span class="hs-identifier hs-var">sum_n</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Integer
+forall b. Integral b =&gt; Rational -&gt; b
+forall a b. (RealFrac a, Integral b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">round</span></span><span> </span><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679129633"><span class="hs-identifier hs-var">sum_n</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-103"></span><span>        </span><span class="annot"><span class="annottext">$sel:prec:LaminarHT2 :: CLong
+</span><a href="Args.html#%24sel%3Aprec%3ALaminarHT2"><span class="hs-identifier hs-var">prec</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Rational -&gt; CLong
+forall b. Integral b =&gt; Rational -&gt; b
+forall a b. (RealFrac a, Integral b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">round</span></span><span> </span><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679129634"><span class="hs-identifier hs-var">prec</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-104"></span><span>        </span><span class="annot"><span class="annottext">$sel:lookupPars:LaminarHT2 :: Connection -&gt; IO (Maybe Int64)
+</span><a href="Args.html#%24sel%3AlookupPars%3ALaminarHT2"><span class="hs-identifier hs-var">lookupPars</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679129635"><span class="annot"><span class="annottext">Connection
+</span><a href="#local-6989586621679129635"><span class="hs-identifier hs-var">con</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-105"></span><span>          </span><span class="annot"><span class="annottext">Connection -&gt; Query -&gt; [SQLData] -&gt; IO [Only Int64]
+forall q r.
+(ToRow q, FromRow r) =&gt;
+Connection -&gt; Query -&gt; q -&gt; IO [r]
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/sqlite-simple-0.4.19.0-84079c744b9b2430c35d587623ed961dfd03b0f9e5ab1e78d91683f05bdd96c2/share/doc/html/src/Database.SQLite.Simple.html#query"><span class="hs-identifier hs-var">query</span></a></span><span>
+</span><span id="line-106"></span><span>            </span><span class="annot"><span class="annottext">Connection
+</span><a href="#local-6989586621679129635"><span class="hs-identifier hs-var">con</span></a></span><span>
+</span><span id="line-107"></span><span>            </span><span class="annot"><span class="annottext">Query
+</span><span class="hs-string">&quot;SELECT id FROM pars WHERE pe = ? AND nlambda = ? AND lambdatol = ? AND h = ? AND sum_n = ? AND prec = ?&quot;</span></span><span>
+</span><span id="line-108"></span><span>            </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">forall a. ToField a =&gt; a -&gt; SQLData
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/sqlite-simple-0.4.19.0-84079c744b9b2430c35d587623ed961dfd03b0f9e5ab1e78d91683f05bdd96c2/share/doc/html/src/Database.SQLite.Simple.ToField.html#toField"><span class="hs-identifier hs-var">toField</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Rational -&gt; Int
+forall b. Integral b =&gt; Rational -&gt; b
+forall a b. (RealFrac a, Integral b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">round</span></span><span> </span><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679129625"><span class="hs-identifier hs-var">pe</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-109"></span><span>              </span><span class="annot"><span class="annottext">forall a. ToField a =&gt; a -&gt; SQLData
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/sqlite-simple-0.4.19.0-84079c744b9b2430c35d587623ed961dfd03b0f9e5ab1e78d91683f05bdd96c2/share/doc/html/src/Database.SQLite.Simple.ToField.html#toField"><span class="hs-identifier hs-var">toField</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Rational -&gt; Int
+forall b. Integral b =&gt; Rational -&gt; b
+forall a b. (RealFrac a, Integral b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">round</span></span><span> </span><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679129630"><span class="hs-identifier hs-var">nlambda</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-110"></span><span>              </span><span class="annot"><span class="annottext">forall a. ToField a =&gt; a -&gt; SQLData
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/sqlite-simple-0.4.19.0-84079c744b9b2430c35d587623ed961dfd03b0f9e5ab1e78d91683f05bdd96c2/share/doc/html/src/Database.SQLite.Simple.ToField.html#toField"><span class="hs-identifier hs-var">toField</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Rational -&gt; Double
+forall a b. (Real a, Fractional b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">realToFrac</span></span><span> </span><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679129631"><span class="hs-identifier hs-var">lambdatol</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-111"></span><span>              </span><span class="annot"><span class="annottext">forall a. ToField a =&gt; a -&gt; SQLData
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/sqlite-simple-0.4.19.0-84079c744b9b2430c35d587623ed961dfd03b0f9e5ab1e78d91683f05bdd96c2/share/doc/html/src/Database.SQLite.Simple.ToField.html#toField"><span class="hs-identifier hs-var">toField</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Rational -&gt; Double
+forall a b. (Real a, Fractional b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">realToFrac</span></span><span> </span><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679129632"><span class="hs-identifier hs-var">h</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-112"></span><span>              </span><span class="annot"><span class="annottext">forall a. ToField a =&gt; a -&gt; SQLData
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/sqlite-simple-0.4.19.0-84079c744b9b2430c35d587623ed961dfd03b0f9e5ab1e78d91683f05bdd96c2/share/doc/html/src/Database.SQLite.Simple.ToField.html#toField"><span class="hs-identifier hs-var">toField</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Rational -&gt; Int
+forall b. Integral b =&gt; Rational -&gt; b
+forall a b. (RealFrac a, Integral b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">round</span></span><span> </span><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679129633"><span class="hs-identifier hs-var">sum_n</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-113"></span><span>              </span><span class="annot"><span class="annottext">forall a. ToField a =&gt; a -&gt; SQLData
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/sqlite-simple-0.4.19.0-84079c744b9b2430c35d587623ed961dfd03b0f9e5ab1e78d91683f05bdd96c2/share/doc/html/src/Database.SQLite.Simple.ToField.html#toField"><span class="hs-identifier hs-var">toField</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Rational -&gt; Int
+forall b. Integral b =&gt; Rational -&gt; b
+forall a b. (RealFrac a, Integral b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">round</span></span><span> </span><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679129634"><span class="hs-identifier hs-var">prec</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-114"></span><span>            </span><span class="hs-special">]</span><span>
+</span><span id="line-115"></span><span>            </span><span class="annot"><span class="annottext">IO [Only Int64]
+-&gt; ([Only Int64] -&gt; Maybe Int64) -&gt; IO (Maybe Int64)
+forall (f :: * -&gt; *) a b. Functor f =&gt; f a -&gt; (a -&gt; b) -&gt; f b
+</span><span class="hs-operator hs-var">&lt;&amp;&gt;</span></span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-116"></span><span>              </span><span class="hs-special">[</span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Only-0.1-e74c0bb07d3da76985fb36a81e046fc2ec14fd71e6c549259af101d2d719f1e7/share/doc/html/src/Data.Tuple.Only.html#Only"><span class="hs-identifier hs-type">Only</span></a></span><span> </span><span id="local-6989586621679129638"><span class="annot"><span class="annottext">Int64
+</span><a href="#local-6989586621679129638"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int64 -&gt; Maybe Int64
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">Int64
+</span><a href="#local-6989586621679129638"><span class="hs-identifier hs-var">i</span></a></span><span>
+</span><span id="line-117"></span><span>              </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe Int64
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span class="hs-special">,</span><span>
+</span><span id="line-118"></span><span>        </span><span class="annot"><span class="annottext">$sel:insertPars:LaminarHT2 :: Connection -&gt; IO ()
+</span><a href="Args.html#%24sel%3AinsertPars%3ALaminarHT2"><span class="hs-identifier hs-var">insertPars</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679129639"><span class="annot"><span class="annottext">Connection
+</span><a href="#local-6989586621679129639"><span class="hs-identifier hs-var">con</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-119"></span><span>          </span><span class="annot"><span class="annottext">Connection -&gt; Query -&gt; [SQLData] -&gt; IO ()
+forall q. ToRow q =&gt; Connection -&gt; Query -&gt; q -&gt; IO ()
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/sqlite-simple-0.4.19.0-84079c744b9b2430c35d587623ed961dfd03b0f9e5ab1e78d91683f05bdd96c2/share/doc/html/src/Database.SQLite.Simple.html#execute"><span class="hs-identifier hs-var">execute</span></a></span><span>
+</span><span id="line-120"></span><span>            </span><span class="annot"><span class="annottext">Connection
+</span><a href="#local-6989586621679129639"><span class="hs-identifier hs-var">con</span></a></span><span>
+</span><span id="line-121"></span><span>            </span><span class="annot"><span class="annottext">Query
+</span><span class="hs-string">&quot;INSERT INTO pars (pe, nlambda, lambdatol, h, sum_n, prec) VALUES (?, ?, ?, ?, ?, ?)&quot;</span></span><span>
+</span><span id="line-122"></span><span>            </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">forall a. ToField a =&gt; a -&gt; SQLData
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/sqlite-simple-0.4.19.0-84079c744b9b2430c35d587623ed961dfd03b0f9e5ab1e78d91683f05bdd96c2/share/doc/html/src/Database.SQLite.Simple.ToField.html#toField"><span class="hs-identifier hs-var">toField</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Rational -&gt; Int
+forall b. Integral b =&gt; Rational -&gt; b
+forall a b. (RealFrac a, Integral b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">round</span></span><span> </span><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679129625"><span class="hs-identifier hs-var">pe</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-123"></span><span>              </span><span class="annot"><span class="annottext">forall a. ToField a =&gt; a -&gt; SQLData
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/sqlite-simple-0.4.19.0-84079c744b9b2430c35d587623ed961dfd03b0f9e5ab1e78d91683f05bdd96c2/share/doc/html/src/Database.SQLite.Simple.ToField.html#toField"><span class="hs-identifier hs-var">toField</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Rational -&gt; Int
+forall b. Integral b =&gt; Rational -&gt; b
+forall a b. (RealFrac a, Integral b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">round</span></span><span> </span><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679129630"><span class="hs-identifier hs-var">nlambda</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-124"></span><span>              </span><span class="annot"><span class="annottext">forall a. ToField a =&gt; a -&gt; SQLData
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/sqlite-simple-0.4.19.0-84079c744b9b2430c35d587623ed961dfd03b0f9e5ab1e78d91683f05bdd96c2/share/doc/html/src/Database.SQLite.Simple.ToField.html#toField"><span class="hs-identifier hs-var">toField</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Rational -&gt; Double
+forall a b. (Real a, Fractional b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">realToFrac</span></span><span> </span><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679129631"><span class="hs-identifier hs-var">lambdatol</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-125"></span><span>              </span><span class="annot"><span class="annottext">forall a. ToField a =&gt; a -&gt; SQLData
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/sqlite-simple-0.4.19.0-84079c744b9b2430c35d587623ed961dfd03b0f9e5ab1e78d91683f05bdd96c2/share/doc/html/src/Database.SQLite.Simple.ToField.html#toField"><span class="hs-identifier hs-var">toField</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Rational -&gt; Double
+forall a b. (Real a, Fractional b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">realToFrac</span></span><span> </span><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679129632"><span class="hs-identifier hs-var">h</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-126"></span><span>              </span><span class="annot"><span class="annottext">forall a. ToField a =&gt; a -&gt; SQLData
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/sqlite-simple-0.4.19.0-84079c744b9b2430c35d587623ed961dfd03b0f9e5ab1e78d91683f05bdd96c2/share/doc/html/src/Database.SQLite.Simple.ToField.html#toField"><span class="hs-identifier hs-var">toField</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Rational -&gt; Int
+forall b. Integral b =&gt; Rational -&gt; b
+forall a b. (RealFrac a, Integral b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">round</span></span><span> </span><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679129633"><span class="hs-identifier hs-var">sum_n</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-127"></span><span>              </span><span class="annot"><span class="annottext">forall a. ToField a =&gt; a -&gt; SQLData
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/sqlite-simple-0.4.19.0-84079c744b9b2430c35d587623ed961dfd03b0f9e5ab1e78d91683f05bdd96c2/share/doc/html/src/Database.SQLite.Simple.ToField.html#toField"><span class="hs-identifier hs-var">toField</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Rational -&gt; Int
+forall b. Integral b =&gt; Rational -&gt; b
+forall a b. (RealFrac a, Integral b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">round</span></span><span> </span><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679129634"><span class="hs-identifier hs-var">prec</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-128"></span><span>            </span><span class="hs-special">]</span><span>
+</span><span id="line-129"></span><span>      </span><span class="hs-special">}</span><span>
+</span><span id="line-130"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="local-6989586621679129625"><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679129625"><span class="hs-identifier hs-var">pe</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[Rational]
+</span><a href="#local-6989586621679129616"><span class="hs-identifier hs-var">pes</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-131"></span><span>      </span><span id="local-6989586621679129630"><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679129630"><span class="hs-identifier hs-var">nlambda</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[Rational]
+</span><a href="#local-6989586621679129619"><span class="hs-identifier hs-var">nlambdas</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-132"></span><span>      </span><span id="local-6989586621679129631"><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679129631"><span class="hs-identifier hs-var">lambdatol</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[Rational]
+</span><a href="#local-6989586621679129620"><span class="hs-identifier hs-var">lambdatols</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-133"></span><span>      </span><span id="local-6989586621679129632"><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679129632"><span class="hs-identifier hs-var">h</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[Rational]
+</span><a href="#local-6989586621679129621"><span class="hs-identifier hs-var">hs</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-134"></span><span>      </span><span id="local-6989586621679129633"><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679129633"><span class="hs-identifier hs-var">sum_n</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[Rational]
+</span><a href="#local-6989586621679129622"><span class="hs-identifier hs-var">sum_ns</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-135"></span><span>      </span><span id="local-6989586621679129634"><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679129634"><span class="hs-identifier hs-var">prec</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[Rational]
+</span><a href="#local-6989586621679129623"><span class="hs-identifier hs-var">acb_precs</span></a></span><span>
+</span><span id="line-136"></span><span>  </span><span class="hs-special">]</span><span>
+</span><span id="line-137"></span></pre></body></html>

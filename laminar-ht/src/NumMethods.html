@@ -1,0 +1,732 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="annot"><span class="hs-comment">-- | numerical methods operating on 'NumT.T'</span></span><span>
+</span><span id="line-2"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">NumMethods</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-3"></span><span>
+</span><span id="line-4"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">when</span></span><span class="hs-special">)</span><span>
+</span><span id="line-5"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Data</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Data</span></span><span class="hs-special">)</span><span>
+</span><span id="line-6"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.html"><span class="hs-identifier">Data.Number.Flint</span></a></span><span>
+</span><span id="line-7"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.Types.FFI.html#Acb"><span class="hs-identifier">Acb</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-8"></span><span>    </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#acb_add_error_mag"><span class="hs-identifier">acb_add_error_mag</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-9"></span><span>    </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#acb_get_mag"><span class="hs-identifier">acb_get_mag</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-10"></span><span>    </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.Hypgeom.FFI.html#acb_hypgeom_1f1"><span class="hs-identifier">acb_hypgeom_1f1</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-11"></span><span>    </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#acb_overlaps"><span class="hs-identifier">acb_overlaps</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-12"></span><span>    </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#acb_sub"><span class="hs-identifier">acb_sub</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-13"></span><span>    </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#acb_swap"><span class="hs-identifier">acb_swap</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-14"></span><span>    </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#acb_union"><span class="hs-identifier">acb_union</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-15"></span><span>    </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Arb.FFI.html#arb_is_positive"><span class="hs-identifier">arb_is_positive</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-16"></span><span>    </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Arb.Mag.FFI.html#mag_get_d"><span class="hs-identifier">mag_get_d</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-17"></span><span>    </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#newAcb"><span class="hs-identifier">newAcb</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-18"></span><span>    </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#withAcb"><span class="hs-identifier">withAcb</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-19"></span><span>    </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Arb.Mag.FFI.html#withMag"><span class="hs-identifier">withMag</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-20"></span><span>    </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#withNewAcb"><span class="hs-identifier">withNewAcb</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-21"></span><span>    </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Arb.Mag.FFI.html#withNewMag"><span class="hs-identifier">withNewMag</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-22"></span><span>  </span><span class="hs-special">)</span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Foreign.C</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">CDouble</span></span><span class="hs-special">)</span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="NumT.html"><span class="hs-identifier">NumT</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="NumT.html#T"><span class="hs-identifier">T</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="NumT.html#t"><span class="hs-identifier">t</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="NumT.html#withAcbRe_"><span class="hs-identifier">withAcbRe_</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="NumT.html#withAcb_"><span class="hs-identifier">withAcb_</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="NumT.html#withAcb__"><span class="hs-identifier">withAcb__</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Text.Read</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">readMaybe</span></span><span class="hs-special">)</span><span>
+</span><span id="line-26"></span><span>
+</span><span id="line-27"></span><span class="hs-comment">-- | Bender Orszag 1999 8.1.16</span><span>
+</span><span id="line-28"></span><span class="hs-comment">--</span><span>
+</span><span id="line-29"></span><span class="hs-comment">-- Given xs::[T] is a list that converges to some value, @A@,</span><span>
+</span><span id="line-30"></span><span class="hs-comment">-- richardson2 n (take _N xs) evaluates the term below:</span><span>
+</span><span id="line-31"></span><span class="hs-comment">--</span><span>
+</span><span id="line-32"></span><span class="hs-comment">-- \[ \sum_{k=0}^N  \frac{A_{n+k} (n+k)^N (-1)^{k+N}}{k! (N- k)!} \]</span><span>
+</span><span id="line-33"></span><span class="hs-comment">--</span><span>
+</span><span id="line-34"></span><span class="hs-comment">-- this is a bit more general than 'richardson'. The uncertainty</span><span>
+</span><span id="line-35"></span><span class="hs-comment">-- in the result is increased by the absolute difference between</span><span>
+</span><span id="line-36"></span><span class="hs-comment">-- the result and the last element of xs.</span><span>
+</span><span id="line-37"></span><span class="hs-comment">--</span><span>
+</span><span id="line-38"></span><span class="hs-comment">-- something is wrong when I  use this, either it's the definition,</span><span>
+</span><span id="line-39"></span><span class="hs-comment">-- or it's being used wrong. The sums become very large and the error</span><span>
+</span><span id="line-40"></span><span class="hs-comment">-- bound includes 0. Maybe I the A_j are terms not sums?</span><span>
+</span><span id="line-41"></span><span class="annot"><a href="NumMethods.html#richardson2"><span class="hs-identifier hs-type">richardson2</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Integer</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="NumT.html#T"><span class="hs-identifier hs-type">T</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="NumT.html#T"><span class="hs-identifier hs-type">T</span></a></span><span>
+</span><span id="line-42"></span><span id="richardson2"><span class="annot"><span class="annottext">richardson2 :: Integer -&gt; [CLong -&gt; IO Acb] -&gt; CLong -&gt; IO Acb
+</span><a href="NumMethods.html#richardson2"><span class="hs-identifier hs-var hs-var">richardson2</span></a></span></span><span> </span><span id="local-6989586621679128710"><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679128710"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621679128711"><span class="annot"><span class="annottext">[CLong -&gt; IO Acb]
+</span><a href="#local-6989586621679128711"><span class="hs-identifier hs-var">xs</span></a></span></span><span> </span><span id="local-6989586621679128712"><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128712"><span class="hs-identifier hs-var">prec</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-43"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679128718"><span class="annot"><span class="annottext">_N :: Integer
+</span><a href="#local-6989586621679128718"><span class="hs-identifier hs-var hs-var">_N</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Integer
+forall a b. (Integral a, Num b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">fromIntegral</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[CLong -&gt; IO Acb] -&gt; Int
+forall a. [a] -&gt; Int
+forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Int
+</span><span class="hs-identifier hs-var">length</span></span><span> </span><span class="annot"><span class="annottext">[CLong -&gt; IO Acb]
+</span><a href="#local-6989586621679128711"><span class="hs-identifier hs-var">xs</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Integer -&gt; Integer
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679128710"><span class="hs-identifier hs-var">n</span></a></span><span>
+</span><span id="line-44"></span><span>      </span><span id="local-6989586621679128743"><span class="annot"><span class="annottext">fac :: a -&gt; b
+</span><a href="#local-6989586621679128743"><span class="hs-identifier hs-var hs-var">fac</span></a></span></span><span> </span><span id="local-6989586621679128744"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679128744"><span class="hs-identifier hs-var">j</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; b
+forall a b. (Integral a, Num b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">fromIntegral</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; b) -&gt; a -&gt; b
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[a] -&gt; a
+forall a. Num a =&gt; [a] -&gt; a
+forall (t :: * -&gt; *) a. (Foldable t, Num a) =&gt; t a -&gt; a
+</span><span class="hs-identifier hs-var">product</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">a
+</span><span class="hs-number">1</span></span><span> </span><span class="hs-glyph">..</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679128744"><span class="hs-identifier hs-var">j</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-45"></span><span>      </span><span class="annot"><a href="#local-6989586621679128746"><span class="hs-identifier hs-type">coeffs</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="NumT.html#T"><span class="hs-identifier hs-type">T</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-46"></span><span>      </span><span id="local-6989586621679128746"><span class="annot"><span class="annottext">coeffs :: [CLong -&gt; IO Acb]
+</span><a href="#local-6989586621679128746"><span class="hs-identifier hs-var hs-var">coeffs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-47"></span><span>        </span><span class="hs-special">[</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Integer -&gt; CLong -&gt; IO Acb
+forall a b. (Integral a, Num b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">fromIntegral</span></span><span> </span><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679128710"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">(CLong -&gt; IO Acb) -&gt; (CLong -&gt; IO Acb) -&gt; CLong -&gt; IO Acb
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; CLong -&gt; IO Acb
+forall a b. (Integral a, Num b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">fromIntegral</span></span><span> </span><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679128748"><span class="hs-identifier hs-var">k</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(CLong -&gt; IO Acb) -&gt; Integer -&gt; CLong -&gt; IO Acb
+forall a b. (Num a, Integral b) =&gt; a -&gt; b -&gt; a
+</span><span class="hs-operator hs-var">^</span></span><span> </span><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679128718"><span class="hs-identifier hs-var">_N</span></a></span><span> </span><span class="annot"><span class="annottext">(CLong -&gt; IO Acb) -&gt; (CLong -&gt; IO Acb) -&gt; CLong -&gt; IO Acb
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">-</span><span class="annot"><span class="annottext">CLong -&gt; IO Acb
+</span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(CLong -&gt; IO Acb) -&gt; Integer -&gt; CLong -&gt; IO Acb
+forall a b. (Num a, Integral b) =&gt; a -&gt; b -&gt; a
+</span><span class="hs-operator hs-var">^</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679128748"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Integer -&gt; Integer
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679128718"><span class="hs-identifier hs-var">_N</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(CLong -&gt; IO Acb) -&gt; (CLong -&gt; IO Acb) -&gt; CLong -&gt; IO Acb
+forall a. Fractional a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">/</span></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; CLong -&gt; IO Acb
+forall a b. (Integral a, Num b) =&gt; a -&gt; b
+</span><a href="#local-6989586621679128743"><span class="hs-identifier hs-var">fac</span></a></span><span> </span><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679128748"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">(CLong -&gt; IO Acb) -&gt; (CLong -&gt; IO Acb) -&gt; CLong -&gt; IO Acb
+forall a. Fractional a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">/</span></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; CLong -&gt; IO Acb
+forall a b. (Integral a, Num b) =&gt; a -&gt; b
+</span><a href="#local-6989586621679128743"><span class="hs-identifier hs-var">fac</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679128718"><span class="hs-identifier hs-var">_N</span></a></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Integer -&gt; Integer
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679128748"><span class="hs-identifier hs-var">k</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-48"></span><span>          </span><span class="hs-glyph">|</span><span> </span><span id="local-6989586621679128748"><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679128748"><span class="hs-identifier hs-var">k</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Integer
+</span><span class="hs-number">0</span></span><span> </span><span class="hs-glyph">..</span><span> </span><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679128718"><span class="hs-identifier hs-var">_N</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-49"></span><span>        </span><span class="hs-special">]</span><span>
+</span><span id="line-50"></span><span>  </span><span id="local-6989586621679128752"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128752"><span class="hs-identifier hs-var">xEnd</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[CLong -&gt; IO Acb] -&gt; CLong -&gt; IO Acb
+forall a. Num a =&gt; [a] -&gt; a
+forall (t :: * -&gt; *) a. (Foldable t, Num a) =&gt; t a -&gt; a
+</span><span class="hs-identifier hs-var">sum</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">((CLong -&gt; IO Acb) -&gt; (CLong -&gt; IO Acb) -&gt; CLong -&gt; IO Acb)
+-&gt; [CLong -&gt; IO Acb] -&gt; [CLong -&gt; IO Acb] -&gt; [CLong -&gt; IO Acb]
+forall a b c. (a -&gt; b -&gt; c) -&gt; [a] -&gt; [b] -&gt; [c]
+</span><span class="hs-identifier hs-var">zipWith</span></span><span> </span><span class="annot"><span class="annottext">(CLong -&gt; IO Acb) -&gt; (CLong -&gt; IO Acb) -&gt; CLong -&gt; IO Acb
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">(*)</span></span><span> </span><span class="annot"><span class="annottext">[CLong -&gt; IO Acb]
+</span><a href="#local-6989586621679128746"><span class="hs-identifier hs-var">coeffs</span></a></span><span> </span><span class="annot"><span class="annottext">([CLong -&gt; IO Acb] -&gt; [CLong -&gt; IO Acb])
+-&gt; [CLong -&gt; IO Acb] -&gt; [CLong -&gt; IO Acb]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; [CLong -&gt; IO Acb] -&gt; [CLong -&gt; IO Acb]
+forall a. Int -&gt; [a] -&gt; [a]
+</span><span class="hs-identifier hs-var">drop</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Integer -&gt; Int
+forall a b. (Integral a, Num b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">fromIntegral</span></span><span> </span><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679128710"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[CLong -&gt; IO Acb]
+</span><a href="#local-6989586621679128711"><span class="hs-identifier hs-var">xs</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128712"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-51"></span><span>  </span><span id="local-6989586621679128756"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128756"><span class="hs-identifier hs-var">err</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">(CLong -&gt; IO Acb) -&gt; CLong -&gt; IO Acb
+forall a. Num a =&gt; a -&gt; a
+</span><span class="hs-identifier hs-var">abs</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Acb -&gt; CLong -&gt; IO Acb
+</span><a href="NumT.html#t"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128752"><span class="hs-identifier hs-var">xEnd</span></a></span><span> </span><span class="annot"><span class="annottext">(CLong -&gt; IO Acb) -&gt; (CLong -&gt; IO Acb) -&gt; CLong -&gt; IO Acb
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">[CLong -&gt; IO Acb] -&gt; CLong -&gt; IO Acb
+forall a. HasCallStack =&gt; [a] -&gt; a
+</span><span class="hs-identifier hs-var">last</span></span><span> </span><span class="annot"><span class="annottext">[CLong -&gt; IO Acb]
+</span><a href="#local-6989586621679128711"><span class="hs-identifier hs-var">xs</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128712"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-52"></span><span>  </span><span class="hs-special">(</span><span id="local-6989586621679128759"><span class="annot"><span class="annottext">Mag
+</span><a href="#local-6989586621679128759"><span class="hs-identifier hs-var">errMag</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">()
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">(Ptr CMag -&gt; IO ()) -&gt; IO (Mag, ())
+forall {a}. (Ptr CMag -&gt; IO a) -&gt; IO (Mag, a)
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Arb.Mag.FFI.html#withNewMag"><span class="hs-identifier hs-var">withNewMag</span></a></span><span> </span><span class="annot"><span class="annottext">((Ptr CMag -&gt; IO ()) -&gt; IO (Mag, ()))
+-&gt; (Ptr CMag -&gt; IO ()) -&gt; IO (Mag, ())
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Acb -&gt; (Ptr CAcb -&gt; IO ()) -&gt; IO ()
+</span><a href="NumT.html#withAcb__"><span class="hs-identifier hs-var">withAcb__</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128756"><span class="hs-identifier hs-var">err</span></a></span><span> </span><span class="annot"><span class="annottext">((Ptr CAcb -&gt; IO ()) -&gt; IO ())
+-&gt; (Ptr CMag -&gt; Ptr CAcb -&gt; IO ()) -&gt; Ptr CMag -&gt; IO ()
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Ptr CMag -&gt; Ptr CAcb -&gt; IO ()
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#acb_get_mag"><span class="hs-identifier hs-var">acb_get_mag</span></a></span><span>
+</span><span id="line-53"></span><span>  </span><span class="annot"><span class="annottext">Acb -&gt; (Ptr CAcb -&gt; IO (Mag, ())) -&gt; IO Acb
+forall a. Acb -&gt; (Ptr CAcb -&gt; IO a) -&gt; IO Acb
+</span><a href="NumT.html#withAcb_"><span class="hs-identifier hs-var">withAcb_</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128752"><span class="hs-identifier hs-var">xEnd</span></a></span><span> </span><span class="annot"><span class="annottext">((Ptr CAcb -&gt; IO (Mag, ())) -&gt; IO Acb)
+-&gt; (Ptr CAcb -&gt; IO (Mag, ())) -&gt; IO Acb
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Mag -&gt; (Ptr CMag -&gt; IO ()) -&gt; IO (Mag, ())
+forall {a}. Mag -&gt; (Ptr CMag -&gt; IO a) -&gt; IO (Mag, a)
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Arb.Mag.FFI.html#withMag"><span class="hs-identifier hs-var">withMag</span></a></span><span> </span><span class="annot"><span class="annottext">Mag
+</span><a href="#local-6989586621679128759"><span class="hs-identifier hs-var">errMag</span></a></span><span> </span><span class="annot"><span class="annottext">((Ptr CMag -&gt; IO ()) -&gt; IO (Mag, ()))
+-&gt; (Ptr CAcb -&gt; Ptr CMag -&gt; IO ()) -&gt; Ptr CAcb -&gt; IO (Mag, ())
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Ptr CAcb -&gt; Ptr CMag -&gt; IO ()
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#acb_add_error_mag"><span class="hs-identifier hs-var">acb_add_error_mag</span></a></span><span>
+</span><span id="line-54"></span><span>
+</span><span id="line-55"></span><span class="hs-comment">-- | Richardson extrapolation:</span><span>
+</span><span id="line-56"></span><span class="hs-comment">-- evaluate f at @h, h\/2, h\/4@</span><span>
+</span><span id="line-57"></span><span class="hs-comment">-- then infer the order and constant factor for the leading error term,</span><span>
+</span><span id="line-58"></span><span class="hs-comment">-- and increase the h\/4 term's error by this amount</span><span>
+</span><span id="line-59"></span><span class="annot"><a href="NumMethods.html#richardson"><span class="hs-identifier hs-type">richardson</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Rational</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="NumT.html#T"><span class="hs-identifier hs-type">T</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Rational</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="NumT.html#T"><span class="hs-identifier hs-type">T</span></a></span><span>
+</span><span id="line-60"></span><span id="richardson"><span class="annot"><span class="annottext">richardson :: (Rational -&gt; CLong -&gt; IO Acb) -&gt; Rational -&gt; CLong -&gt; IO Acb
+</span><a href="NumMethods.html#richardson"><span class="hs-identifier hs-var hs-var">richardson</span></a></span></span><span> </span><span id="local-6989586621679128761"><span class="annot"><span class="annottext">Rational -&gt; CLong -&gt; IO Acb
+</span><a href="#local-6989586621679128761"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679128762"><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679128762"><span class="hs-identifier hs-var">h</span></a></span></span><span> </span><span id="local-6989586621679128763"><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128763"><span class="hs-identifier hs-var">prec</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-61"></span><span>  </span><span id="local-6989586621679128764"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128764"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Rational -&gt; CLong -&gt; IO Acb
+</span><a href="#local-6989586621679128761"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679128762"><span class="hs-identifier hs-var">h</span></a></span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128763"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-62"></span><span>  </span><span id="local-6989586621679128765"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128765"><span class="hs-identifier hs-var">at</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Rational -&gt; CLong -&gt; IO Acb
+</span><a href="#local-6989586621679128761"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679128762"><span class="hs-identifier hs-var">h</span></a></span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Rational -&gt; Rational
+forall a. Fractional a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">/</span></span><span> </span><span class="annot"><span class="annottext">Rational
+</span><span class="hs-number">2</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128763"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-63"></span><span>  </span><span id="local-6989586621679128766"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128766"><span class="hs-identifier hs-var">att</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Rational -&gt; CLong -&gt; IO Acb
+</span><a href="#local-6989586621679128761"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679128762"><span class="hs-identifier hs-var">h</span></a></span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Rational -&gt; Rational
+forall a. Fractional a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">/</span></span><span> </span><span class="annot"><span class="annottext">Rational
+</span><span class="hs-number">4</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128763"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-64"></span><span>  </span><span id="local-6989586621679128767"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128767"><span class="hs-identifier hs-var">k</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">(CLong -&gt; IO Acb) -&gt; (CLong -&gt; IO Acb) -&gt; CLong -&gt; IO Acb
+forall a. Floating a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-identifier hs-var">logBase</span></span><span> </span><span class="annot"><span class="annottext">CLong -&gt; IO Acb
+</span><span class="hs-number">2</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Acb -&gt; CLong -&gt; IO Acb
+</span><a href="NumT.html#t"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128765"><span class="hs-identifier hs-var">at</span></a></span><span> </span><span class="annot"><span class="annottext">(CLong -&gt; IO Acb) -&gt; (CLong -&gt; IO Acb) -&gt; CLong -&gt; IO Acb
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">Acb -&gt; CLong -&gt; IO Acb
+</span><a href="NumT.html#t"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128764"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(CLong -&gt; IO Acb) -&gt; (CLong -&gt; IO Acb) -&gt; CLong -&gt; IO Acb
+forall a. Fractional a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">/</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Acb -&gt; CLong -&gt; IO Acb
+</span><a href="NumT.html#t"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128766"><span class="hs-identifier hs-var">att</span></a></span><span> </span><span class="annot"><span class="annottext">(CLong -&gt; IO Acb) -&gt; (CLong -&gt; IO Acb) -&gt; CLong -&gt; IO Acb
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">Acb -&gt; CLong -&gt; IO Acb
+</span><a href="NumT.html#t"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128765"><span class="hs-identifier hs-var">at</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128763"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-65"></span><span>  </span><span class="hs-comment">-- or use att and at pairs? or att and a?</span><span>
+</span><span id="line-66"></span><span>  </span><span class="hs-comment">-- why should any of them be different or preferable?</span><span>
+</span><span id="line-67"></span><span>  </span><span id="local-6989586621679128769"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128769"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Acb -&gt; CLong -&gt; IO Acb
+</span><a href="NumT.html#t"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128765"><span class="hs-identifier hs-var">at</span></a></span><span> </span><span class="annot"><span class="annottext">(CLong -&gt; IO Acb) -&gt; (CLong -&gt; IO Acb) -&gt; CLong -&gt; IO Acb
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">Acb -&gt; CLong -&gt; IO Acb
+</span><a href="NumT.html#t"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128764"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(CLong -&gt; IO Acb) -&gt; (CLong -&gt; IO Acb) -&gt; CLong -&gt; IO Acb
+forall a. Fractional a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">/</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Rational -&gt; CLong -&gt; IO Acb
+forall a. Fractional a =&gt; Rational -&gt; a
+</span><span class="hs-identifier hs-var">fromRational</span></span><span> </span><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679128762"><span class="hs-identifier hs-var">h</span></a></span><span> </span><span class="annot"><span class="annottext">(CLong -&gt; IO Acb) -&gt; (CLong -&gt; IO Acb) -&gt; CLong -&gt; IO Acb
+forall a. Floating a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">**</span></span><span> </span><span class="annot"><span class="annottext">Acb -&gt; CLong -&gt; IO Acb
+</span><a href="NumT.html#t"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128767"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">(CLong -&gt; IO Acb) -&gt; (CLong -&gt; IO Acb) -&gt; CLong -&gt; IO Acb
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">Rational -&gt; CLong -&gt; IO Acb
+forall a. Fractional a =&gt; Rational -&gt; a
+</span><span class="hs-identifier hs-var">fromRational</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679128762"><span class="hs-identifier hs-var">h</span></a></span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Rational -&gt; Rational
+forall a. Fractional a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">/</span></span><span> </span><span class="annot"><span class="annottext">Rational
+</span><span class="hs-number">2</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(CLong -&gt; IO Acb) -&gt; (CLong -&gt; IO Acb) -&gt; CLong -&gt; IO Acb
+forall a. Floating a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">**</span></span><span> </span><span class="annot"><span class="annottext">Acb -&gt; CLong -&gt; IO Acb
+</span><a href="NumT.html#t"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128767"><span class="hs-identifier hs-var">k</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(CLong -&gt; IO Acb) -&gt; CLong -&gt; IO Acb
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128763"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-68"></span><span>  </span><span id="local-6989586621679128771"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128771"><span class="hs-identifier hs-var">err</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Acb -&gt; CLong -&gt; IO Acb
+</span><a href="NumT.html#t"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128769"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="annot"><span class="annottext">(CLong -&gt; IO Acb) -&gt; (CLong -&gt; IO Acb) -&gt; CLong -&gt; IO Acb
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">Rational -&gt; CLong -&gt; IO Acb
+forall a. Fractional a =&gt; Rational -&gt; a
+</span><span class="hs-identifier hs-var">fromRational</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679128762"><span class="hs-identifier hs-var">h</span></a></span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Rational -&gt; Rational
+forall a. Fractional a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">/</span></span><span> </span><span class="annot"><span class="annottext">Rational
+</span><span class="hs-number">4</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(CLong -&gt; IO Acb) -&gt; (CLong -&gt; IO Acb) -&gt; CLong -&gt; IO Acb
+forall a. Floating a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">**</span></span><span> </span><span class="annot"><span class="annottext">Acb -&gt; CLong -&gt; IO Acb
+</span><a href="NumT.html#t"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128767"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">(CLong -&gt; IO Acb) -&gt; CLong -&gt; IO Acb
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128763"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-69"></span><span>  </span><span class="hs-special">(</span><span id="local-6989586621679128772"><span class="annot"><span class="annottext">Mag
+</span><a href="#local-6989586621679128772"><span class="hs-identifier hs-var">errMag</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">()
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">(Ptr CMag -&gt; IO ()) -&gt; IO (Mag, ())
+forall {a}. (Ptr CMag -&gt; IO a) -&gt; IO (Mag, a)
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Arb.Mag.FFI.html#withNewMag"><span class="hs-identifier hs-var">withNewMag</span></a></span><span> </span><span class="annot"><span class="annottext">((Ptr CMag -&gt; IO ()) -&gt; IO (Mag, ()))
+-&gt; (Ptr CMag -&gt; IO ()) -&gt; IO (Mag, ())
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Acb -&gt; (Ptr CAcb -&gt; IO ()) -&gt; IO ()
+</span><a href="NumT.html#withAcb__"><span class="hs-identifier hs-var">withAcb__</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128771"><span class="hs-identifier hs-var">err</span></a></span><span> </span><span class="annot"><span class="annottext">((Ptr CAcb -&gt; IO ()) -&gt; IO ())
+-&gt; (Ptr CMag -&gt; Ptr CAcb -&gt; IO ()) -&gt; Ptr CMag -&gt; IO ()
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Ptr CMag -&gt; Ptr CAcb -&gt; IO ()
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#acb_get_mag"><span class="hs-identifier hs-var">acb_get_mag</span></a></span><span>
+</span><span id="line-70"></span><span>  </span><span class="annot"><span class="annottext">Acb -&gt; (Ptr CAcb -&gt; IO (Mag, ())) -&gt; IO Acb
+forall a. Acb -&gt; (Ptr CAcb -&gt; IO a) -&gt; IO Acb
+</span><a href="NumT.html#withAcb_"><span class="hs-identifier hs-var">withAcb_</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128766"><span class="hs-identifier hs-var">att</span></a></span><span> </span><span class="annot"><span class="annottext">((Ptr CAcb -&gt; IO (Mag, ())) -&gt; IO Acb)
+-&gt; (Ptr CAcb -&gt; IO (Mag, ())) -&gt; IO Acb
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Mag -&gt; (Ptr CMag -&gt; IO ()) -&gt; IO (Mag, ())
+forall {a}. Mag -&gt; (Ptr CMag -&gt; IO a) -&gt; IO (Mag, a)
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Arb.Mag.FFI.html#withMag"><span class="hs-identifier hs-var">withMag</span></a></span><span> </span><span class="annot"><span class="annottext">Mag
+</span><a href="#local-6989586621679128772"><span class="hs-identifier hs-var">errMag</span></a></span><span> </span><span class="annot"><span class="annottext">((Ptr CMag -&gt; IO ()) -&gt; IO (Mag, ()))
+-&gt; (Ptr CAcb -&gt; Ptr CMag -&gt; IO ()) -&gt; Ptr CAcb -&gt; IO (Mag, ())
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Ptr CAcb -&gt; Ptr CMag -&gt; IO ()
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#acb_add_error_mag"><span class="hs-identifier hs-var">acb_add_error_mag</span></a></span><span>
+</span><span id="line-71"></span><span>
+</span><span id="line-72"></span><span class="annot"><span class="hs-comment">-- | central difference for df/dx (O(h^4) error)</span></span><span>
+</span><span id="line-73"></span><span class="annot"><a href="NumMethods.html#numdiff2"><span class="hs-identifier hs-type">numdiff2</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="NumT.html#T"><span class="hs-identifier hs-type">T</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="NumT.html#T"><span class="hs-identifier hs-type">T</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="NumT.html#T"><span class="hs-identifier hs-type">T</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Rational</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="NumT.html#T"><span class="hs-identifier hs-type">T</span></a></span><span>
+</span><span id="line-74"></span><span id="numdiff2"><span class="annot"><span class="annottext">numdiff2 :: ((CLong -&gt; IO Acb) -&gt; CLong -&gt; IO Acb)
+-&gt; (CLong -&gt; IO Acb) -&gt; Rational -&gt; CLong -&gt; IO Acb
+</span><a href="NumMethods.html#numdiff2"><span class="hs-identifier hs-var hs-var">numdiff2</span></a></span></span><span> </span><span id="local-6989586621679128774"><span class="annot"><span class="annottext">(CLong -&gt; IO Acb) -&gt; CLong -&gt; IO Acb
+</span><a href="#local-6989586621679128774"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679128775"><span class="annot"><span class="annottext">CLong -&gt; IO Acb
+</span><a href="#local-6989586621679128775"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679128776"><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679128776"><span class="hs-identifier hs-var">h</span></a></span></span><span> </span><span id="local-6989586621679128777"><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128777"><span class="hs-identifier hs-var">prec</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-75"></span><span>  </span><span id="local-6989586621679128778"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128778"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">CLong -&gt; IO Acb
+</span><a href="#local-6989586621679128775"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128777"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-76"></span><span>  </span><span id="local-6989586621679128779"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128779"><span class="hs-identifier hs-var">x1</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">(CLong -&gt; IO Acb) -&gt; CLong -&gt; IO Acb
+</span><a href="#local-6989586621679128774"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Acb -&gt; CLong -&gt; IO Acb
+</span><a href="NumT.html#t"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128778"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">(CLong -&gt; IO Acb) -&gt; (CLong -&gt; IO Acb) -&gt; CLong -&gt; IO Acb
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">Rational -&gt; CLong -&gt; IO Acb
+forall a. Fractional a =&gt; Rational -&gt; a
+</span><span class="hs-identifier hs-var">fromRational</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Rational
+</span><span class="hs-number">2</span></span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Rational -&gt; Rational
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679128776"><span class="hs-identifier hs-var">h</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128777"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-77"></span><span>  </span><span id="local-6989586621679128780"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128780"><span class="hs-identifier hs-var">x2</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">(CLong -&gt; IO Acb) -&gt; CLong -&gt; IO Acb
+</span><a href="#local-6989586621679128774"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Acb -&gt; CLong -&gt; IO Acb
+</span><a href="NumT.html#t"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128778"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">(CLong -&gt; IO Acb) -&gt; (CLong -&gt; IO Acb) -&gt; CLong -&gt; IO Acb
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">Rational -&gt; CLong -&gt; IO Acb
+forall a. Fractional a =&gt; Rational -&gt; a
+</span><span class="hs-identifier hs-var">fromRational</span></span><span> </span><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679128776"><span class="hs-identifier hs-var">h</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128777"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-78"></span><span>  </span><span id="local-6989586621679128781"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128781"><span class="hs-identifier hs-var">x3</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">(CLong -&gt; IO Acb) -&gt; CLong -&gt; IO Acb
+</span><a href="#local-6989586621679128774"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Acb -&gt; CLong -&gt; IO Acb
+</span><a href="NumT.html#t"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128778"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">(CLong -&gt; IO Acb) -&gt; (CLong -&gt; IO Acb) -&gt; CLong -&gt; IO Acb
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">Rational -&gt; CLong -&gt; IO Acb
+forall a. Fractional a =&gt; Rational -&gt; a
+</span><span class="hs-identifier hs-var">fromRational</span></span><span> </span><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679128776"><span class="hs-identifier hs-var">h</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128777"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-79"></span><span>  </span><span id="local-6989586621679128782"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128782"><span class="hs-identifier hs-var">x4</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">(CLong -&gt; IO Acb) -&gt; CLong -&gt; IO Acb
+</span><a href="#local-6989586621679128774"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Acb -&gt; CLong -&gt; IO Acb
+</span><a href="NumT.html#t"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128778"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">(CLong -&gt; IO Acb) -&gt; (CLong -&gt; IO Acb) -&gt; CLong -&gt; IO Acb
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">Rational -&gt; CLong -&gt; IO Acb
+forall a. Fractional a =&gt; Rational -&gt; a
+</span><span class="hs-identifier hs-var">fromRational</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Rational
+</span><span class="hs-number">2</span></span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Rational -&gt; Rational
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679128776"><span class="hs-identifier hs-var">h</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128777"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-80"></span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Acb -&gt; CLong -&gt; IO Acb
+</span><a href="NumT.html#t"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128779"><span class="hs-identifier hs-var">x1</span></a></span><span> </span><span class="annot"><span class="annottext">(CLong -&gt; IO Acb) -&gt; (CLong -&gt; IO Acb) -&gt; CLong -&gt; IO Acb
+forall a. Fractional a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">/</span></span><span> </span><span class="annot"><span class="annottext">CLong -&gt; IO Acb
+</span><span class="hs-number">12</span></span><span> </span><span class="annot"><span class="annottext">(CLong -&gt; IO Acb) -&gt; (CLong -&gt; IO Acb) -&gt; CLong -&gt; IO Acb
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">CLong -&gt; IO Acb
+</span><span class="hs-number">2</span></span><span> </span><span class="annot"><span class="annottext">(CLong -&gt; IO Acb) -&gt; (CLong -&gt; IO Acb) -&gt; CLong -&gt; IO Acb
+forall a. Fractional a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">/</span></span><span> </span><span class="annot"><span class="annottext">CLong -&gt; IO Acb
+</span><span class="hs-number">3</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(CLong -&gt; IO Acb) -&gt; (CLong -&gt; IO Acb) -&gt; CLong -&gt; IO Acb
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">Acb -&gt; CLong -&gt; IO Acb
+</span><a href="NumT.html#t"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128780"><span class="hs-identifier hs-var">x2</span></a></span><span> </span><span class="annot"><span class="annottext">(CLong -&gt; IO Acb) -&gt; (CLong -&gt; IO Acb) -&gt; CLong -&gt; IO Acb
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">+</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">CLong -&gt; IO Acb
+</span><span class="hs-number">2</span></span><span> </span><span class="annot"><span class="annottext">(CLong -&gt; IO Acb) -&gt; (CLong -&gt; IO Acb) -&gt; CLong -&gt; IO Acb
+forall a. Fractional a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">/</span></span><span> </span><span class="annot"><span class="annottext">CLong -&gt; IO Acb
+</span><span class="hs-number">3</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(CLong -&gt; IO Acb) -&gt; (CLong -&gt; IO Acb) -&gt; CLong -&gt; IO Acb
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">Acb -&gt; CLong -&gt; IO Acb
+</span><a href="NumT.html#t"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128781"><span class="hs-identifier hs-var">x3</span></a></span><span> </span><span class="annot"><span class="annottext">(CLong -&gt; IO Acb) -&gt; (CLong -&gt; IO Acb) -&gt; CLong -&gt; IO Acb
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">Acb -&gt; CLong -&gt; IO Acb
+</span><a href="NumT.html#t"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128782"><span class="hs-identifier hs-var">x4</span></a></span><span> </span><span class="annot"><span class="annottext">(CLong -&gt; IO Acb) -&gt; (CLong -&gt; IO Acb) -&gt; CLong -&gt; IO Acb
+forall a. Fractional a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">/</span></span><span> </span><span class="annot"><span class="annottext">CLong -&gt; IO Acb
+</span><span class="hs-number">12</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(CLong -&gt; IO Acb) -&gt; (CLong -&gt; IO Acb) -&gt; CLong -&gt; IO Acb
+forall a. Fractional a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">/</span></span><span> </span><span class="annot"><span class="annottext">Rational -&gt; CLong -&gt; IO Acb
+forall a. Fractional a =&gt; Rational -&gt; a
+</span><span class="hs-identifier hs-var">fromRational</span></span><span> </span><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679128776"><span class="hs-identifier hs-var">h</span></a></span><span> </span><span class="annot"><span class="annottext">(CLong -&gt; IO Acb) -&gt; CLong -&gt; IO Acb
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128777"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-81"></span><span>
+</span><span id="line-82"></span><span class="annot"><span class="hs-comment">-- | central difference for df/dx (O(h^2) error)</span></span><span>
+</span><span id="line-83"></span><span class="annot"><a href="NumMethods.html#numdiff"><span class="hs-identifier hs-type">numdiff</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="NumT.html#T"><span class="hs-identifier hs-type">T</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="NumT.html#T"><span class="hs-identifier hs-type">T</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="NumT.html#T"><span class="hs-identifier hs-type">T</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Rational</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="NumT.html#T"><span class="hs-identifier hs-type">T</span></a></span><span>
+</span><span id="line-84"></span><span id="numdiff"><span class="annot"><span class="annottext">numdiff :: ((CLong -&gt; IO Acb) -&gt; CLong -&gt; IO Acb)
+-&gt; (CLong -&gt; IO Acb) -&gt; Rational -&gt; CLong -&gt; IO Acb
+</span><a href="NumMethods.html#numdiff"><span class="hs-identifier hs-var hs-var">numdiff</span></a></span></span><span> </span><span id="local-6989586621679128784"><span class="annot"><span class="annottext">(CLong -&gt; IO Acb) -&gt; CLong -&gt; IO Acb
+</span><a href="#local-6989586621679128784"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679128785"><span class="annot"><span class="annottext">CLong -&gt; IO Acb
+</span><a href="#local-6989586621679128785"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679128786"><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679128786"><span class="hs-identifier hs-var">h</span></a></span></span><span> </span><span id="local-6989586621679128787"><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128787"><span class="hs-identifier hs-var">prec</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-85"></span><span>  </span><span id="local-6989586621679128788"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128788"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">CLong -&gt; IO Acb
+</span><a href="#local-6989586621679128785"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128787"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-86"></span><span>  </span><span id="local-6989586621679128789"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128789"><span class="hs-identifier hs-var">x1</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">(CLong -&gt; IO Acb) -&gt; CLong -&gt; IO Acb
+</span><a href="#local-6989586621679128784"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Acb -&gt; CLong -&gt; IO Acb
+</span><a href="NumT.html#t"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128788"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">(CLong -&gt; IO Acb) -&gt; (CLong -&gt; IO Acb) -&gt; CLong -&gt; IO Acb
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">Rational -&gt; CLong -&gt; IO Acb
+forall a. Fractional a =&gt; Rational -&gt; a
+</span><span class="hs-identifier hs-var">fromRational</span></span><span> </span><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679128786"><span class="hs-identifier hs-var">h</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128787"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-87"></span><span>  </span><span id="local-6989586621679128790"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128790"><span class="hs-identifier hs-var">x2</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">(CLong -&gt; IO Acb) -&gt; CLong -&gt; IO Acb
+</span><a href="#local-6989586621679128784"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Acb -&gt; CLong -&gt; IO Acb
+</span><a href="NumT.html#t"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128788"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">(CLong -&gt; IO Acb) -&gt; (CLong -&gt; IO Acb) -&gt; CLong -&gt; IO Acb
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">Rational -&gt; CLong -&gt; IO Acb
+forall a. Fractional a =&gt; Rational -&gt; a
+</span><span class="hs-identifier hs-var">fromRational</span></span><span> </span><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679128786"><span class="hs-identifier hs-var">h</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128787"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-88"></span><span>  </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Acb -&gt; CLong -&gt; IO Acb
+</span><a href="NumT.html#t"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128790"><span class="hs-identifier hs-var">x2</span></a></span><span> </span><span class="annot"><span class="annottext">(CLong -&gt; IO Acb) -&gt; (CLong -&gt; IO Acb) -&gt; CLong -&gt; IO Acb
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">Acb -&gt; CLong -&gt; IO Acb
+</span><a href="NumT.html#t"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128789"><span class="hs-identifier hs-var">x1</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(CLong -&gt; IO Acb) -&gt; (CLong -&gt; IO Acb) -&gt; CLong -&gt; IO Acb
+forall a. Fractional a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">/</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">CLong -&gt; IO Acb
+</span><span class="hs-number">2</span></span><span> </span><span class="annot"><span class="annottext">(CLong -&gt; IO Acb) -&gt; (CLong -&gt; IO Acb) -&gt; CLong -&gt; IO Acb
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">Rational -&gt; CLong -&gt; IO Acb
+forall a. Fractional a =&gt; Rational -&gt; a
+</span><span class="hs-identifier hs-var">fromRational</span></span><span> </span><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679128786"><span class="hs-identifier hs-var">h</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128787"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-89"></span><span>
+</span><span id="line-90"></span><span class="annot"><span class="hs-comment">-- | wraps 'acb_hypgeom_1f1'</span></span><span>
+</span><span id="line-91"></span><span class="annot"><a href="NumMethods.html#hypergeom1f1"><span class="hs-identifier hs-type">hypergeom1f1</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="NumT.html#T"><span class="hs-identifier hs-type">T</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="NumT.html#T"><span class="hs-identifier hs-type">T</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="NumT.html#T"><span class="hs-identifier hs-type">T</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="NumT.html#T"><span class="hs-identifier hs-type">T</span></a></span><span>
+</span><span id="line-92"></span><span id="hypergeom1f1"><span class="annot"><span class="annottext">hypergeom1f1 :: (CLong -&gt; IO Acb)
+-&gt; (CLong -&gt; IO Acb) -&gt; (CLong -&gt; IO Acb) -&gt; CLong -&gt; IO Acb
+</span><a href="NumMethods.html#hypergeom1f1"><span class="hs-identifier hs-var hs-var">hypergeom1f1</span></a></span></span><span> </span><span id="local-6989586621679128792"><span class="annot"><span class="annottext">CLong -&gt; IO Acb
+</span><a href="#local-6989586621679128792"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621679128793"><span class="annot"><span class="annottext">CLong -&gt; IO Acb
+</span><a href="#local-6989586621679128793"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span id="local-6989586621679128794"><span class="annot"><span class="annottext">CLong -&gt; IO Acb
+</span><a href="#local-6989586621679128794"><span class="hs-identifier hs-var">z</span></a></span></span><span> </span><span id="local-6989586621679128795"><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128795"><span class="hs-identifier hs-var">prec</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-93"></span><span>  </span><span id="local-6989586621679128796"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128796"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">CLong -&gt; IO Acb
+</span><a href="#local-6989586621679128792"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128795"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-94"></span><span>  </span><span id="local-6989586621679128797"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128797"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">CLong -&gt; IO Acb
+</span><a href="#local-6989586621679128793"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128795"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-95"></span><span>  </span><span id="local-6989586621679128798"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128798"><span class="hs-identifier hs-var">z</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">CLong -&gt; IO Acb
+</span><a href="#local-6989586621679128794"><span class="hs-identifier hs-var">z</span></a></span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128795"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-96"></span><span>  </span><span id="local-6989586621679128799"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128799"><span class="hs-identifier hs-var">result</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">IO Acb
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#newAcb"><span class="hs-identifier hs-var">newAcb</span></a></span><span>
+</span><span id="line-97"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679128801"><span class="annot"><span class="annottext">regularized :: CInt
+</span><a href="#local-6989586621679128801"><span class="hs-identifier hs-var hs-var">regularized</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CInt
+</span><span class="hs-number">1</span></span><span> </span><span class="hs-comment">-- regularized means dividing by gamma(b), but gamma(1) = 1 so it doesn't matter which this ends up being</span><span>
+</span><span id="line-98"></span><span>  </span><span class="annot"><span class="annottext">Acb -&gt; (Ptr CAcb -&gt; IO ()) -&gt; IO Acb
+forall a. Acb -&gt; (Ptr CAcb -&gt; IO a) -&gt; IO Acb
+</span><a href="NumT.html#withAcb_"><span class="hs-identifier hs-var">withAcb_</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128799"><span class="hs-identifier hs-var">result</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679128802"><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128802"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Acb -&gt; (Ptr CAcb -&gt; IO ()) -&gt; IO ()
+</span><a href="NumT.html#withAcb__"><span class="hs-identifier hs-var">withAcb__</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128796"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679128803"><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128803"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Acb -&gt; (Ptr CAcb -&gt; IO ()) -&gt; IO ()
+</span><a href="NumT.html#withAcb__"><span class="hs-identifier hs-var">withAcb__</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128797"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679128804"><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128804"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Acb -&gt; (Ptr CAcb -&gt; IO ()) -&gt; IO ()
+</span><a href="NumT.html#withAcb__"><span class="hs-identifier hs-var">withAcb__</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128798"><span class="hs-identifier hs-var">z</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679128805"><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128805"><span class="hs-identifier hs-var">z</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Ptr CAcb
+-&gt; Ptr CAcb -&gt; Ptr CAcb -&gt; Ptr CAcb -&gt; CInt -&gt; CLong -&gt; IO ()
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.Hypgeom.FFI.html#acb_hypgeom_1f1"><span class="hs-identifier hs-var">acb_hypgeom_1f1</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128802"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128803"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128804"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128805"><span class="hs-identifier hs-var">z</span></a></span><span> </span><span class="annot"><span class="annottext">CInt
+</span><a href="#local-6989586621679128801"><span class="hs-identifier hs-var">regularized</span></a></span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128795"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-99"></span><span>
+</span><span id="line-100"></span><span class="hs-comment">-- | `secant f x0 x2 tol prec` finds x such that f x == 0, between x0 and x2</span><span>
+</span><span id="line-101"></span><span class="hs-comment">-- Data.Number.Flint.Arb.Calc's newton or bisect may be better</span><span>
+</span><span id="line-102"></span><span class="annot"><a href="NumMethods.html#secant"><span class="hs-identifier hs-type">secant</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="NumT.html#T"><span class="hs-identifier hs-type">T</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="NumT.html#T"><span class="hs-identifier hs-type">T</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.Types.FFI.html#Acb"><span class="hs-identifier hs-type">Acb</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.Types.FFI.html#Acb"><span class="hs-identifier hs-type">Acb</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">CDouble</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="NumT.html#T"><span class="hs-identifier hs-type">T</span></a></span><span>
+</span><span id="line-103"></span><span id="secant"><span class="annot"><span class="annottext">secant :: ((CLong -&gt; IO Acb) -&gt; CLong -&gt; IO Acb)
+-&gt; Acb -&gt; Acb -&gt; CDouble -&gt; CLong -&gt; IO Acb
+</span><a href="NumMethods.html#secant"><span class="hs-identifier hs-var hs-var">secant</span></a></span></span><span> </span><span id="local-6989586621679128807"><span class="annot"><span class="annottext">(CLong -&gt; IO Acb) -&gt; CLong -&gt; IO Acb
+</span><a href="#local-6989586621679128807"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679128808"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128808"><span class="hs-identifier hs-var">x0</span></a></span></span><span> </span><span id="local-6989586621679128809"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128809"><span class="hs-identifier hs-var">x2</span></a></span></span><span> </span><span id="local-6989586621679128810"><span class="annot"><span class="annottext">CDouble
+</span><a href="#local-6989586621679128810"><span class="hs-identifier hs-var">tol</span></a></span></span><span> </span><span id="local-6989586621679128811"><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128811"><span class="hs-identifier hs-var">prec</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-104"></span><span>  </span><span id="local-6989586621679128812"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128812"><span class="hs-identifier hs-var">y0</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">(CLong -&gt; IO Acb) -&gt; CLong -&gt; IO Acb
+</span><a href="#local-6989586621679128807"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Acb -&gt; CLong -&gt; IO Acb
+</span><a href="NumT.html#t"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128808"><span class="hs-identifier hs-var">x0</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128811"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-105"></span><span>  </span><span id="local-6989586621679128813"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128813"><span class="hs-identifier hs-var">y2</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">(CLong -&gt; IO Acb) -&gt; CLong -&gt; IO Acb
+</span><a href="#local-6989586621679128807"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Acb -&gt; CLong -&gt; IO Acb
+</span><a href="NumT.html#t"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128809"><span class="hs-identifier hs-var">x2</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128811"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-106"></span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Mag
+</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Acb
+</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Acb
+</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Acb
+</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679128814"><span class="annot"><span class="annottext">CDouble
+</span><a href="#local-6989586621679128814"><span class="hs-identifier hs-var">d</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679128815"><span class="annot"><span class="annottext">CInt
+</span><a href="#local-6989586621679128815"><span class="hs-identifier hs-var">e</span></a></span></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">(Ptr CMag -&gt; IO (Acb, (Acb, (Acb, (CDouble, CInt)))))
+-&gt; IO (Mag, (Acb, (Acb, (Acb, (CDouble, CInt)))))
+forall {a}. (Ptr CMag -&gt; IO a) -&gt; IO (Mag, a)
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Arb.Mag.FFI.html#withNewMag"><span class="hs-identifier hs-var">withNewMag</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679128816"><span class="annot"><span class="annottext">Ptr CMag
+</span><a href="#local-6989586621679128816"><span class="hs-identifier hs-var">mag</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(Ptr CAcb -&gt; IO (Acb, (Acb, (CDouble, CInt))))
+-&gt; IO (Acb, (Acb, (Acb, (CDouble, CInt))))
+forall {a}. (Ptr CAcb -&gt; IO a) -&gt; IO (Acb, a)
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#withNewAcb"><span class="hs-identifier hs-var">withNewAcb</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679128817"><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128817"><span class="hs-identifier hs-var">w</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Acb
+-&gt; (Ptr CAcb -&gt; IO (Acb, (CDouble, CInt)))
+-&gt; IO (Acb, (Acb, (CDouble, CInt)))
+forall {a}. Acb -&gt; (Ptr CAcb -&gt; IO a) -&gt; IO (Acb, a)
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#withAcb"><span class="hs-identifier hs-var">withAcb</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128808"><span class="hs-identifier hs-var">x0</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679128818"><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128818"><span class="hs-identifier hs-var">x0</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Acb
+-&gt; (Ptr CAcb -&gt; IO (CDouble, CInt)) -&gt; IO (Acb, (CDouble, CInt))
+forall {a}. Acb -&gt; (Ptr CAcb -&gt; IO a) -&gt; IO (Acb, a)
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#withAcb"><span class="hs-identifier hs-var">withAcb</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128809"><span class="hs-identifier hs-var">x2</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679128819"><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128819"><span class="hs-identifier hs-var">x2</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-107"></span><span>    </span><span class="annot"><span class="annottext">Ptr CAcb -&gt; Ptr CAcb -&gt; Ptr CAcb -&gt; CLong -&gt; IO ()
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#acb_sub"><span class="hs-identifier hs-var">acb_sub</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128817"><span class="hs-identifier hs-var">w</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128818"><span class="hs-identifier hs-var">x0</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128819"><span class="hs-identifier hs-var">x2</span></a></span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128811"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-108"></span><span>    </span><span class="annot"><span class="annottext">Ptr CMag -&gt; Ptr CAcb -&gt; IO ()
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#acb_get_mag"><span class="hs-identifier hs-var">acb_get_mag</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CMag
+</span><a href="#local-6989586621679128816"><span class="hs-identifier hs-var">mag</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128817"><span class="hs-identifier hs-var">w</span></a></span><span>
+</span><span id="line-109"></span><span>    </span><span id="local-6989586621679128820"><span class="annot"><span class="annottext">CDouble
+</span><a href="#local-6989586621679128820"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Ptr CMag -&gt; IO CDouble
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Arb.Mag.FFI.html#mag_get_d"><span class="hs-identifier hs-var">mag_get_d</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CMag
+</span><a href="#local-6989586621679128816"><span class="hs-identifier hs-var">mag</span></a></span><span>
+</span><span id="line-110"></span><span>    </span><span id="local-6989586621679128821"><span class="annot"><span class="annottext">CInt
+</span><a href="#local-6989586621679128821"><span class="hs-identifier hs-var">e</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Ptr CAcb -&gt; Ptr CAcb -&gt; IO CInt
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#acb_overlaps"><span class="hs-identifier hs-var">acb_overlaps</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128818"><span class="hs-identifier hs-var">x0</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128819"><span class="hs-identifier hs-var">x2</span></a></span><span>
+</span><span id="line-111"></span><span>    </span><span class="hs-identifier">return</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">CDouble
+</span><a href="#local-6989586621679128820"><span class="hs-identifier hs-var">d</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">CInt
+</span><a href="#local-6989586621679128821"><span class="hs-identifier hs-var">e</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-112"></span><span>  </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">CDouble
+</span><a href="#local-6989586621679128814"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">CDouble -&gt; CDouble -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&lt;</span></span><span> </span><span class="annot"><span class="annottext">CDouble
+</span><a href="#local-6989586621679128810"><span class="hs-identifier hs-var">tol</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><span class="hs-operator hs-var">||</span></span><span> </span><span class="annot"><span class="annottext">CInt
+</span><a href="#local-6989586621679128815"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">CInt -&gt; CInt -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">/=</span></span><span> </span><span class="annot"><span class="annottext">CInt
+</span><span class="hs-number">0</span></span><span>
+</span><span id="line-113"></span><span>    </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">(Acb, ()) -&gt; Acb
+forall a b. (a, b) -&gt; a
+</span><span class="hs-identifier hs-var">fst</span></span><span> </span><span class="annot"><span class="annottext">((Acb, ()) -&gt; Acb) -&gt; IO (Acb, ()) -&gt; IO Acb
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">(Ptr CAcb -&gt; IO ()) -&gt; IO (Acb, ())
+forall {a}. (Ptr CAcb -&gt; IO a) -&gt; IO (Acb, a)
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#withNewAcb"><span class="hs-identifier hs-var">withNewAcb</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679128827"><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128827"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Acb -&gt; (Ptr CAcb -&gt; IO ()) -&gt; IO ()
+</span><a href="NumT.html#withAcb__"><span class="hs-identifier hs-var">withAcb__</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128808"><span class="hs-identifier hs-var">x0</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679128828"><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128828"><span class="hs-identifier hs-var">x0</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Acb -&gt; (Ptr CAcb -&gt; IO ()) -&gt; IO ()
+</span><a href="NumT.html#withAcb__"><span class="hs-identifier hs-var">withAcb__</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128809"><span class="hs-identifier hs-var">x2</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679128829"><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128829"><span class="hs-identifier hs-var">x2</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Ptr CAcb -&gt; Ptr CAcb -&gt; Ptr CAcb -&gt; CLong -&gt; IO ()
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#acb_union"><span class="hs-identifier hs-var">acb_union</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128827"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128828"><span class="hs-identifier hs-var">x0</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CAcb
+</span><a href="#local-6989586621679128829"><span class="hs-identifier hs-var">x2</span></a></span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128811"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-114"></span><span>    </span><span class="hs-keyword">else</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-115"></span><span>      </span><span id="local-6989586621679128830"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128830"><span class="hs-identifier hs-var">x02</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Acb -&gt; CLong -&gt; IO Acb
+</span><a href="NumT.html#t"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128808"><span class="hs-identifier hs-var">x0</span></a></span><span> </span><span class="annot"><span class="annottext">(CLong -&gt; IO Acb) -&gt; (CLong -&gt; IO Acb) -&gt; CLong -&gt; IO Acb
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">Acb -&gt; CLong -&gt; IO Acb
+</span><a href="NumT.html#t"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128809"><span class="hs-identifier hs-var">x2</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128811"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-116"></span><span>      </span><span id="local-6989586621679128831"><span class="annot"><span class="annottext">CInt
+</span><a href="#local-6989586621679128831"><span class="hs-identifier hs-var">flip</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Acb -&gt; (Ptr CArb -&gt; IO CInt) -&gt; IO CInt
+forall {b}. Acb -&gt; (Ptr CArb -&gt; IO b) -&gt; IO b
+</span><a href="NumT.html#withAcbRe_"><span class="hs-identifier hs-var">withAcbRe_</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128830"><span class="hs-identifier hs-var">x02</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CArb -&gt; IO CInt
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Arb.FFI.html#arb_is_positive"><span class="hs-identifier hs-var">arb_is_positive</span></a></span><span>
+</span><span id="line-117"></span><span>      </span><span class="annot"><span class="annottext">Bool -&gt; IO () -&gt; IO ()
+forall (f :: * -&gt; *). Applicative f =&gt; Bool -&gt; f () -&gt; f ()
+</span><span class="hs-identifier hs-var">when</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">CInt
+</span><a href="#local-6989586621679128831"><span class="hs-identifier hs-var">flip</span></a></span><span> </span><span class="annot"><span class="annottext">CInt -&gt; CInt -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">/=</span></span><span> </span><span class="annot"><span class="annottext">CInt
+</span><span class="hs-number">0</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(IO () -&gt; IO ()) -&gt; IO () -&gt; IO ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Acb -&gt; (Ptr CAcb -&gt; IO ()) -&gt; IO ()
+</span><a href="NumT.html#withAcb__"><span class="hs-identifier hs-var">withAcb__</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128808"><span class="hs-identifier hs-var">x0</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Acb -&gt; (Ptr CAcb -&gt; IO ()) -&gt; IO ()
+</span><a href="NumT.html#withAcb__"><span class="hs-identifier hs-var">withAcb__</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128809"><span class="hs-identifier hs-var">x2</span></a></span><span> </span><span class="annot"><span class="annottext">((Ptr CAcb -&gt; IO ()) -&gt; IO ())
+-&gt; (Ptr CAcb -&gt; Ptr CAcb -&gt; IO ()) -&gt; Ptr CAcb -&gt; IO ()
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Ptr CAcb -&gt; Ptr CAcb -&gt; IO ()
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Acb.FFI.html#acb_swap"><span class="hs-identifier hs-var">acb_swap</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-118"></span><span>      </span><span id="local-6989586621679128832"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128832"><span class="hs-identifier hs-var">x1</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Acb -&gt; CLong -&gt; IO Acb
+</span><a href="NumT.html#t"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128809"><span class="hs-identifier hs-var">x2</span></a></span><span> </span><span class="annot"><span class="annottext">(CLong -&gt; IO Acb) -&gt; (CLong -&gt; IO Acb) -&gt; CLong -&gt; IO Acb
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">Acb -&gt; CLong -&gt; IO Acb
+</span><a href="NumT.html#t"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128813"><span class="hs-identifier hs-var">y2</span></a></span><span> </span><span class="annot"><span class="annottext">(CLong -&gt; IO Acb) -&gt; (CLong -&gt; IO Acb) -&gt; CLong -&gt; IO Acb
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Acb -&gt; CLong -&gt; IO Acb
+</span><a href="NumT.html#t"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128809"><span class="hs-identifier hs-var">x2</span></a></span><span> </span><span class="annot"><span class="annottext">(CLong -&gt; IO Acb) -&gt; (CLong -&gt; IO Acb) -&gt; CLong -&gt; IO Acb
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">Acb -&gt; CLong -&gt; IO Acb
+</span><a href="NumT.html#t"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128808"><span class="hs-identifier hs-var">x0</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(CLong -&gt; IO Acb) -&gt; (CLong -&gt; IO Acb) -&gt; CLong -&gt; IO Acb
+forall a. Fractional a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">/</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Acb -&gt; CLong -&gt; IO Acb
+</span><a href="NumT.html#t"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128813"><span class="hs-identifier hs-var">y2</span></a></span><span> </span><span class="annot"><span class="annottext">(CLong -&gt; IO Acb) -&gt; (CLong -&gt; IO Acb) -&gt; CLong -&gt; IO Acb
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">Acb -&gt; CLong -&gt; IO Acb
+</span><a href="NumT.html#t"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128812"><span class="hs-identifier hs-var">y0</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128811"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-119"></span><span>      </span><span id="local-6989586621679128833"><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128833"><span class="hs-identifier hs-var">y1</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">(CLong -&gt; IO Acb) -&gt; CLong -&gt; IO Acb
+</span><a href="#local-6989586621679128807"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Acb -&gt; CLong -&gt; IO Acb
+</span><a href="NumT.html#t"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128832"><span class="hs-identifier hs-var">x1</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128811"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-120"></span><span>      </span><span id="local-6989586621679128834"><span class="annot"><span class="annottext">CInt
+</span><a href="#local-6989586621679128834"><span class="hs-identifier hs-var">y0s</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Acb -&gt; (Ptr CArb -&gt; IO CInt) -&gt; IO CInt
+forall {b}. Acb -&gt; (Ptr CArb -&gt; IO b) -&gt; IO b
+</span><a href="NumT.html#withAcbRe_"><span class="hs-identifier hs-var">withAcbRe_</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128812"><span class="hs-identifier hs-var">y0</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CArb -&gt; IO CInt
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Arb.FFI.html#arb_is_positive"><span class="hs-identifier hs-var">arb_is_positive</span></a></span><span>
+</span><span id="line-121"></span><span>      </span><span id="local-6989586621679128835"><span class="annot"><span class="annottext">CInt
+</span><a href="#local-6989586621679128835"><span class="hs-identifier hs-var">y1s</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Acb -&gt; (Ptr CArb -&gt; IO CInt) -&gt; IO CInt
+forall {b}. Acb -&gt; (Ptr CArb -&gt; IO b) -&gt; IO b
+</span><a href="NumT.html#withAcbRe_"><span class="hs-identifier hs-var">withAcbRe_</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128833"><span class="hs-identifier hs-var">y1</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CArb -&gt; IO CInt
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Arb.FFI.html#arb_is_positive"><span class="hs-identifier hs-var">arb_is_positive</span></a></span><span>
+</span><span id="line-122"></span><span>      </span><span id="local-6989586621679128836"><span class="annot"><span class="annottext">CInt
+</span><a href="#local-6989586621679128836"><span class="hs-identifier hs-var">y2s</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Acb -&gt; (Ptr CArb -&gt; IO CInt) -&gt; IO CInt
+forall {b}. Acb -&gt; (Ptr CArb -&gt; IO b) -&gt; IO b
+</span><a href="NumT.html#withAcbRe_"><span class="hs-identifier hs-var">withAcbRe_</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128813"><span class="hs-identifier hs-var">y2</span></a></span><span> </span><span class="annot"><span class="annottext">Ptr CArb -&gt; IO CInt
+</span><a href="file:///home/aavogt/.cabal/store/ghc-9.6.6/Flint2-0.1.0.5-dd6b608951deb76493a7bd9879a674b9636ad78560e590240f8800e6d86a7ca5/share/doc/html/src/Data.Number.Flint.Arb.FFI.html#arb_is_positive"><span class="hs-identifier hs-var">arb_is_positive</span></a></span><span>
+</span><span id="line-123"></span><span>      </span><span class="hs-keyword">case</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">CInt
+</span><a href="#local-6989586621679128834"><span class="hs-identifier hs-var">y0s</span></a></span><span> </span><span class="annot"><span class="annottext">CInt -&gt; CInt -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">CInt
+</span><a href="#local-6989586621679128835"><span class="hs-identifier hs-var">y1s</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">CInt
+</span><a href="#local-6989586621679128835"><span class="hs-identifier hs-var">y1s</span></a></span><span> </span><span class="annot"><span class="annottext">CInt -&gt; CInt -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">CInt
+</span><a href="#local-6989586621679128836"><span class="hs-identifier hs-var">y2s</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-124"></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">True</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">False</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">((CLong -&gt; IO Acb) -&gt; CLong -&gt; IO Acb)
+-&gt; Acb -&gt; Acb -&gt; CDouble -&gt; CLong -&gt; IO Acb
+</span><a href="NumMethods.html#secant"><span class="hs-identifier hs-var">secant</span></a></span><span> </span><span class="annot"><span class="annottext">(CLong -&gt; IO Acb) -&gt; CLong -&gt; IO Acb
+</span><a href="#local-6989586621679128807"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128832"><span class="hs-identifier hs-var">x1</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128809"><span class="hs-identifier hs-var">x2</span></a></span><span> </span><span class="annot"><span class="annottext">CDouble
+</span><a href="#local-6989586621679128810"><span class="hs-identifier hs-var">tol</span></a></span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128811"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-125"></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">False</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">True</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">((CLong -&gt; IO Acb) -&gt; CLong -&gt; IO Acb)
+-&gt; Acb -&gt; Acb -&gt; CDouble -&gt; CLong -&gt; IO Acb
+</span><a href="NumMethods.html#secant"><span class="hs-identifier hs-var">secant</span></a></span><span> </span><span class="annot"><span class="annottext">(CLong -&gt; IO Acb) -&gt; CLong -&gt; IO Acb
+</span><a href="#local-6989586621679128807"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128808"><span class="hs-identifier hs-var">x0</span></a></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128832"><span class="hs-identifier hs-var">x1</span></a></span><span> </span><span class="annot"><span class="annottext">CDouble
+</span><a href="#local-6989586621679128810"><span class="hs-identifier hs-var">tol</span></a></span><span> </span><span class="annot"><span class="annottext">CLong
+</span><a href="#local-6989586621679128811"><span class="hs-identifier hs-var">prec</span></a></span><span>
+</span><span id="line-126"></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Acb -&gt; IO Acb
+forall a. a -&gt; IO a
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">Acb
+</span><a href="#local-6989586621679128832"><span class="hs-identifier hs-var">x1</span></a></span><span>
+</span><span id="line-127"></span></pre></body></html>
