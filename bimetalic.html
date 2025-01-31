@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html>
+ <head>
+  <title>bimetalic</title>
+  <meta name="generator" content="wxMaxima">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    displayAlign: "left",
+    context: "MathJax",
+    TeX: {TagSide: "left"}
+  })
+</script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  // A comment that hinders wxWidgets from optimizing this tag too much.
+</script>
+  <link rel="stylesheet" type="text/css" href="bimetalic_htmlimg/bimetalic.css">
+ </head>
+ <body>
+
+<!-- ****************************************************** -->
+<!-- *        Created with wxMaxima version 24.02.1       * -->
+<!-- ****************************************************** -->
+<noscript><div class="error message"><p>Please enable JavaScript in order to get a 2d display of the equations embedded in this web page.</p></div></noscript><p hidden = "hidden">\(      \DeclareMathOperator{\abs}{abs}
+      \newcommand{\ensuremath}[1]{\mbox{$#1$}}
+\)</p>
+
+<!-- Title cell -->
+
+
+<div class="title">
+<p>
+Bimetalic Strip
+</p>
+</div>
+
+
+<!-- Text cell -->
+
+
+<div class="comment">
+The question is whether stainless rails on aluminum extrusions really causes a problem.<br><br>Specification:<br><br>Code: S8-40×40<br>Slot Width: 8.2 mm<br>Weight: 1.75 kg/m<br>Mass of Inertia: lx: 9.70 cm4   ly: 9.70 cm4<br>Section Modulus: zx: 5.10 cm3   zy: 5.10 cm3<br><br>Summary:<br><br>Order No: HY-S8-4040, T-slot height: 12.3 mm, Section size: 40 mm × 40 mm, Hole: φ6.8 mm, Thickness of diagonal bar: 2.0 mm. Wall thickness: 1.8 mm<br><br>Mgn7 is 7x4.8<br>I=bh³/12<br>=0.007188<br>Is 1000 times smaller than the al. So I can assume the Al neutral plane stays in the middle. <br><br>Steel 10 to 18<br>Al 21 to 24<br>um/m / C<br><br>Young's modulus<br>Stainless Steel (304) 190 gpa<br>Aluminum (99.5%) 80 gpa<br><br>So 30C means the 40cm linear rail will be 14*10*0.4 =56 um too short<br>Stretching the rail that amount takes tension: <br>E = FL/AdL<br>F =E A dL/L<br>F = (190`GPa) * (7`mm)*(4.8`mm) * 14*30e-6<br>F=2.7kN
+</div>
+
+
+<!-- Code cell -->
+
+
+<table><tr><td>
+  <span class="prompt">
+(%i1)	
+  </span></td>
+  <td><span class="input">
+<span class="code_function">load</span><span class="code_operator">(</span><span class="code_variable">ezunits</span><span class="code_operator">)</span><span class="code_endofline">;</span>  </span></td>
+</tr></table>
+<p>
+\[\]\[\tag{%o1} "/usr/share/maxima/5.47.0/share/ezunits/ezunits.mac"\]
+</p>
+
+
+<!-- Text cell -->
+
+
+<div class="comment">
+Per degree C:
+</div>
+
+
+<!-- Code cell -->
+
+
+<table><tr><td>
+  <span class="prompt">
+(%i5)	
+  </span></td>
+  <td><span class="input">
+<span class="code_variable">F</span> <span class="code_operator">:</span> <span class="code_operator">(</span><span class="code_number">190</span><span class="code_endofline">`</span><span class="code_variable">GPa</span><span class="code_operator">)</span> <span class="code_operator">·</span> <span class="code_operator">(</span><span class="code_number">7</span><span class="code_endofline">`</span><span class="code_variable">mm</span><span class="code_operator">)</span><span class="code_operator">·</span><span class="code_operator">(</span><span class="code_number">4</span><span class="code_endofline">.</span><span class="code_number">8</span><span class="code_endofline">`</span><span class="code_variable">mm</span><span class="code_operator">)</span> <span class="code_operator">·</span> <span class="code_number">14</span><span class="code_operator">·</span><span class="code_number">1e-6</span> <span class="code_endofline">`</span><span class="code_endofline">`</span> <span class="code_variable">N</span><span class="code_endofline">;</span>  </span></td>
+</tr></table>
+<p>
+\[\]\[\tag{} 89.37599999999999\ensuremath{\mathrm{ ` }}N\]
+</p>
+
+
+<!-- Text cell -->
+
+
+<div class="comment">
+For 100 C:
+</div>
+
+
+<!-- Code cell -->
+
+
+<table><tr><td>
+  <span class="prompt">
+(%i47)	
+  </span></td>
+  <td><span class="input">
+<span class="code_variable">L</span> <span class="code_operator">:</span> <span class="code_number">400</span> <span class="code_endofline">`</span> <span class="code_variable">mm</span><span class="code_endofline">;</span><span class="code_endofline"><br>
+</span><span class="code_variable">I</span> <span class="code_operator">:</span> <span class="code_number">9</span><span class="code_endofline">.</span><span class="code_number">7</span> <span class="code_endofline">`</span> <span class="code_variable">cm</span><span class="code_operator">^</span><span class="code_number">4</span><span class="code_endofline">;</span><span class="code_endofline"><br>
+</span><span class="code_variable">E</span> <span class="code_operator">:</span> <span class="code_number">80</span> <span class="code_endofline">`</span> <span class="code_variable">GPa</span><span class="code_endofline">;</span><span class="code_endofline"><br>
+</span><span class="code_variable">M</span> <span class="code_operator">:</span> <span class="code_number">100</span> <span class="code_operator">·</span> <span class="code_variable">F</span> <span class="code_operator">·</span> <span class="code_number">20</span><span class="code_endofline">`</span><span class="code_variable">mm</span><span class="code_endofline">;</span><span class="code_endofline"><br>
+</span><span class="code_variable">M</span><span class="code_operator">·</span> <span class="code_variable">L</span><span class="code_operator">^</span><span class="code_number">2</span> <span class="code_operator">/</span> <span class="code_operator">(</span><span class="code_number">8</span><span class="code_operator">·</span><span class="code_variable">E</span><span class="code_operator">·</span><span class="code_variable">I</span><span class="code_operator">)</span> <span class="code_endofline">`</span><span class="code_endofline">`</span><span class="code_variable">mm</span><span class="code_endofline">;</span><span class="code_endofline"><br>
+</span><span class="code_variable">theta</span> <span class="code_operator">:</span> <span class="code_variable">M</span><span class="code_operator">·</span><span class="code_variable">L</span><span class="code_operator">/</span><span class="code_operator">(</span><span class="code_number">2</span><span class="code_operator">·</span><span class="code_variable">E</span><span class="code_operator">·</span><span class="code_variable">I</span><span class="code_operator">)</span> <span class="code_endofline">`</span><span class="code_endofline">`</span> <span class="code_number">1</span><span class="code_endofline">;</span><span class="code_endofline"><br>
+</span><span class="code_variable">%</span> <span class="code_operator">·</span> <span class="code_number">180</span> <span class="code_operator">/</span> <span class="code_variable">%pi</span> <span class="code_endofline">,</span> <span class="code_variable">numer</span><span class="code_endofline">;</span>  </span></td>
+</tr></table>
+<p>
+\[\]\[\tag{} 400\ensuremath{\mathrm{ ` }}\ensuremath{\mathrm{mm}}\]
+</p>
+<p>
+\[\]\[\tag{} 9.7\ensuremath{\mathrm{ ` }}{{\ensuremath{\mathrm{cm}}}^{4}}\]
+</p>
+<p>
+\[\]\[\tag{} 80\ensuremath{\mathrm{ ` }}\ensuremath{\mathrm{GPa}}\]
+</p>
+<p>
+\[\]\[\tag{} 178751.99999999998\ensuremath{\mathrm{ ` }}N\, \ensuremath{\mathrm{mm}}\]
+</p>
+<p>
+\[\]\[\tag{%o45} 0.46070103092783495\ensuremath{\mathrm{ ` }}\ensuremath{\mathrm{mm}}\]
+</p>
+<p>
+\[\]\[\tag{het} 0.004607010309278349\]
+</p>
+<p>
+\[\]\[\tag{%o47} 0.2639622468949095\]
+</p>
+
+
+<!-- Text cell -->
+
+
+<div class="comment">
+The angle is 0.26° at the edges, say the probe is 40mm away,<br>the resulting error in nozzle position is:
+</div>
+
+
+<!-- Code cell -->
+
+
+<table><tr><td>
+  <span class="prompt">
+(%i48)	
+  </span></td>
+  <td><span class="input">
+<span class="code_number">40</span> <span class="code_operator">·</span> <span class="code_function">sin</span><span class="code_operator">(</span><span class="code_variable">theta</span><span class="code_operator">)</span><span class="code_endofline">;</span>  </span></td>
+</tr></table>
+<p>
+\[\]\[\tag{%o48} 0.18427976049387263\]
+</p>
+
+
+<!-- Image cell -->
+
+
+<div class="image">
+Figure 1:
+<br>
+  <img src="bimetalic_htmlimg/bimetalic_10.png" alt="Diagram" style="max-width:90%;" loading="lazy" /></div>
+
+
+<!-- Image cell -->
+
+
+<div class="image">
+Figure 2: maximum deflection
+<br>
+  <img src="bimetalic_htmlimg/bimetalic_11.png" alt="Diagram" style="max-width:90%;" loading="lazy" /></div>
+
+
+<!-- Text cell -->
+
+
+<div class="comment">
+lambda(u=0) = 1
+</div>
+
+
+<!-- Image cell -->
+
+
+<div class="image">
+Figure 3:
+<br>
+  <img src="bimetalic_htmlimg/bimetalic_12.png" alt="Diagram" style="max-width:90%;" loading="lazy" /></div>
+
+
+<!-- Image cell -->
+
+
+<div class="image">
+Figure 4:
+<br>
+  <img src="bimetalic_htmlimg/bimetalic_13.png" alt="Diagram" style="max-width:90%;" loading="lazy" /></div>
+
+
+<!-- Code cell -->
+
+
+<table><tr><td>
+  <span class="prompt">
+(%i14)	
+  </span></td>
+  <td><span class="input">
+<span class="code_function">limit</span><span class="code_operator">(</span><span class="code_function">tan</span><span class="code_operator">(</span><span class="code_variable">u</span><span class="code_operator">)</span><span class="code_operator">/</span><span class="code_variable">u</span><span class="code_endofline">,</span> <span class="code_variable">u</span><span class="code_endofline">,</span> <span class="code_number">0</span><span class="code_operator">)</span><span class="code_endofline">;</span>  </span></td>
+</tr></table>
+<p>
+\[\]\[\tag{%o14} 1\]
+</p>
+
+ <hr>
+ <p><small> Created with <a href="https://wxMaxima-developers.github.io/wxmaxima/">wxMaxima</a>.</small></p>
+ <small> The source of this Maxima session can be downloaded <a href="bimetalic_htmlimg/bimetalic.wxmx">here</a>.</small>
+ </body>
+</html>
