@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html>
+ <head>
+  <title>voc</title>
+  <meta name="generator" content="wxMaxima">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    displayAlign: "left",
+    context: "MathJax",
+    TeX: {TagSide: "left"}
+  })
+</script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  // A comment that hinders wxWidgets from optimizing this tag too much.
+</script>
+  <link rel="stylesheet" type="text/css" href="voc_htmlimg/voc.css">
+ </head>
+ <body>
+
+<!-- ****************************************************** -->
+<!-- *        Created with wxMaxima version 24.02.1       * -->
+<!-- ****************************************************** -->
+<noscript><div class="error message"><p>Please enable JavaScript in order to get a 2d display of the equations embedded in this web page.</p></div></noscript><p hidden = "hidden">\(      \DeclareMathOperator{\abs}{abs}
+      \newcommand{\ensuremath}[1]{\mbox{$#1$}}
+\)</p>
+
+<!-- Title cell -->
+
+
+<div class="title">
+<p>
+Enclosure Vacuum Level
+</p>
+</div>
+
+
+<!-- Text cell -->
+
+
+<div class="comment">
+One way to decide the enclosure vacuum/ exhaust vent speed is to measure/smell.
+</div>
+
+
+<!-- Code cell -->
+
+
+<table><tr><td>
+  <span class="prompt">
+(%i6)	
+  </span></td>
+  <td><span class="input">
+<span class="code_function">assume</span><span class="code_operator">(</span><span class="code_variable">Pe</span><span class="code_endofline">&gt;</span><span class="code_number">0</span><span class="code_operator">)</span><span class="code_endofline">$</span> <span class="code_function">assume</span><span class="code_operator">(</span><span class="code_variable">v</span> <span class="code_endofline">&lt;</span> <span class="code_number">0</span><span class="code_operator">)</span><span class="code_endofline">$</span> <span class="code_function">assume</span><span class="code_operator">(</span><span class="code_variable">tau</span> <span class="code_endofline">&gt;</span> <span class="code_number">0</span><span class="code_operator">)</span><span class="code_endofline">$</span> <span class="code_variable">ratprint</span> <span class="code_operator">:</span> <span class="code_function">false</span><span class="code_endofline">$</span> <span class="code_function">load</span><span class="code_operator">(</span><span class="code_variable">ezunits</span><span class="code_operator">)</span><span class="code_endofline">$</span> <span class="code_function">assume</span><span class="code_operator">(</span><span class="code_variable">ePe</span> <span class="code_endofline">&gt;</span> <span class="code_number">1</span><span class="code_operator">)</span><span class="code_endofline">$</span>  </span></td>
+</tr></table>
+
+
+
+<!-- Section cell -->
+
+
+<div class="section">
+<p>
+  1 Diffusion in a Tube
+</p>
+</div>
+
+
+<!-- Text cell -->
+
+
+<div class="comment">
+For dilute components that have no influence on air movement:
+</div>
+
+
+<!-- Code cell -->
+
+
+<table><tr><td>
+  <span class="prompt">
+(%i7)	
+  </span></td>
+  <td><span class="input">
+<span class="code_variable">de</span> <span class="code_operator">:</span> <span class="code_function">ode2</span><span class="code_operator">(</span><span class="code_variable">Pe</span><span class="code_operator">·</span><span class="code_function">diff</span><span class="code_operator">(</span><span class="code_function">c</span><span class="code_operator">(</span><span class="code_variable">x</span><span class="code_operator">)</span><span class="code_endofline">,</span> <span class="code_variable">x</span><span class="code_operator">)</span> <span class="code_operator">+</span> <span class="code_function">diff</span><span class="code_operator">(</span><span class="code_function">c</span><span class="code_operator">(</span><span class="code_variable">x</span><span class="code_operator">)</span><span class="code_endofline">,</span> <span class="code_variable">x</span><span class="code_endofline">,</span> <span class="code_number">2</span><span class="code_operator">)</span><span class="code_endofline">,</span> <span class="code_function">c</span><span class="code_operator">(</span><span class="code_variable">x</span><span class="code_operator">)</span><span class="code_endofline">,</span> <span class="code_variable">x</span><span class="code_operator">)</span><span class="code_endofline">;</span>  </span></td>
+</tr></table>
+<p>
+\[\]\[(\% i1) 
+\]\[(\% i1) (\% i1) (\% i1) (\% i1) (\% i1) (\% i1) (\% i1) (\% i1) (\% i1) (\% i1) (\% i1) (\% i1) (\% i1) (\% i1) (\% i1) (\% i1) (\% i1) (\% i1) (\% i1) (\% i1) (\% i1) (\% i1) (\% i1) (\% i1) (\% i1) (\% i1) (\% i1) (\% i1) (\% i1) (\% i1) (\% i1) (\% i1) (\% i1) (\% i1) (\% i1) (\% i1) \]
+</p>
+<p>
+\[\]\[\tag{} \mathop{c}(x)\mathop{=}\ensuremath{\mathrm{\% k2}} {{\% e}^{-\left( \ensuremath{\mathrm{Pe}} x\right) }}\mathop{+}\ensuremath{\mathrm{\% k1}}\]
+</p>
+
+
+<!-- Text cell -->
+
+
+<div class="comment">
+Do the boundary conditions, c0 inside and c1(t) outside the enclosure:
+</div>
+
+
+<!-- Code cell -->
+
+
+<table><tr><td>
+  <span class="prompt">
+(%i9)	
+  </span></td>
+  <td><span class="input">
+<span class="code_function">solve</span><span class="code_operator">(</span> <span class="code_operator">[</span><span class="code_function">subst</span><span class="code_operator">(</span><span class="code_variable">x</span><span class="code_operator">=</span><span class="code_number">1</span><span class="code_endofline">,</span> <span class="code_function">rhs</span><span class="code_operator">(</span><span class="code_variable">de</span><span class="code_operator">)</span><span class="code_operator">)</span> <span class="code_operator">=</span> <span class="code_function">c1</span><span class="code_operator">(</span><span class="code_variable">t</span><span class="code_operator">)</span><span class="code_endofline">,</span> <span class="code_function">subst</span><span class="code_operator">(</span><span class="code_variable">x</span><span class="code_operator">=</span><span class="code_number">0</span><span class="code_endofline">,</span> <span class="code_function">rhs</span><span class="code_operator">(</span><span class="code_variable">de</span><span class="code_operator">)</span><span class="code_operator">)</span> <span class="code_operator">=</span> <span class="code_variable">c0</span><span class="code_operator">]</span> <span class="code_endofline">,</span> <span class="code_operator">[</span><span class="code_variable">%k1</span><span class="code_endofline">,</span> <span class="code_variable">%k2</span><span class="code_operator">]</span><span class="code_operator">)</span><span class="code_operator">[</span><span class="code_number">1</span><span class="code_operator">]</span><span class="code_endofline">;</span> <span class="code_comment">/* atvalue except it seems desolve only does IVP not BVP */</span><span class="code_endofline"><br>
+</span><span class="code_variable">deb</span> <span class="code_operator">:</span> <span class="code_function">subst</span><span class="code_operator">(</span><span class="code_variable">%</span><span class="code_endofline">,</span> <span class="code_variable">de</span><span class="code_operator">)</span><span class="code_endofline">;</span>  </span></td>
+</tr></table>
+<p>
+\[\]\[\tag{%o8} \left[ \ensuremath{\mathrm{\% k1}}\mathop{=}\frac{{{\% e}^{\ensuremath{\mathrm{Pe}}}} \mathop{c1}(t)\mathop{-}\ensuremath{\mathrm{c0}}}{{{\% e}^{\ensuremath{\mathrm{Pe}}}}\mathop{-}1}\mathop{,}\ensuremath{\mathrm{\% k2}}\mathop{=}\mathop{-}\left( \frac{{{\% e}^{\ensuremath{\mathrm{Pe}}}} \mathop{c1}(t)\mathop{-}{{\% e}^{\ensuremath{\mathrm{Pe}}}} \ensuremath{\mathrm{c0}}}{{{\% e}^{\ensuremath{\mathrm{Pe}}}}\mathop{-}1}\right) \right] \]
+</p>
+<p>
+\[\]\[\tag{e} \mathop{c}(x)\mathop{=}\frac{{{\% e}^{\ensuremath{\mathrm{Pe}}}} \mathop{c1}(t)\mathop{-}\ensuremath{\mathrm{c0}}}{{{\% e}^{\ensuremath{\mathrm{Pe}}}}\mathop{-}1}\mathop{-}\frac{\left( {{\% e}^{\ensuremath{\mathrm{Pe}}}} \mathop{c1}(t)\mathop{-}{{\% e}^{\ensuremath{\mathrm{Pe}}}} \ensuremath{\mathrm{c0}}\right)  {{\% e}^{-\left( \ensuremath{\mathrm{Pe}} x\right) }}}{{{\% e}^{\ensuremath{\mathrm{Pe}}}}\mathop{-}1}\]
+</p>
+
+
+<!-- Text cell -->
+
+
+<div class="comment">
+Next I need the flux through the tube, where D_L stands for D/L<br>diffusivity / tube length
+</div>
+
+
+<!-- Code cell -->
+
+
+<table><tr><td>
+  <span class="prompt">
+(%i11)	
+  </span></td>
+  <td><span class="input">
+<span class="code_operator">(</span><span class="code_function">diff</span><span class="code_operator">(</span> <span class="code_function">rhs</span><span class="code_operator">(</span><span class="code_variable">deb</span><span class="code_operator">)</span><span class="code_endofline">,</span> <span class="code_variable">x</span><span class="code_endofline">,</span> <span class="code_number">1</span><span class="code_operator">)</span> <span class="code_operator">+</span> <span class="code_variable">Pe</span> <span class="code_operator">·</span> <span class="code_function">rhs</span><span class="code_operator">(</span><span class="code_variable">deb</span><span class="code_operator">)</span><span class="code_operator">)</span> <span class="code_operator">·</span> <span class="code_variable">D_L</span><span class="code_endofline">;</span><span class="code_endofline"><br>
+</span><span class="code_variable">jeq</span> <span class="code_operator">:</span> <span class="code_function">expand</span><span class="code_operator">(</span><span class="code_variable">%</span><span class="code_operator">)</span><span class="code_endofline">;</span>  </span></td>
+</tr></table>
+<p>
+\[\]\[\tag{%o10} {D_L} \left( \ensuremath{\mathrm{Pe}}\, \left( \frac{{{\% e}^{\ensuremath{\mathrm{Pe}}}} \mathop{c1}(t)\mathop{-}\ensuremath{\mathrm{c0}}}{{{\% e}^{\ensuremath{\mathrm{Pe}}}}\mathop{-}1}\mathop{-}\frac{\left( {{\% e}^{\ensuremath{\mathrm{Pe}}}} \mathop{c1}(t)\mathop{-}{{\% e}^{\ensuremath{\mathrm{Pe}}}} \ensuremath{\mathrm{c0}}\right)  {{\% e}^{-\left( \ensuremath{\mathrm{Pe}} x\right) }}}{{{\% e}^{\ensuremath{\mathrm{Pe}}}}\mathop{-}1}\right) \mathop{+}\frac{\ensuremath{\mathrm{Pe}}\, \left( {{\% e}^{\ensuremath{\mathrm{Pe}}}} \mathop{c1}(t)\mathop{-}{{\% e}^{\ensuremath{\mathrm{Pe}}}} \ensuremath{\mathrm{c0}}\right)  {{\% e}^{-\left( \ensuremath{\mathrm{Pe}} x\right) }}}{{{\% e}^{\ensuremath{\mathrm{Pe}}}}\mathop{-}1}\right) \]
+</p>
+<p>
+\[\]\[\tag{e} \frac{{D_L} \ensuremath{\mathrm{Pe}} {{\% e}^{\ensuremath{\mathrm{Pe}}}} \mathop{c1}(t)}{{{\% e}^{\ensuremath{\mathrm{Pe}}}}\mathop{-}1}\mathop{-}\frac{{D_L} \ensuremath{\mathrm{Pe}}\, \ensuremath{\mathrm{c0}}}{{{\% e}^{\ensuremath{\mathrm{Pe}}}}\mathop{-}1}\]
+</p>
+
+
+<!-- Section cell -->
+
+
+<div class="section">
+<p>
+  2 CSTR
+</p>
+</div>
+
+
+<!-- Text cell -->
+
+
+<div class="comment">
+Here the room is assumed to be well mixed,<br>so there is only one concentration to be concerned with c1(t).<br>There is exchange with outside through a window or hvac of<br>F [m3/s]<br>tau [1/s] = V [m3] / F<br>jeq [1/s/m2]<br>A [m2]<br>A_F = A/F
+</div>
+
+
+<!-- Code cell -->
+
+
+<table><tr><td>
+  <span class="prompt">
+(%i17)	
+  </span></td>
+  <td><span class="input">
+<span class="code_variable">cstr1</span> <span class="code_operator">:</span> <span class="code_function">ode2</span><span class="code_operator">(</span><span class="code_variable">tau</span> <span class="code_operator">·</span> <span class="code_function">diff</span><span class="code_operator">(</span><span class="code_function">c1</span><span class="code_operator">(</span><span class="code_variable">t</span><span class="code_operator">)</span><span class="code_endofline">,</span> <span class="code_variable">t</span><span class="code_operator">)</span> <span class="code_operator">=</span> <span class="code_operator">−</span><span class="code_variable">jeq</span> <span class="code_operator">·</span> <span class="code_variable">A_F</span>  <span class="code_operator">−</span> <span class="code_function">c1</span><span class="code_operator">(</span><span class="code_variable">t</span><span class="code_operator">)</span><span class="code_endofline">,</span> <span class="code_function">c1</span><span class="code_operator">(</span><span class="code_variable">t</span><span class="code_operator">)</span><span class="code_endofline">,</span> <span class="code_variable">t</span> <span class="code_operator">)</span><span class="code_endofline">;</span><span class="code_endofline"><br>
+</span><span class="code_function">subst</span><span class="code_operator">(</span><span class="code_variable">t</span><span class="code_operator">=</span><span class="code_number">0</span><span class="code_endofline">,</span> <span class="code_variable">cstr1</span><span class="code_operator">)</span><span class="code_endofline">;</span><span class="code_endofline"><br>
+</span><span class="code_function">solve</span><span class="code_operator">(</span><span class="code_function">rhs</span><span class="code_operator">(</span><span class="code_variable">%</span><span class="code_operator">)</span><span class="code_endofline">,</span> <span class="code_variable">%c</span><span class="code_operator">)</span><span class="code_endofline">;</span><span class="code_endofline"><br>
+</span><span class="code_function">subst</span><span class="code_operator">(</span><span class="code_variable">%</span><span class="code_endofline">,</span> <span class="code_variable">cstr1</span><span class="code_operator">)</span><span class="code_endofline">;</span><span class="code_endofline"><br>
+</span><span class="code_function">expand</span><span class="code_operator">(</span><span class="code_variable">%</span><span class="code_operator">)</span><span class="code_endofline">;</span> <span class="code_variable">cstr2</span> <span class="code_operator">:</span> <span class="code_function">factor</span><span class="code_operator">(</span><span class="code_variable">%</span><span class="code_operator">)</span><span class="code_endofline">;</span>  </span></td>
+</tr></table>
+<p>
+\[\]\[\tag{str} \mathop{c1}(t)\mathop{=}{{\% e}^{-\left( \frac{\left( \left( {A_F} {D_L} \ensuremath{\mathrm{Pe}}\mathop{+}1\right)  {{\% e}^{\ensuremath{\mathrm{Pe}}}}\mathop{-}1\right)  t}{\left( {{\% e}^{\ensuremath{\mathrm{Pe}}}}\mathop{-}1\right)  tau}\right) }} \left( \frac{{A_F} {D_L} \ensuremath{\mathrm{Pe}}\, \ensuremath{\mathrm{c0}} {{\% e}^{\frac{\left( \left( {A_F} {D_L} \ensuremath{\mathrm{Pe}}\mathop{+}1\right)  {{\% e}^{\ensuremath{\mathrm{Pe}}}}\mathop{-}1\right)  t}{\left( {{\% e}^{\ensuremath{\mathrm{Pe}}}}\mathop{-}1\right)  tau}}}}{\left( {A_F} {D_L} \ensuremath{\mathrm{Pe}}\mathop{+}1\right)  {{\% e}^{\ensuremath{\mathrm{Pe}}}}\mathop{-}1}\mathop{+}\ensuremath{\mathrm{\% c}}\right) \]
+</p>
+<p>
+\[\]\[\tag{%o13} \mathop{c1}(0)\mathop{=}\frac{{A_F} {D_L} \ensuremath{\mathrm{Pe}}\, \ensuremath{\mathrm{c0}}}{\left( {A_F} {D_L} \ensuremath{\mathrm{Pe}}\mathop{+}1\right)  {{\% e}^{\ensuremath{\mathrm{Pe}}}}\mathop{-}1}\mathop{+}\ensuremath{\mathrm{\% c}}\]
+</p>
+<p>
+\[\]\[\tag{%o14} \left[ \ensuremath{\mathrm{\% c}}\mathop{=}\mathop{-}\left( \frac{{A_F} {D_L} \ensuremath{\mathrm{Pe}}\, \ensuremath{\mathrm{c0}}}{\left( {A_F} {D_L} \ensuremath{\mathrm{Pe}}\mathop{+}1\right)  {{\% e}^{\ensuremath{\mathrm{Pe}}}}\mathop{-}1}\right) \right] \]
+</p>
+<p>
+\[\]\[\tag{%o15} \mathop{c1}(t)\mathop{=}{{\% e}^{-\left( \frac{\left( \left( {A_F} {D_L} \ensuremath{\mathrm{Pe}}\mathop{+}1\right)  {{\% e}^{\ensuremath{\mathrm{Pe}}}}\mathop{-}1\right)  t}{\left( {{\% e}^{\ensuremath{\mathrm{Pe}}}}\mathop{-}1\right)  tau}\right) }} \left( \frac{{A_F} {D_L} \ensuremath{\mathrm{Pe}}\, \ensuremath{\mathrm{c0}} {{\% e}^{\frac{\left( \left( {A_F} {D_L} \ensuremath{\mathrm{Pe}}\mathop{+}1\right)  {{\% e}^{\ensuremath{\mathrm{Pe}}}}\mathop{-}1\right)  t}{\left( {{\% e}^{\ensuremath{\mathrm{Pe}}}}\mathop{-}1\right)  tau}}}}{\left( {A_F} {D_L} \ensuremath{\mathrm{Pe}}\mathop{+}1\right)  {{\% e}^{\ensuremath{\mathrm{Pe}}}}\mathop{-}1}\mathop{-}\frac{{A_F} {D_L} \ensuremath{\mathrm{Pe}}\, \ensuremath{\mathrm{c0}}}{\left( {A_F} {D_L} \ensuremath{\mathrm{Pe}}\mathop{+}1\right)  {{\% e}^{\ensuremath{\mathrm{Pe}}}}\mathop{-}1}\right) \]
+</p>
+<p>
+\[\]\[\tag{%o16} \mathop{c1}(t)\mathop{=}\frac{{A_F} {D_L} \ensuremath{\mathrm{Pe}}\, \ensuremath{\mathrm{c0}}}{{A_F} {D_L} \ensuremath{\mathrm{Pe}} {{\% e}^{\ensuremath{\mathrm{Pe}}}}\mathop{+}{{\% e}^{\ensuremath{\mathrm{Pe}}}}\mathop{-}1}\mathop{-}\frac{{A_F} {D_L} \ensuremath{\mathrm{Pe}}\, \ensuremath{\mathrm{c0}} {{\% e}^{\mathop{-}\left( \frac{{A_F} {D_L} \ensuremath{\mathrm{Pe}} {{\% e}^{\ensuremath{\mathrm{Pe}}}} t}{{{\% e}^{\ensuremath{\mathrm{Pe}}}} tau\mathop{-}tau}\right) \mathop{-}\frac{{{\% e}^{\ensuremath{\mathrm{Pe}}}} t}{{{\% e}^{\ensuremath{\mathrm{Pe}}}} tau\mathop{-}tau}\mathop{+}\frac{t}{{{\% e}^{\ensuremath{\mathrm{Pe}}}} tau\mathop{-}tau}}}}{{A_F} {D_L} \ensuremath{\mathrm{Pe}} {{\% e}^{\ensuremath{\mathrm{Pe}}}}\mathop{+}{{\% e}^{\ensuremath{\mathrm{Pe}}}}\mathop{-}1}\]
+</p>
+<p>
+\[\]\[\tag{str} \mathop{c1}(t)\mathop{=}\frac{{A_F} {D_L} \ensuremath{\mathrm{Pe}}\, \ensuremath{\mathrm{c0}} {{\% e}^{\mathop{-}\left( \frac{{A_F} {D_L} \ensuremath{\mathrm{Pe}} {{\% e}^{\ensuremath{\mathrm{Pe}}}} t}{{{\% e}^{\ensuremath{\mathrm{Pe}}}} tau\mathop{-}tau}\right) \mathop{-}\frac{{{\% e}^{\ensuremath{\mathrm{Pe}}}} t}{{{\% e}^{\ensuremath{\mathrm{Pe}}}} tau\mathop{-}tau}}} \left( {{\% e}^{\frac{{A_F} {D_L} \ensuremath{\mathrm{Pe}} {{\% e}^{\ensuremath{\mathrm{Pe}}}} t}{{{\% e}^{\ensuremath{\mathrm{Pe}}}} tau\mathop{-}tau}\mathop{+}\frac{{{\% e}^{\ensuremath{\mathrm{Pe}}}} t}{{{\% e}^{\ensuremath{\mathrm{Pe}}}} tau\mathop{-}tau}}}\mathop{-}{{\% e}^{\frac{t}{{{\% e}^{\ensuremath{\mathrm{Pe}}}} tau\mathop{-}tau}}}\right) }{{A_F} {D_L} \ensuremath{\mathrm{Pe}} {{\% e}^{\ensuremath{\mathrm{Pe}}}}\mathop{+}{{\% e}^{\ensuremath{\mathrm{Pe}}}}\mathop{-}1}\]
+</p>
+
+
+<!-- Text cell -->
+
+
+<div class="comment">
+ePe = exp(Pe)<br>k = A/F * D/L * Pe
+</div>
+
+
+<!-- Code cell -->
+
+
+<table><tr><td>
+  <span class="prompt">
+(%i18)	
+  </span></td>
+  <td><span class="input">
+<span class="code_variable">cstr2sub</span> <span class="code_operator">:</span> <span class="code_function">subst</span><span class="code_operator">(</span> <span class="code_operator">[</span><span class="code_variable">A_F</span> <span class="code_operator">=</span> <span class="code_variable">k</span> <span class="code_operator">/</span> <span class="code_variable">D_L</span> <span class="code_operator">/</span> <span class="code_variable">Pe</span><span class="code_endofline">,</span> <span class="code_variable">Pe</span> <span class="code_operator">=</span> <span class="code_function">log</span><span class="code_operator">(</span><span class="code_variable">ePe</span><span class="code_operator">)</span><span class="code_operator">]</span><span class="code_endofline">,</span> <span class="code_variable">cstr2</span><span class="code_operator">)</span><span class="code_endofline">;</span>  </span></td>
+</tr></table>
+<p>
+\[\]\[\tag{str2su} \mathop{c1}(t)\mathop{=}\frac{\ensuremath{\mathrm{c0}} k {{\% e}^{\mathop{-}\left( \frac{\ensuremath{\mathrm{ePe}} k t}{\ensuremath{\mathrm{ePe}} tau\mathop{-}tau}\right) \mathop{-}\frac{\ensuremath{\mathrm{ePe}} t}{\ensuremath{\mathrm{ePe}} tau\mathop{-}tau}}} \left( {{\% e}^{\frac{\ensuremath{\mathrm{ePe}} k t}{\ensuremath{\mathrm{ePe}} tau\mathop{-}tau}\mathop{+}\frac{\ensuremath{\mathrm{ePe}} t}{\ensuremath{\mathrm{ePe}} tau\mathop{-}tau}}}\mathop{-}{{\% e}^{\frac{t}{\ensuremath{\mathrm{ePe}} tau\mathop{-}tau}}}\right) }{\ensuremath{\mathrm{ePe}} k\mathop{+}\ensuremath{\mathrm{ePe}}\mathop{-}1}\]
+</p>
+
+
+<!-- Code cell -->
+
+
+<table><tr><td>
+  <span class="prompt">
+(%i19)	
+  </span></td>
+  <td><span class="input">
+<span class="code_function">limit</span><span class="code_operator">(</span><span class="code_function">rhs</span><span class="code_operator">(</span><span class="code_variable">cstr2sub</span><span class="code_operator">)</span><span class="code_endofline">,</span> <span class="code_variable">t</span><span class="code_endofline">,</span> <span class="code_variable">inf</span><span class="code_operator">)</span><span class="code_endofline">;</span>  </span></td>
+</tr></table>
+<p>
+\[\]\[\tag{%o19} \frac{\ensuremath{\mathrm{c0}} k}{\ensuremath{\mathrm{ePe}} k\mathop{+}\ensuremath{\mathrm{ePe}}\mathop{-}1}\]
+</p>
+
+
+<!-- Text cell -->
+
+
+<div class="comment">
+k = A/F * D/L * Pe<br>k = A/F * D/L * Lu/D<br>k = A * u / F<br>this should be dimensionless,<br>A [cm^2] cross section of the enclosure holes<br>L [cm] length of the flow through the enclosure holes<br>u [cm/s] speed of the plug flow through the enclosure holes<br>F [cm^3/s] air exchange rate of the room. Perhaps 0.3 air changes per hour * 10 m3<br>then k [1]<br><br>Pe = Lu/D
+</div>
+
+
+<!-- Code cell -->
+
+
+<table><tr><td>
+  <span class="prompt">
+(%i21)	
+  </span></td>
+  <td><span class="input">
+<span class="code_function">load</span><span class="code_operator">(</span><span class="code_variable">ezunits</span><span class="code_operator">)</span><span class="code_endofline">$</span><span class="code_endofline"><br>
+</span><span class="code_variable">kVal</span> <span class="code_operator">:</span> <span class="code_operator">(</span><span class="code_number">5</span> <span class="code_endofline">`</span><span class="code_variable">cm</span><span class="code_operator">^</span><span class="code_number">2</span><span class="code_operator">)</span> <span class="code_operator">·</span> <span class="code_operator">(</span><span class="code_number">1</span> <span class="code_endofline">`</span> <span class="code_variable">cm</span><span class="code_operator">/</span><span class="code_variable">s</span><span class="code_operator">)</span> <span class="code_operator">/</span> <span class="code_operator">(</span><span class="code_operator">(</span><span class="code_number">10</span> <span class="code_endofline">`</span> <span class="code_variable">m</span><span class="code_operator">^</span><span class="code_number">3</span><span class="code_operator">)</span> <span class="code_operator">/</span> <span class="code_operator">(</span><span class="code_number">0</span><span class="code_endofline">.</span><span class="code_number">3</span> <span class="code_endofline">`</span> <span class="code_variable">hour</span><span class="code_operator">)</span><span class="code_operator">)</span>  <span class="code_endofline">`</span><span class="code_endofline">`</span> <span class="code_number">1</span><span class="code_endofline">;</span>  </span></td>
+</tr></table>
+<p>
+\[\]\[\tag{Va} 5.4 {{10}^{-4}}\]
+</p>
+
+
+<!-- Code cell -->
+
+
+<table><tr><td>
+  <span class="prompt">
+(%i22)	
+  </span></td>
+  <td><span class="input">
+<span class="code_variable">cstr2end</span> <span class="code_operator">:</span> <span class="code_variable">c0</span> <span class="code_operator">·</span> <span class="code_variable">k</span> <span class="code_operator">/</span> <span class="code_operator">(</span><span class="code_operator">(</span><span class="code_number">1</span><span class="code_operator">+</span><span class="code_variable">k</span><span class="code_operator">)</span><span class="code_operator">·</span> <span class="code_function">exp</span><span class="code_operator">(</span><span class="code_variable">Pe</span><span class="code_operator">)</span> <span class="code_operator">−</span> <span class="code_number">1</span><span class="code_operator">)</span><span class="code_endofline">;</span>  </span></td>
+</tr></table>
+<p>
+\[\]\[\tag{str2en} \frac{\ensuremath{\mathrm{c0}} k}{{{\% e}^{\ensuremath{\mathrm{Pe}}}} \left( k\mathop{+}1\right) \mathop{-}1}\]
+</p>
+
+
+<!-- Code cell -->
+
+
+<table><tr><td>
+  <span class="prompt">
+(%i23)	
+  </span></td>
+  <td><span class="input">
+<span class="code_variable">c1000</span> <span class="code_operator">:</span> <span class="code_function">subst</span><span class="code_operator">(</span><span class="code_operator">[</span><span class="code_variable">k</span><span class="code_operator">=</span><span class="code_variable">kVal</span><span class="code_endofline">,</span> <span class="code_variable">c0</span><span class="code_operator">=</span><span class="code_number">1000</span><span class="code_operator">]</span><span class="code_endofline">,</span> <span class="code_variable">cstr2end</span><span class="code_operator">)</span><span class="code_endofline">;</span>  </span></td>
+</tr></table>
+<p>
+\[\]\[\tag{100} \frac{0.54}{1.00054 {{\% e}^{\ensuremath{\mathrm{Pe}}}}\mathop{-}1}\]
+</p>
+
+
+<!-- Code cell -->
+
+
+<table><tr><td>
+  <span class="prompt">
+(%i24)	
+  </span></td>
+  <td><span class="input">
+<span class="code_function">wxplot2d</span><span class="code_operator">(</span><span class="code_variable">c1000</span><span class="code_endofline">,</span> <span class="code_operator">[</span><span class="code_variable">Pe</span><span class="code_endofline">,</span> <span class="code_number">1e-3</span><span class="code_endofline">,</span> <span class="code_number">1</span><span class="code_operator">]</span><span class="code_operator">)</span><span class="code_endofline">;</span>  </span></td>
+</tr></table>
+<p>
+\[\]\[\tag{%t24} \]
+</p>
+  <img src="voc_htmlimg/voc_18.png" width="1198" style="max-width:90%;" loading="lazy" alt=" (Graphics) " /><br>
+
+<p>
+\[\]\[\tag{%o24} \]
+</p>
+
+ <hr>
+ <p><small> Created with <a href="https://wxMaxima-developers.github.io/wxmaxima/">wxMaxima</a>.</small></p>
+ <small> The source of this Maxima session can be downloaded <a href="voc_htmlimg/voc.wxmx">here</a>.</small>
+ </body>
+</html>
