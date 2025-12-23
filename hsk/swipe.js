@@ -1,6 +1,6 @@
 // Config
-const PRELOAD_RANGE = 4; // ensure [current-PRELOAD_RANGE .. current+PRELOAD_RANGE]
-const KEEP_RANGE = 7;    // delete tables farther than this distance from current
+const PRELOAD_RANGE = 3; // ensure [current-PRELOAD_RANGE .. current+PRELOAD_RANGE]
+const KEEP_RANGE = 2;    // visibility: hidden on tables farther than this distance from current
 const MAXPAGE = 200; //  XXX
 
 const hc = document.getElementById('hContainer');
@@ -28,10 +28,9 @@ function getSectionByIndex(i) {
   return Array.from(hc.children).find(ch => parseInt(ch.dataset.index) === i) || null;
 }
 
-// formerly async but I don't want asyncify and the jsapi option didn't seem to work
-// probably because I didn't generate async functions like Module.ccall("func", "number", [], [], {async: true}).then(result => {
-//   console.log("js_func: " + result);
-// });
+// TODO cleanup
+// view.h calls ensureSection
+// hide-
 function fillSectionAsync(index, sec) {
   if (!sec.isConnected) return;
 
@@ -66,6 +65,19 @@ function relativeVisibleIndex(di) {
   setVisibleIndex(((((i - 1) % MAXPAGE) + MAXPAGE) % MAXPAGE) + 1);
 }
 
+function fillSectionTemplates() {
+  let sec;
+  const curClassList = getSectionByIndex(getVisibleIndex()).querySelector("table").classList;
+  for (let index = 2; index < 200; index++) {
+    sec = document.getElementById("table-section-template").content.cloneNode(true).firstElementChild;
+    sec.querySelector("table").classList = curClassList;
+    sec.dataset = [];
+    sec.dataset.index = index;
+    sec.id = `sec${index}`
+    hc.appendChild(sec);
+  }
+}
+
 function ensureSection(index) {
   if (getSectionByIndex(index)) return;
 
@@ -86,28 +98,28 @@ function ensureSection(index) {
   } else {
     const before = hc.children[insertPos];
     hc.insertBefore(sec, before);
-    // sec.ariaBusy = true;
+    sec.ariaBusy = true;
     try {
       fillSectionAsync(index, sec);
-      // sec.ariaBusy = false;
+      sec.ariaBusy = false;
     } finally {
       loading.delete(index);
     }
   }
 }
 
-function cleanupFar(currentIndex) {
+function hideFar(currentIndex) {
   const ch = Array.from(hc.children);
   if (ch.length > 2 * KEEP_RANGE) {
-    const a = Math.max(0, currentIndex - KEEP_RANGE);
-    const b = Math.min(ch.length, currentIndex + KEEP_RANGE)
-    hc.replaceChildren(...ch.slice(a, b));
+    for (let i = 0; i < ch.length; i++) {
+      ch[i].style.visibility = i >= Math.max(0, currentIndex - KEEP_RANGE) && i <= Math.min(ch.length, currentIndex + KEEP_RANGE) ? 'visible' : 'hidden';
+    }
   }
 }
 
 function preloadAround(center) {
-  for (let i = center - PRELOAD_RANGE; i <= center + PRELOAD_RANGE; i++) {
-    ensureSection(i);
+  for (let i = Math.max(1, center - PRELOAD_RANGE); i <= Math.min(MAXPAGE, center + PRELOAD_RANGE); i++) {
+    fill_section(i);
   }
 }
 
@@ -136,9 +148,10 @@ function onScroll() {
 
   if (scrollTimer) clearTimeout(scrollTimer);
   scrollTimer = setTimeout(() => {
+
     const cur = getVisibleIndex();
-    // preloadAround(cur);
-    // cleanupFar(cur);
+    preloadAround(cur);
+    hideFar(cur);
   }, 150);
 }
 

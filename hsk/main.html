@@ -27,7 +27,7 @@
             display: flex;
             overflow-x: auto;
             scroll-snap-type: x mandatory;
-            height: 100vh;
+            height: 100%;
         }
         
       .table-section {
@@ -129,6 +129,7 @@
                   <th class="cl">Cluster <input type="button" onclick="hide('cl')" value="^"></th>
                 </tr>
               </thead>
+              <!-- or it should be div#spinner -->
               <tbody></tbody>
             </table>
       </div>
@@ -192,17 +193,13 @@
           Module.ready = true;
           console.log('initialized');
           setTimeout(() => {
+            console.log('fill_section(1)');
             ensureSection(1);
-            Module.ccall("fill_section", null, ["number"], [1]);
+            fill_section(1);
+            fillSectionTemplates();
+            backgroundTables.resolve();
             }, 0);
 
-          setTimeout(() => {
-            for (let i = 2; i <= 200; i++) {
-              ensureSection(i);
-              Module.ccall("fill_section", null, ["number"], [i]);
-            }
-            backgroundTables.resolve(); // done
-            }, 300);
         }
       };
       Module.setStatus('Downloading...');
@@ -265,11 +262,11 @@
           document.querySelectorAll('table.results').forEach((el) => {
             el.classList[op](`hide-${target}`);
           });
-        }, { timeout : 400 });
+        }, { timeout : 40 });
       };
 
-      function unhide(target) { setColumnVisibility(target, false) };
-      function hide(target) { setColumnVisibility(target, true) };
+      async function unhide(target) { await setColumnVisibility(target, false) };
+      async function hide(target) { await setColumnVisibility(target, true) };
 
     </script>
     <script async type="text/javascript" src="main.js"></script>
