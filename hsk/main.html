@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>HSK-3.0 Mandarin Cangjie Thesaurus</title>
+    <style>
+      #status { display: inline-block; vertical-align: top; margin-top: 30px; margin-left: 20px; font-weight: bold; color: rgb(120,120,120); }
+      #top-controls { border: 2px solid black;  display: grid; grid-auto-flow: column; gap: 2px; align-items: start; }
+      #settings { border: 2px solid black; display: flex; flex-direction: column; gap: 4px; }
+      input[type="text"] { box-sizing: border-box; height:40px; width: 100% }
+      table.results { border-collapse: collapse; width: 100%; table-layout: fixed; }
+      table.results th, table.results td { border: 1px solid #ccc; text-align: left; word-wrap: break-word; overflow-wrap: break-word; padding: 9px }
+      table.results col.hanzi { width: 10%; }
+      table.results col.pinyin { width: 7%; }
+      table.results col.cangjie { width: 15%; }
+      table.results col.meaning { width: 35%; }
+      table.results col.cl { width: 10%; }
+      table.hide-hanzi .hanzi { display: none; }
+      table.hide-pinyin .pinyin { display: none; }
+      table.hide-cangjie .cangjie { display: none; }
+      table.hide-meaning .meaning { display: none; }
+      table.hide-cl .cl { display: none; }
+      td.hanzi { font-size: 2em; }
+
+      #hContainer {
+            display: flex;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            height: 100vh;
+        }
+        
+      .table-section {
+            flex: 0 0 100vw;
+            scroll-snap-align: start;
+            height: 100%;
+            overflow-y: auto;
+            scroll-snap-type: y mandatory;
+        }
+
+        .scroll-indicator {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            z-index: 100;
+            display: none;
+        }
+
+
+      .spinner { height: 30px; width: 30px; margin-top: 20px; margin-left: 20px; display: inline-block; vertical-align: top;
+        animation: rotation 0.8s linear infinite; border-left: 5px solid rgb(235,235,235);
+        border-right: 5px solid rgb(235,235,235); border-bottom: 5px solid rgb(235,235,235);
+        border-top: 5px solid rgb(120,120,120); border-radius: 100%; background-color: rgb(189,215,46); }
+      @keyframes rotation { from {transform: rotate(0deg);} to {transform: rotate(360deg);} }
+    </style>
+    <meta name=viewport content="width=device-width, initial-scale=1.0">
+  </head>
+  <body>
+    <div id="top-controls">
+      <label>
+        <a href=https://en.wikipedia.org/wiki/Pinyin_input_method class=labels style='display: none' >Pinyin</a>
+        <input type="text" id="grepPinyin" placeholder="hao mǎ" onchange="on_change(5)" oninput="on_input(5)"> </label>
+      <label>
+              <a href=https://en.wikipedia.org/wiki/Cangjie_input_method class=labels style='display: none'>Cangjie</a>
+          <input type="text" id="grepCangjie" placeholder="rd" onchange="on_change(4)" oninput="on_input(4)"></label>
+      <label>
+          <a title="" class=labels style='display: none'>Definition</a>
+        <input type=text id=grepDefinition placeholder="idiom" onchange="on_change(10)" oninput="on_input(10)">
+        </label>
+      <label>
+          <a title="Nomic-embed-text produces a point on a 768 dimensional unit sphere. R's cluster::clara() with the default Euclidean distance divides up the space into a specified number of regions assigning an arbitrary number to each."
+            href=https://ollama.com/library/nomic-embed-text
+            class=labels style='display:none'>Cluster</a>
+      <input type="text" title="Numbers or names match the cluster numbers or assigned names" id="grepCluster" placeholder="1 2 3 40 time" onchange="on_change(9)" oninput="on_input(9)"></label>
+      <label><a class=labels style='display:none'>Name this cluster</a>
+        <input type=text id=clusterName placeholder=time onchange="on_change(6)" oninput="on_input(6)">
+      </label>
+      <div id="settings" style="display: none">
+        <label><input type="radio" name="paginate" id="paginate_on" value="on" checked onchange="on_input(1)"> Paginate</label>
+        <label><input type="radio" name="paginate" id="paginate_off" value="off" onchange="on_input(2)"> List</label>
+        <label> <a href="https://en.wikipedia.org/wiki/Damerau%E2%80%93Levenshtein_distance">Edit distance</a>
+          <input type="text" id="LDparam" value="1232"
+              title="insert delete substitute transpose costs. Empty means exact matches only."
+                 onchange="on_change(3)" oninput="on_input(3)">
+              </label>
+      </div>
+      <div>
+        <input type="button" title='toggle settings' onclick="toggleSettingsDisplay()" value="⚙️">
+        <input type="button" id='toggleLabels' title='toggle filter labels' onclick="toggleLabels()" value="v">
+        <button id="prevBtn" onclick="relativeVisibleIndex(-1)">&lt;</button>
+        <button id="nextBtn" onclick="relativeVisibleIndex(1)">&gt;</button>
+        <button id="hanzi-unhide" onclick="unhide('hanzi')" style='display:none'>show hanzi</button>
+        <button id="pinyin-unhide" onclick="unhide('pinyin')" style='display:none'>show pinyin</button>
+        <button id="cangjie-unhide" onclick="unhide('cangjie')" style='display:inline'>show cangjie</button>
+        <button id="meaning-unhide" onclick="unhide('meaning')" style='display:none'>show definition</button>
+        <button id="cl-unhide" onclick="unhide('cl')" style='display:inline'>show cluster</button>
+      </div>
+    </div>
+    <div class="horizontal-container" id="hContainer"></div>
+    <div class="scroll-indicator">Horizontal: Table 1 | Vertical: Top</div>
+    <div class="spinner" id="spinner"></div>
+    <div class="emscripten" id="status">Downloading...</div>
+    <div class="emscripten">
+      <progress value="0" max="100" id="progress" hidden></progress>
+    </div>
+
+    <template id="table-section-template">
+      <div class="table-section">
+            <table class="results hide-cangjie hide-cl">
+              <colgroup>
+                <col class="hanzi">
+                <col class="pinyin">
+                <col class="cangjie">
+                <col class="meaning">
+                <col class="cl">
+              </colgroup>
+              <thead>
+                <tr>
+                  <th class="hanzi">Simplified <input type="button" onclick="hide('hanzi')" value="^"></th>
+                  <th class="pinyin">Pinyin <input type="button" onclick="hide('pinyin')" value="^"></th>
+                  <th class="cangjie">Cangjie <input type="button" onclick="hide('cangjie')" value="^"></th>
+                  <th class="meaning">Definition (Traditional if different) <input type="button" onclick="hide('meaning')" value="^"></th>
+                  <th class="cl">Cluster <input type="button" onclick="hide('cl')" value="^"></th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+      </div>
+    </template>
+    <template id="result-row-template">
+      <tr>
+        <td class="hanzi"></td>
+        <td class="pinyin"></td>
+        <td class="cangjie"></td>
+        <td class="meaning"></td>
+        <td class="cl"></td>
+      </tr>
+    </template>
+
+    <script type="text/javascript" src="swipe.js"></script>
+    <script type="text/javascript">
+      const statusElement = document.getElementById('status');
+      const progressElement = document.getElementById('progress');
+      const spinnerElement = document.getElementById('spinner');
+
+      function defer() {
+        let resolve, reject;
+        const promise = new Promise((res, rej) => {
+          resolve = res;
+          reject = rej;
+        });
+        return { promise, resolve, reject };
+      }
+      const backgroundTables = defer();
+
+      // Emscripten Module
+      var Module = {
+        setStatus: (text) => {
+          Module.setStatus.last ??= { time: Date.now(), text: '' };
+          if (text === Module.setStatus.last.text) return;
+          var m = text.match(/([^(]+)\((\d+(\.\d+)?)\/(\d+)\)/);
+          var now = Date.now();
+          if (m && now - Module.setStatus.last.time < 30) return;
+          Module.setStatus.last.time = now;
+          Module.setStatus.last.text = text;
+          if (m) {
+            text = m[1];
+            progressElement.value = parseInt(m[2]) * 100;
+            progressElement.max = parseInt(m[4]) * 100;
+            progressElement.hidden = false;
+            spinnerElement.hidden = false;
+          } else {
+            progressElement.value = null;
+            progressElement.max = null;
+            progressElement.hidden = true;
+            if (!text) spinnerElement.style.display = 'none';
+          }
+          statusElement.innerHTML = text;
+        },
+        totalDependencies: 0,
+        monitorRunDependencies: (left) => {
+          this.totalDependencies = Math.max(this.totalDependencies, left);
+          Module.setStatus(left ? 'Preparing... (' + (this.totalDependencies - left) + '/' + this.totalDependencies + ')' : 'All downloads complete.');
+        },
+        onRuntimeInitialized: () => {
+          Module.ready = true;
+          console.log('initialized');
+          setTimeout(() => {
+            ensureSection(1);
+            Module.ccall("fill_section", null, ["number"], [1]);
+            }, 0);
+
+          setTimeout(() => {
+            for (let i = 2; i <= 200; i++) {
+              ensureSection(i);
+              Module.ccall("fill_section", null, ["number"], [i]);
+            }
+            backgroundTables.resolve(); // done
+            }, 300);
+        }
+      };
+      Module.setStatus('Downloading...');
+      window.onerror = () => {
+        Module.setStatus('Exception thrown, see JavaScript console');
+        spinnerElement.style.display = 'none';
+        Module.setStatus = (text) => { if (text) console.error('[post-exception status] ' + text); };
+      };
+
+      function fill_section(idx) {
+        console.log(`filling section ${idx}`);
+        if (!Module.ready) return;
+        Module.ccall("fill_section", null, ["number"], [idx]);
+      };
+
+      function on_change(n) {
+        if (!Module.ready) return;
+        Module.ccall("on_change", null, ["number"], [n]);
+      }
+      function on_input(n) { 
+        on_change(n);
+      };
+      // TODO use classList like hide()/unhide()
+      function toggleSettingsDisplay() {
+          var settings = document.getElementById('settings');
+          if (settings.style.display === 'none') {
+              settings.style.display = 'flex';
+          } else {
+              settings.style.display = 'none';
+          }
+      }
+      function toggleLabels() {
+        const upEmoji = '^';
+        const downEmoji = 'v';
+        const b = document.getElementById('toggleLabels');
+        const targets = document.querySelectorAll(".labels");
+        console.log(`${b} ${targets}`);
+        if (b.value === upEmoji) {
+          targets.forEach((e) => {
+            e.style.display = 'none';
+            })
+          b.value = downEmoji;
+        } else {
+          targets.forEach((e) => {
+            e.style.display = '';
+            });
+          b.value = upEmoji;
+        };
+      }
+      async function setColumnVisibility(target, hide) {
+        document.getElementById(`${target}-unhide`).style.display = hide ? '' : 'none';
+        const op = hide ? "add" : "remove"
+
+        document.querySelectorAll(`div#sec${getVisibleIndex()} table.results`).forEach((el) => {
+          el.classList[op](`hide-${target}`);
+        });
+
+        await backgroundTables.promise;
+        window.requestIdleCallback(() => {
+          document.querySelectorAll('table.results').forEach((el) => {
+            el.classList[op](`hide-${target}`);
+          });
+        }, { timeout : 400 });
+      };
+
+      function unhide(target) { setColumnVisibility(target, false) };
+      function hide(target) { setColumnVisibility(target, true) };
+
+    </script>
+    <script async type="text/javascript" src="main.js"></script>
+  </body>
+</html>
