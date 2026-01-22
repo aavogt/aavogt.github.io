@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Blog - Gimp xcf file plot digitizer</title>
+        <link rel="stylesheet" href="../css/default.css" />
+    </head>
+    <body>
+        <header>
+            <div class="logo">
+                <a href="../">aavogt</a>
+            </div>
+            <nav>
+                <a href="../">Home</a>
+                <a href="../archive.html">Archive</a>
+            </nav>
+        </header>
+
+        <main role="main">
+            <h1>Gimp xcf file plot digitizer</h1>
+            <article>
+    <section class="header">
+        Posted on January 21, 2026
+        
+    </section>
+    <section>
+        <p>Often data is only available as a plot, and the goal is to replot or use it in a program. In the past I used engauge or webplotdigitizer for this task.
+This time I was frustrated with webplotdigitizer and decided to do it with GIMP.</p>
+<h2 id="aavogtdigitizer"><a href="https://github.com/aavogt/digitizer">aavogt/digitizer</a></h2>
+<p>I ended up using a <a href="https://crates.io/crates/xcf">rust xcf parser</a>. I prompted copilot (gpt-5.2-codex) with types, and my requested names for image coordinates, plot coordinates, image layer that defines the plot area, as well as what the output csv should look like. It’s not a one-shot since rustc doesn’t accept it right away but only small changes were needed to compile <code>main.rs</code>. One mistake was that I ended up with one csv file for each layer instead of a single csv for everything. More importantly, the initial results were wrong mostly in the y coordinate. In computer graphics the origin in at the top left, but plots usually have an origin on the bottom left. I didn’t think of it right away. I chose to flip it at the end:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>xf <span class="op">=</span> <span class="op">(</span>x<span class="op">-</span>xmin<span class="op">)</span> <span class="op">/</span> <span class="op">(</span>xmax<span class="op">-</span>xmin<span class="op">);</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>yf <span class="op">=</span> <span class="op">(</span>y<span class="op">-</span>ymin<span class="op">)</span> <span class="op">/</span> <span class="op">(</span>ymax<span class="op">-</span>ymin<span class="op">);</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>xplot <span class="op">=</span> <span class="op">(</span>x1 <span class="op">-</span> x0<span class="op">)</span> <span class="op">*</span> xf <span class="op">+</span> x0<span class="op">;</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>yplot <span class="op">=</span> y1 <span class="op">-</span> <span class="op">(</span>y1 <span class="op">-</span> y0<span class="op">)</span> <span class="op">*</span> yf<span class="op">;</span></span></code></pre></div>
+<p>But that’s not quite the end: x,y in <code>Layer::pixel(x,y)</code> doesn’t use <em>canvas</em> coordinates, it uses <em>layer</em> coordinates. It turns out that <code>PROP_OFFSETS</code> has the <code>[dx,dy]</code> to recover canvas coordinates according to <code>x_canvas = x_layer + dx</code>.</p>
+<p>The final code is <a href="https://github.com/aavogt/digitizer/blob/main/src/main.rs">here</a>, which could be improved mostly in aesthetics. For example <code>Option&lt;()&gt;</code> might become <code>bool</code> and <code>bounding_box()</code> was written before I know about <code>PROP_OFFSETS</code>, so it might be simplified to <code>ax.xmax = layer.pixels.width-1; ax.ymax = layer.pixels.height-1;</code>.</p>
+<h2 id="application">Application</h2>
+<p>A print-in-place fifteen puzzle is my newest 3dp goal:</p>
+<p><img src="../images/fifteen.webp" /></p>
+<p>How does friction relate to extrusion line orientation, speed, pressure? I found <a href="https://doi.org/10.37358/MP.21.1.5457">ASTM G133 pin-on-plate results in this paper</a>. I have trouble with the excel graphs because they have different scales. Here are their plots:</p>
+<p><img src="../images/chisiu0.png" /></p>
+<p>Using <code>GIMP</code> I take a couple minutes to select every colored region of the plot. Then <code>digitizer</code> outputs csvs that load with R/tidyverse/ggplot2. I replot ABS and PLA from their figure 7-10 below. With this arrangement, speed only matters for ABS in particular when moving in the longitudinal direction, the 100N-1mm/s-ABS run is different in a way that the averages over distances don’t show.</p>
+<p><img src="../images/chisiu.svg" /></p>
+<p>digitizer outputs the all of the y coordinates for each x. Above I collapsed them into a single line with <code>geom_smooth</code> but the way I’m using it, the wiggliness depends on my arbitrarily chosen image resolution, and here it may be too low.</p>
+<h2 id="failed-attempts">Failed attempts</h2>
+<h3 id="haskell">Haskell</h3>
+<p>First I tried to revive <a href="https://github.com/leino/xcf">leino/xcf</a>. Only small changes are needed build it with ghc-9.6.7: see <a href="https://github.com/aavogt/xcf">here</a>. But unfortunately my xcf files are version v011 and can’t be parsed as Version2 (v002).</p>
+<h3 id="python">Python</h3>
+<p>Next I tried with python.</p>
+<p>First I tried with gimpformats from pypi, but it doesn’t load my image.</p>
+<p>Instead I tried with Gimp’s api. Here’s how far I got:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># in b.py</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> gi</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> ctypes</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>gi.require_version(<span class="st">'Gimp'</span>, <span class="st">'3.0'</span>)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> gi.repository <span class="im">import</span> Gimp</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> gi.repository <span class="im">import</span> Gio</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> gi.repository <span class="im">import</span> Gegl</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>run_mode <span class="op">=</span> Gimp.RunMode.NONINTERACTIVE</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>image <span class="op">=</span> Gimp.file_load(run_mode, Gio.file_new_for_path(<span class="st">&quot;long_0.5.xcf&quot;</span>))</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>layers <span class="op">=</span> image.get_layers()</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>layer_dict <span class="op">=</span> {}</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> layer <span class="kw">in</span> layers:</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    name <span class="op">=</span> layer.get_name()</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    width <span class="op">=</span> layer.get_width()</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    height <span class="op">=</span> layer.get_height()</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>    <span class="bu">buffer</span> <span class="op">=</span> layer.get_buffer()</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>    data <span class="op">=</span> <span class="bu">buffer</span>.get(Gegl.Rectangle.new(<span class="dv">0</span>, <span class="dv">0</span>, width, height),</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>                        <span class="fl">1.0</span>, </span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>                      <span class="st">&quot;R'G'B'A u8&quot;</span>,</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>                      Gegl.AUTO_ROWSTRIDE)  </span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>    pixels <span class="op">=</span> np.frombuffer(data, dtype<span class="op">=</span>np.uint8).reshape(width, height, <span class="dv">4</span>)</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>    layer_dict[name] <span class="op">=</span> pixels</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a><span class="co"># then find a rectangular layer with x0,x1,y0,y1</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a><span class="co"># then write the csv with header &quot;name, xcanvas, ycanvas&quot;</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a><span class="co"># for each pixel in the other layers that's not transparent</span></span></code></pre></div>
+<p>I didn’t finish this. Gimp’s api is not fun. For example <code>print(dir(layer.get_buffer()))</code> prints:</p>
+<pre><code>['__class__', '__copy__', '__deepcopy__', '__delattr__', '__dict__', '__dir__',
+'__doc__', '__eq__', '__firstlineno__', '__format__', '__gdoc__', '__ge__',
+'__getattribute__', '__getstate__', '__gpointer__', '__grefcount__',
+'__gsignals__', '__gt__', '__gtype__', '__hash__', '__info__', '__init__',
+'__init_subclass__', '__le__', '__lt__', '__module__', '__ne__', '__new__',
+'__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__',
+'__static_attributes__', '__str__', '__subclasshook__', '_force_floating',
+'_ref', '_ref_sink', '_unref', '_unsupported_data_method',
+'_unsupported_method', 'add_handler', 'bind_property', 'bind_property_full',
+'chain', 'clear', 'command', 'compat_control', 'connect', 'connect_after',
+'connect_data', 'connect_object', 'connect_object_after', 'copy',
+'create_sub_buffer', 'damage_rect', 'damage_tile', 'disconnect',
+'disconnect_by_func', 'do_dispose', 'dup', 'emit', 'emit_stop_by_name',
+'find_property', 'flush', 'flush_ext', 'force_floating', 'freeze_changed',
+'freeze_notify', 'g_type_instance', 'get', 'get_abyss', 'get_data',
+'get_extent', 'get_properties', 'get_property', 'get_qdata', 'getv',
+'handler_block', 'handler_block_by_func', 'handler_disconnect',
+'handler_is_connected', 'handler_unblock', 'handler_unblock_by_func',
+'install_properties', 'install_property', 'interface_find_property',
+'interface_install_property', 'interface_list_properties', 'is_floating',
+'linear_close', 'list_properties', 'load', 'lock', 'new', 'new_for_backend',
+'newv', 'notify', 'notify_by_pspec', 'open', 'override_property', 'padding',
+'parent_instance', 'priv', 'props', 'qdata', 'ref', 'ref_count', 'ref_sink',
+'remove_handler', 'replace_data', 'replace_qdata', 'run_dispose',
+'sample_cleanup', 'save', 'set', 'set_abyss', 'set_color',
+'set_color_from_pixel', 'set_data', 'set_extent', 'set_pattern',
+'set_properties', 'set_property', 'set_source', 'share_storage',
+'signal_connect', 'source', 'steal_data', 'steal_qdata', 'stop_emission',
+'stop_emission_by_name', 'swap_create_file', 'swap_has_file',
+'swap_remove_file', 'thaw_changed', 'thaw_notify', 'unlock', 'unref',
+'watch_closure', 'weak_ref']</code></pre>
+<p>Which suggests we can have <code>layer.get_buffer().get_data()</code> but that’s an error:</p>
+<pre><code>File &quot;/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/python-eval/python-eval.py&quot;, line 42, in code_eval
+  exec(code, globals())
+  ~~~~^^^^^^^^^^^^^^^^^
+File &quot;&lt;string&gt;&quot;, line 1, in &lt;module&gt;
+File &quot;&lt;string&gt;&quot;, line 19, in &lt;module&gt;
+File &quot;/usr/lib/python3/dist-packages/gi/overrides/GObject.py&quot;, line 635, in _unsupported_data_method
+  raise RuntimeError(
+      &quot;Data access methods are unsupported. Use normal Python attributes instead&quot;
+  )</code></pre>
+<p>So I try <code>.data</code></p>
+<pre><code>AttributeError: 'Buffer' object has no attribute 'data'. Did you mean: 'qdata'?</code></pre>
+<p><code>.qdata</code> is some kind of glib array I didn’t look into. But GIMP’s API also has too much cleaning, where for example <a href="https://stackoverflow.com/a/47554384">a simple way to get the numpy array</a> that exists in Gimp 2 is gone in Gimp 3. I end up finding the <code>.get</code> method which is a binding to <a href="https://developer.gimp.org/api/gegl/method.Buffer.get.html">gegl_buffer_get</a>, but the arguments are different, so I got it wrong at first:</p>
+<pre><code>batch command experienced a calling error:
+Traceback (most recent call last):
+  File &quot;/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/python-eval/python-eval.py&quot;, line 42, in code_eval
+    exec(code, globals())
+    ~~~~^^^^^^^^^^^^^^^^^
+  File &quot;&lt;string&gt;&quot;, line 1, in &lt;module&gt;
+  File &quot;&lt;string&gt;&quot;, line 20, in &lt;module&gt;
+TypeError: Must be string, not Object
+Stopping at failing batch command [0]: exec(open(&quot;b.py&quot;).read())</code></pre>
+<p>Which argument of <code>.get</code> is supposed to be a string and not an object? The error message doesn’t say. It’s the third one but I didn’t figure that out until I came back to document it today.</p>
+<p>While a gimp plugin might be easiest to use. It might be possible to click on the plugin name and then be guided step-by-step instead of following instructions my rust <code>digitizer</code> prints out:</p>
+<pre><code>Prepare the XCF in GIMP:
+- Open the plot image.
+- Use Magic Wand or other tool to select each plot object, grow/shrink as needed,
+  then press Ctrl-Shift-L, Ctrl-Shift-N, PageDown. Repeat until all objects are gone.
+- Select the plot area with the r (rectangle) tool, then press Ctrl-Shift-L, Ctrl-Shift-N
+  and name the new layer &quot;x0,x1,y0,y1&quot; (e.g. &quot;0,100,20,40&quot;) or just &quot;x1,y1&quot; if x0 and y0 are 0,
+- Rename each plot-object layer to the desired output CSV name column.
+- Leave the original image in the bottom layer: it will be skipped</code></pre>
+    </section>
+</article>
+
+        </main>
+
+        <footer>
+            Site proudly generated by
+            <a href="http://jaspervdj.be/hakyll">Hakyll</a>
+        </footer>
+    </body>
+</html>
