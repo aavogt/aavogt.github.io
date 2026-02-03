@@ -340,7 +340,7 @@ void UpdateDrawFrame() {
 
     if (GuiSlider((Rectangle){labelw, GetScreenHeight() - slider_h,
                               GetScreenWidth() - marginx - labelw, slider_h},
-                  "-1", "10", &regularize, -1, 10))
+                  "0", "1", &regularize, 0, 1))
       pw_opt();
   }
 
