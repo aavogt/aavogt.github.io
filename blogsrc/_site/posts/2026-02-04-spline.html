@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Blog - Cubic spline decimation 1</title>
+        <link rel="stylesheet" href="../css/default.css" />
+    </head>
+    <body>
+        <header>
+            <div class="logo">
+                <a href="../">aavogt</a>
+            </div>
+            <nav>
+                <a href="../">Home</a>
+                <a href="../archive.html">Archive</a>
+            </nav>
+        </header>
+
+        <main role="main">
+            <h1>Cubic spline decimation 1</h1>
+            <article>
+    <section class="header">
+        Posted on February  4, 2026
+        
+    </section>
+    <section>
+        <p><a href="http://aavogt.github.io/splinesimp/main.html"><img src="../images/abcde-spline.png" /></a></p>
+<p><a href="http://aavogt.github.io/splinesimp/main.html">Click here or the image to interact with the splines.</a></p>
+<p>Click and drag the circles to and see how the original yellow <span style="color: yellow; background-color: black">abcde(s)</span> spline differs from the simplified blue <span style="color: blue">abde(t)</span> spline.
+The estimated warping path (green <span style="color: green">s(t)</span>) is plotted above the roughness penalty slider at the bottom.
+The red line segment connects abcde(<span class="math inline"><em>s</em>(<em>t</em><sup>*</sup>)</span>) to abde(<span class="math inline"><em>t</em><sup>*</sup></span>), where <span class="math inline"><em>t</em><sup>*</sup></span> maximizes the length, and <span style="color: green">s(t)</span> minimizes that maximum plus the optional roughness penalty. The red graph is the shape of |abcde(s(t)) - abde(t)| vs t.
+The roughness penalty slider value multiplies <span class="math inline">∑<sub><em>i</em></sub>|<em>s</em><sup>″</sup>(<em>t</em><sub><em>i</em></sub>)|<em>d</em><em>t</em></span>, and high values make s(t) a straight line.</p>
+<h1 id="background">Background</h1>
+<p>I have a long-term interest in functional data –
+dealing with samples of functions x(t) and y(t). Handwriting recognition is the
+most recent application. One sub-problem is to decimate or simplify sampled
+points, which reduces space and time required downstream at the cost of
+introducing a bounded error.</p>
+<p>Most commonly the <a href="https://en.wikipedia.org/wiki/Ramer%E2%80%93Douglas%E2%80%93Peucker_algorithm">Ramer-Douglas-Peuker algorithm</a> is used.
+It interprets the input points as being connected by straight line segments.
+So the error introduced by deleting point <span class="math inline"><em>j</em></span> or replacing ijk(t) with ik(t) is
+a point-line segment distance, which we might compute with:</p>
+<pre><code>// Squared perpendicular distance between the line from index i to k,
+// and the point at index j
+//
+// Here i,j,k refer to vectors [xs[i], ys[i]].
+// any point p along the i-k line is: p = i + (k-i)t
+// If p makes the perpendicular dropping from j to segment k-i:
+// 0 = (j-p) . (k-i)
+// substitute p and expand:
+// 0 = (j-i).(k-i) - t |k-i|^2
+// 0 =     num     - t *  den
+// finally evaluate p-j:
+// = i + (k-i)t - j 
+// =    (k-i)*t - (j-i)
+double pdist_at(int i, int j, int k) {
+  double xki = xs[k] - xs[i], xji = xs[j] - xs[i];
+  double yki = ys[k] - ys[i], yji = ys[j] - ys[i];
+  double num = xki * xji + yki * yji; // (j-i) . (k-i)
+  double den = xki * xki + yki * yki; // |k-i|^2
+  if (den &lt; 1e-8) {
+    // the i-k segment is too short: just return the distance i-j
+    return xji * xji + yji * yji;
+  }
+  double t = Clamp(num / den, 0, 1);
+  double dx = xki * t - xji;
+  double dy = yki * t - yji;
+  return dx * dx + dy * dy;
+}</code></pre>
+<p>I spent about a week trying to find the equivalent function for cubic splines.
+At first I used maxima and made a mess starting with the Catmull-Rom spline
+definition from
+<a href="https://github.com/raysan5/raylib/blob/d4f636151b2d1e27249d4fe7859f11d6b7bc4d73/src/rshapes.c#L2201">rshapes.h</a>,
+and try to find <a href="https://en.wikipedia.org/wiki/Stationary_point">stationary
+points</a> of the distance between splines.
+The distance is then abcd(s)-abde(t) or abcd(t)-bcde(u) for some particular
+s,t,u. Without loss of generality, focus on abcd(s)-abde(t). The cubic spline
+has terms up to <span class="math inline"><em>s</em><sup>3</sup></span> or <span class="math inline"><em>t</em><sup>3</sup></span>, so the squared distance between them is function of <span class="math inline"><em>s</em><sup>6</sup></span> and <span class="math inline"><em>t</em><sup>6</sup></span>.
+the stationary points then give two polynomial equations in both s and t with
+terms up to <span class="math inline"><em>s</em><sup>5</sup></span> or <span class="math inline"><em>t</em><sup>5</sup></span>. The <a href="https://en.wikipedia.org/wiki/Resultant">resultant</a> gives one way to solve such equations,
+but with maxima the resultant function doesn’t terminate in a reasonable time. So I take a step back and work with the matrix
+<a href="https://maxima.sourceforge.io/docs/manual/Polynomials.html#bezout">Sylvester or Bezout</a> whose determinant is the resultant. A determinant must be hard to calculate with symbolic entries. I have not looked into details of maxima’s “subresultant polynomial remainder sequence”, but the number of terms would be very high using a Cramer rule and doing a LU decomposition involves dividing rows by an entry for example the 2x2:</p>
+<pre><code>a b
+c d</code></pre>
+<p>eliminate c:</p>
+<pre><code>a b
+0 (d - c*b/a)</code></pre>
+<p>and then the determinant is <span class="math inline"><em>a</em>(<em>d</em> − <em>c</em><em>b</em>/<em>a</em>)</span> which expands out to the usual. It’s possible to do calculations with <a href="https://github.com/aavogt/controltheory/blob/3f693f9ef0f1c8ce95d19079737b405acba74b6d/R/controltheory.R#L37">rational functions</a>, and maybe that approach could work here. Instead I decides to switch out of symbolic land into numerical land. The
+Bezout matrix is a 5x5 matrix of univariate polynomials in t up to t^8, using 122 coefficients in total. Then I use LAPAKE_dgetrf to compute the LU decomposition for particular coefficients and values of t, and numerically search for the t in [0,1] which makes it equal zero. Then each candidate t can be substituted back into one of the original multivariate polynomials that defines the stationary point. I solve that univariate polynomial degree 5 (<span class="math inline"><em>s</em><sup>5</sup></span>) using LAPACKE_dhseqr on the <a href="https://en.wikipedia.org/wiki/Companion_matrix">Frobenius companion matrix</a>. But unfortunately it’s not right: s=0 t=1 or similar points are always the farthest apart and other stationary points don’t quite look right either. For a long time I thought I had a mistake somewhere. Now I believe the missing piece is the warping function which expresses the idea that both splines are related paths being traversed in the same direction without reversing, but the speeds used don’t have to match at all.
+It might be possible from maxima, but my attempt at <a href="https://en.wikipedia.org/wiki/I-spline">I-splines</a> didn’t show the correct properties after a quick attempt.</p>
+<p>Instead I decided to use GSL for the numerical version, which is the demo at top. It estimates the warping function parameters (pw) with gsl_multimin_fminimizer which in turn uses gsl_min_fminimizer to find <span class="math inline"><em>t</em><sup>*</sup></span> which maximizes the distance between the splines. Details are in <a href="http://aavogt.github.io/splinesimp/main.c">main.c</a>. I would have preferred to use nlopt’s subplex which has better aesthetics and possibly performance, but I gave up on building it with <a href="https://emscripten.org/">emscripten</a>.</p>
+    </section>
+</article>
+
+        </main>
+
+        <footer>
+            Site proudly generated by
+            <a href="http://jaspervdj.be/hakyll">Hakyll</a>
+        </footer>
+    </body>
+</html>
