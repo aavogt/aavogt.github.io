@@ -18,7 +18,7 @@
 #include <emscripten/emscripten.h>
 #endif
 
-const double radius = 30;
+const double radius = 80;
 const double marginx = 30;
 const double marginy = 120;
 
@@ -64,6 +64,8 @@ void unswapc(int m, int n, double xs[]) {
 }
 
 Vector2 spline_eval(spline_eval_which which, double t) {
+  gsl_error_handler_t *old_handler =
+      gsl_set_error_handler(NULL); // restore default
   static double ts[5];
   t = CLAMP(t, 1e-6, 1 - 1e-6);
   gsl_interp_accel *acc = NULL;
@@ -111,6 +113,7 @@ Vector2 spline_eval(spline_eval_which which, double t) {
   }
   }
   gsl_interp_accel_free(acc);
+  gsl_set_error_handler(old_handler);
   return result;
 }
 
@@ -140,12 +143,17 @@ double tstar = -1;
 double last_result = 0;
 double last_r = 0;
 
-#define NEV 100
+#define NEV 10
 static Vector2 abde[NEV];
 void preopt() {
   for (int i = 0; i < NEV; i++) {
     abde[i] = spline_eval(ABDE, (double)i / (NEV - 1));
   }
+}
+
+double f_brent(double t, void *params) {
+  (void)params;
+  return -Vector2DistanceSqr(spline_eval(ABDE, t), spline_eval(ABCDE, t));
 }
 
 double f_eval(const double *x, unsigned n) {
@@ -162,18 +170,38 @@ double f_eval(const double *x, unsigned n) {
   for (int i = 1; i < 5; i++) {
     pw[i] = MIN(pw[i], 1);
   }
+  // some the intervals don't have a minimum and gsl_min_fminimizer complains,
+  gsl_set_error_handler_off();
+  gsl_min_fminimizer *fine = gsl_min_fminimizer_alloc(gsl_min_fminimizer_brent);
+  gsl_function f_brent_g = {.function = &f_brent, .params = 0};
 
   double result = 0;
   for (int i = 0; i < NEV; i++) {
-    double t = i;
-    t /= NEV - 1;
+    double t = (double)i / NEV;
+    double thigh = (double)(i + 1) / NEV;
     Vector2 abcde = spline_eval(ABCDE, t);
     double d = Vector2DistanceSqr(abcde, abde[i]);
+    gsl_min_fminimizer_set(fine, &f_brent_g, (t + thigh) / 2, t, thigh);
+
+    for (int j = 0; j < 5; j++) {
+      if (gsl_min_fminimizer_iterate(fine) != GSL_SUCCESS)
+        break;
+      t = gsl_min_fminimizer_x_lower(fine);
+      thigh = gsl_min_fminimizer_x_upper(fine);
+      if (gsl_min_test_interval(t, thigh, 1e-4, 1e-3) == GSL_SUCCESS)
+        break;
+    }
+
+    d = -gsl_min_fminimizer_f_minimum(fine);
+    t = gsl_min_fminimizer_x_minimum(fine);
+    // TODO; fine tune with Brent from gsl_min.h
     if (d > result) {
       result = d;
       tstar = t;
     }
   }
+
+  gsl_min_fminimizer_free(fine);
   last_result = result;
   last_r = spline_warp_roughness();
   return result + regularize * last_r;
@@ -241,7 +269,7 @@ void draw_unit_line(Vector2 a[2], Color col) {
 void draw_text_i(const char *str, int i, Color col) {
   double w = GetScreenWidth() - marginx;
   double h = GetScreenHeight() - marginy;
-  DrawText(str, w * px[i], h * py[i], radius / 2, col);
+  DrawText(str, w * px[i] - radius / 4, h * py[i] - radius / 4, radius, col);
 }
 
 void draw_circle_i(int i, double radius, Color col) {
@@ -291,9 +319,9 @@ bool handle_dragging() {
     }
   }
   if (dragging >= 0) {
-    Vector2 md = GetMouseDelta();
-    px[dragging] += md.x / w;
-    py[dragging] += md.y / h;
+    Vector2 m = GetMousePosition();
+    px[dragging] = m.x / w;
+    py[dragging] = m.y / h;
     p_rescale();
   }
   return dragging >= 0;
@@ -325,7 +353,7 @@ void UpdateDrawFrame() {
 
     Rectangle plot = {labelw, panel_y, GetScreenWidth() - marginx - labelw,
                       label_h};
-    const int nseg = 100;
+    const int nseg = 101;
     Vector2 prev = spline_eval(WARP, 0);
     for (int i = 1; i < nseg; i++) {
       double t = (double)i / (nseg - 1);
@@ -336,6 +364,20 @@ void UpdateDrawFrame() {
       int y1 = plot.y + plot.height - cur.y * plot.height;
       DrawLine(x0, y0, x1, y1, GREEN);
       prev = cur;
+    }
+
+    double max_d =
+        Vector2Distance(spline_eval(ABCDE, tstar), spline_eval(ABDE, tstar));
+    if (max_d <= 0.0)
+      max_d = 1.0;
+    Vector2 d[2];
+    for (int i = 0; i < nseg; i++) {
+      double t = (double)i / (nseg - 1);
+      double d0 = Vector2Distance(spline_eval(ABDE, t), spline_eval(ABCDE, t));
+      d[i % 2] = (Vector2){plot.x + t * plot.width,
+                           plot.y + (1 - d0 / max_d) * plot.height};
+      if (i > 0)
+        DrawLineV(d[0], d[1], RED);
     }
 
     if (GuiSlider((Rectangle){labelw, GetScreenHeight() - slider_h,
