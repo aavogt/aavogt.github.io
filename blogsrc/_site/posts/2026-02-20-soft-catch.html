@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Blog - Pendulum swing</title>
+        <link rel="stylesheet" href="../css/default.css" />
+    </head>
+    <body>
+        <header>
+            <div class="logo">
+                <a href="../">aavogt</a>
+            </div>
+            <nav>
+                <a href="../">Home</a>
+                <a href="../archive.html">Archive</a>
+            </nav>
+        </header>
+
+        <main role="main">
+            <h1>Pendulum swing</h1>
+            <article>
+    <section class="header">
+        Posted on February 20, 2026
+        
+    </section>
+    <section>
+        <p>I’ve been lead climbing again. How much does extra slack affect the speed with which you hit the wall? Here’s a model:</p>
+<h2 id="model">Model</h2>
+<p><img src="../images/model.png" /></p>
+<p>The climber starts falling at the height of the last draw, a distance <span class="math inline"><em>a</em></span> out from the wall. Let <span class="math inline"><em>b</em></span> be the extra slack and <span class="math inline"><em>d</em></span> be the length of rope from the belayer to the first draw. The climber’s acceleration due to the rope points towards (0,0), and is proportional to the rope stretch. The spring constant <span class="math inline"><em>k</em>/(<em>a</em> + <em>b</em> + <em>d</em>)</span> is probably off.
+<a href="https://gist.github.com/aavogt/f89f750f9ee3136ae642f2a764c82e55">Here is the R script</a>. For ODEs there are other languages like OpenModelica or ModelingToolkit.jl which are supposed to hide details. For example I split <span class="math inline"><em>m</em><em>y</em><sup>″</sup> = <em>F</em></span> into two equations <span class="math inline"><em>m</em><em>v</em><sup>′</sup> = <em>F</em>; <em>y</em><sup>′</sup> = <em>v</em></span>, but these modeling languages may let you call der(x) instead of vx which avoids a possible mistake where vx isn’t what it claims to be. Also many equations that relate separate components can be added with a single connect(). Maybe I’ll try Modia.jl next time, which may have been unsuitable last time (membrane dehumidifier) for a lack of flow variables.</p>
+<h2 id="solved-trajectory">Solved trajectory</h2>
+<p>Here is a plot of 4 trajectories:</p>
+<p><img src="../images/trajectories.png" /></p>
+<p>You can start out close to the wall <span class="math inline"><em>a</em> = 0.2</span> or far from the wall <span class="math inline"><em>a</em> = 1</span>, and from either starting point there’s either the light blue extra slack or dark blue minimum slack case. In the next section I evaluated a range of <span class="math inline"><em>a</em></span> and <span class="math inline"><em>b</em></span> values.</p>
+<h2 id="maximum-x-velocity">Maximum x velocity</h2>
+<p><img src="../images/efall_height.png" /></p>
+<p>For the next section we’re looking at the horizontal speed with which the climber hits the wall.
+I convert the maximum x velocity (as x=0) into an equivalent height because 9.8 m/s isn’t as informative as a 1 m fall.
+I also divide by the initial distance to the wall to the vertical axis, making the vertical axis dimensionless. It also bring the curves closer together.</p>
+<p>Begin digression:
+Ideally we find a simple transformation that overlays the separate curves. Then the dependency on <span class="math inline"><em>a</em></span> no longer takes up space in the plots, and a different (dimensionless) parameters can be explored such as <span class="math inline"><em>a</em>/<em>d</em></span> <span class="math inline"><em>m</em>/<em>m</em><em>b</em></span> <span class="math inline"><em>k</em>/<em>g</em><em>m</em></span>… A SymbolicRegression.jl or https://herbie.uwplse.org/ type of search would likely find an informative expression . This reminds me how heat transfer derivations will often say it’s solved when you have a series instead of something more manageable:</p>
+<p><img src="../images/4.2.15.png" />
+<img src="../images/4.2.16.png" /> &lt;1.5% error</p>
+<p>End digression. Interestingly there’s a <span class="math inline"><em>b</em></span> value maximizes this velocity, which is a realistic amount of slack:</p>
+<p>To compare shapes, remove the variation caused by <span class="math inline"><em>a</em></span>, first from a gam(x.equiv.fall ~ a + s(b)) and then from a gam(x.equiv.fall ~ a + s(b)):</p>
+<p><img src="../images/efall_height2.png" /></p>
+<p><img src="../images/efall_height3.png" /></p>
+<p>The two smooths are:</p>
+<p><img src="../images/sofa.png" /></p>
+<p>Less interesting is the total fall:</p>
+<p><img src="../images/fall_height.png" /></p>
+<p>There are still questions:</p>
+<ul>
+<li>what side of the maximum equivalent height are we on</li>
+<li>how much to increase b to reach the other side</li>
+<li>having more time to prepare for impact likely has a bigger effect than speed variation</li>
+<li>gravity affects the leg force when landing a 0.5 m fall, but it has no effect on the wall landing, so correcting it</li>
+<li>render a simulation similar to <a href="http://localhost:8001/posts/2026-02-04-spline.html">splines</a> getting into gamedev</li>
+</ul>
+    </section>
+</article>
+
+        </main>
+
+        <footer>
+            Site proudly generated by
+            <a href="http://jaspervdj.be/hakyll">Hakyll</a>
+        </footer>
+    </body>
+</html>
