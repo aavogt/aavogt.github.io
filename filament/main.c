@@ -79,13 +79,12 @@ void free_splines() {
 }
 
 typedef struct {
-  double EI[2], w1, kappa_h;
+  float EI[2], w1, kappa_h, gui_lambda;
   enum { S1, S2, S12 } which;
 } Params;
 
 const double ei0 = 1e2;
 /* GUI-controlled penalty weight */
-double gui_lambda = 1e1;
 Params params = {ei0, ei0, 1, 1e-4, S1};
 typedef struct {
   double kappa, kappa_ss;
@@ -321,7 +320,8 @@ double f_gsl(const gsl_vector *x, void *paramsv) {
   // weight for penalty (tunable)
   // controlled from GUI via global gui_lambda
 
-  return params->w1 * t1 + t2 + (1 + params->w1) * t12 + gui_lambda * penalty;
+  return params->w1 * t1 + t2 + (1 + params->w1) * t12 +
+         params->gui_lambda * penalty;
 }
 
 typedef struct {
@@ -516,184 +516,14 @@ void draw_spline_lines() {
   }
 }
 
-void gui_sliders() {
-  static bool gui_inited = false;
-  static float slider_logEI0, slider_logEI1, slider_logEIgm, slider_w1,
-      slider_kappa_h, slider_lambda_f;
-  static float prev_logEI0, prev_logEI1, prev_logEIgm, prev_w1, prev_kappa_h,
-      prev_lambda_f;
-  if (!gui_inited) {
-    slider_logEI0 = log10f((float)params.EI[0]);
-    slider_logEI1 = log10f((float)params.EI[1]);
-    slider_logEIgm = 0.5f * (slider_logEI0 + slider_logEI1);
-    slider_w1 = (float)params.w1;
-    slider_kappa_h = (float)params.kappa_h;
-    slider_lambda_f = (float)gui_lambda;
-    prev_logEI0 = slider_logEI0;
-    prev_logEI1 = slider_logEI1;
-    prev_logEIgm = slider_logEIgm;
-    prev_w1 = slider_w1;
-    prev_kappa_h = slider_kappa_h;
-    prev_lambda_f = slider_lambda_f;
-    gui_inited = true;
-  }
+#include "gui_sliders.inc"
 
-  char value_text[6][32];
-  sprintf(value_text[0], "%g", params.EI[0]);
-  sprintf(value_text[1], "%g", params.EI[1]);
-  sprintf(value_text[2], "%g", sqrt(params.EI[0] * params.EI[1]));
-  sprintf(value_text[3], "%g", params.w1);
-  sprintf(value_text[4], "%g", params.kappa_h);
-  sprintf(value_text[5], "%g", gui_lambda);
-
-  float padding = 10;
-  float y = 10;
-  float h = 20;
-  float row_gap = 4;
-  float label_w = 120;
-  float value_w = 60;
-  float gap = 4;
-  bool single_col = GetScreenWidth() < 400;
-
-  if (single_col) {
-    float col_x = padding;
-    float col_w = GetScreenWidth() - 2 * padding;
-    float slider_w = col_w - label_w - value_w - 2 * gap;
-
-    GuiLabel((Rectangle){col_x, y, label_w, h}, "log10 EI[0]");
-    GuiSlider((Rectangle){col_x + label_w + gap, y, slider_w, h}, "", "",
-              &slider_logEI0, -6, 6);
-    GuiLabel((Rectangle){col_x + label_w + gap + slider_w + gap, y, value_w, h},
-             value_text[0]);
-    y += h + row_gap;
-
-    GuiLabel((Rectangle){col_x, y, label_w, h}, "log10 EI[1]");
-    GuiSlider((Rectangle){col_x + label_w + gap, y, slider_w, h}, "", "",
-              &slider_logEI1, -6, 6);
-    GuiLabel((Rectangle){col_x + label_w + gap + slider_w + gap, y, value_w, h},
-             value_text[1]);
-    y += h + row_gap;
-
-    GuiLabel((Rectangle){col_x, y, label_w, h}, "log10 EI[0] + EI[1]");
-    GuiSlider((Rectangle){col_x + label_w + gap, y, slider_w, h}, "", "",
-              &slider_logEIgm, -6, 6);
-    GuiLabel((Rectangle){col_x + label_w + gap + slider_w + gap, y, value_w, h},
-             value_text[2]);
-    y += h + row_gap;
-
-    GuiLabel((Rectangle){col_x, y, label_w, h}, "w");
-    GuiSlider((Rectangle){col_x + label_w + gap, y, slider_w, h}, "", "",
-              &slider_w1, 0.0f, 100.0f);
-    GuiLabel((Rectangle){col_x + label_w + gap + slider_w + gap, y, value_w, h},
-             value_text[3]);
-    y += h + row_gap;
-
-    GuiLabel((Rectangle){col_x, y, label_w, h}, "kappa_h");
-    GuiSlider((Rectangle){col_x + label_w + gap, y, slider_w, h}, "", "",
-              &slider_kappa_h, 1e-6f, 1.0f);
-    GuiLabel((Rectangle){col_x + label_w + gap + slider_w + gap, y, value_w, h},
-             value_text[4]);
-    y += h + row_gap;
-
-    GuiLabel((Rectangle){col_x, y, label_w, h}, "lambda");
-    GuiSlider((Rectangle){col_x + label_w + gap, y, slider_w, h}, "", "",
-              &slider_lambda_f, 0.0f, 1e4f);
-    GuiLabel((Rectangle){col_x + label_w + gap + slider_w + gap, y, value_w, h},
-             value_text[5]);
-  } else {
-    float col_w = (GetScreenWidth() - 3 * padding) / 2;
-    float x0 = padding;
-    float x1 = padding * 2 + col_w;
-    float slider_w = col_w - label_w - value_w - 2 * gap;
-
-    GuiLabel((Rectangle){x0, y, label_w, h}, "log10 EI[0]");
-    GuiSlider((Rectangle){x0 + label_w + gap, y, slider_w, h}, "", "",
-              &slider_logEI0, -6, 6);
-    GuiLabel((Rectangle){x0 + label_w + gap + slider_w + gap, y, value_w, h},
-             value_text[0]);
-    GuiLabel((Rectangle){x1, y, label_w, h}, "log10 EI[1]");
-    GuiSlider((Rectangle){x1 + label_w + gap, y, slider_w, h}, "", "",
-              &slider_logEI1, -6, 6);
-    GuiLabel((Rectangle){x1 + label_w + gap + slider_w + gap, y, value_w, h},
-             value_text[1]);
-    y += h + row_gap;
-
-    GuiLabel((Rectangle){x0, y, label_w, h}, "log10 EI[0] + EI[1]");
-    GuiSlider((Rectangle){x0 + label_w + gap, y, slider_w, h}, "", "",
-              &slider_logEIgm, -6, 6);
-    GuiLabel((Rectangle){x0 + label_w + gap + slider_w + gap, y, value_w, h},
-             value_text[2]);
-    GuiLabel((Rectangle){x1, y, label_w, h}, "w");
-    GuiSlider((Rectangle){x1 + label_w + gap, y, slider_w, h}, "", "",
-              &slider_w1, 0.0f, 100.0f);
-    GuiLabel((Rectangle){x1 + label_w + gap + slider_w + gap, y, value_w, h},
-             value_text[3]);
-    y += h + row_gap;
-
-    GuiLabel((Rectangle){x0, y, label_w, h}, "kappa_h");
-    GuiSlider((Rectangle){x0 + label_w + gap, y, slider_w, h}, "", "",
-              &slider_kappa_h, 1e-6f, 1.0f);
-    GuiLabel((Rectangle){x0 + label_w + gap + slider_w + gap, y, value_w, h},
-             value_text[4]);
-    GuiLabel((Rectangle){x1, y, label_w, h}, "lambda");
-    GuiSlider((Rectangle){x1 + label_w + gap, y, slider_w, h}, "", "",
-              &slider_lambda_f, 0.0f, 1e4f);
-    GuiLabel((Rectangle){x1 + label_w + gap + slider_w + gap, y, value_w, h},
-             value_text[5]);
-  }
-
-  bool changed = false;
-  if (fabsf(slider_logEI0 - prev_logEI0) > 1e-6f) {
-    params.EI[0] = pow(10.0, slider_logEI0);
-    changed = true;
-  }
-  if (fabsf(slider_logEI1 - prev_logEI1) > 1e-6f) {
-    params.EI[1] = pow(10.0, slider_logEI1);
-    changed = true;
-  }
-  if (fabsf(slider_logEIgm - prev_logEIgm) > 1e-6f) {
-    double r = params.EI[0] / params.EI[1];
-    if (r <= 0)
-      r = 1.0;
-    double new_gm = pow(10.0, slider_logEIgm);
-    double sqrt_r = sqrt(r);
-    params.EI[0] = new_gm * sqrt_r;
-    params.EI[1] = new_gm / sqrt_r;
-    changed = true;
-  }
-  if (fabsf(slider_w1 - prev_w1) > 1e-6f) {
-    params.w1 = slider_w1;
-    changed = true;
-  }
-  if (fabsf(slider_kappa_h - prev_kappa_h) > 1e-8f) {
-    params.kappa_h = slider_kappa_h;
-    changed = true;
-  }
-  if (fabsf(slider_lambda_f - prev_lambda_f) > 1e-6f) {
-    gui_lambda = slider_lambda_f;
-    changed = true;
-  }
-
-  if (changed) {
-    slider_logEI0 = log10f((float)params.EI[0]);
-    slider_logEI1 = log10f((float)params.EI[1]);
-    slider_logEIgm = 0.5f * (slider_logEI0 + slider_logEI1);
-    slider_w1 = (float)params.w1;
-    slider_kappa_h = (float)params.kappa_h;
-    slider_lambda_f = (float)gui_lambda;
-    prev_logEI0 = slider_logEI0;
-    prev_logEI1 = slider_logEI1;
-    prev_logEIgm = slider_logEIgm;
-    prev_w1 = slider_w1;
-    prev_kappa_h = slider_kappa_h;
-    prev_lambda_f = slider_lambda_f;
-    init_opt();
-  }
-}
-
+bool is_mobile = false;
 void UpdateDrawFrame() {
 #if defined(PLATFORM_WEB)
-  SetMouseScale((float)GetScreenWidth() / 640, (float)GetScreenHeight() / 480);
+  if (!is_mobile)
+    SetMouseScale((float)GetScreenWidth() / 640,
+                  (float)GetScreenHeight() / 480);
 #endif
 
   if (update_user_points()) {
@@ -753,7 +583,11 @@ int main() {
   SetConfigFlags(FLAG_MSAA_4X_HINT | FLAG_WINDOW_RESIZABLE);
   InitWindow(640, 480, "wye");
 #if defined(PLATFORM_WEB)
-  SetMouseScale((float)GetScreenWidth() / 640, (float)GetScreenHeight() / 480);
+  is_mobile = EM_ASM_INT(
+      { return window.matchMedia("(pointer: coarse)").matches ? 1 : 0; });
+  if (!is_mobile)
+    SetMouseScale((float)GetScreenWidth() / 640,
+                  (float)GetScreenHeight() / 480);
 #endif
   user_points_rand();
   from_user();
