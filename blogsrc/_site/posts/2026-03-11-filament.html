@@ -27,27 +27,43 @@
     </section>
     <div>
         
-            Tags: <a title="All pages tagged 'c'." href="../tags/c.html" rel="tag">c</a>, <a title="All pages tagged 'raylib'." href="../tags/raylib.html" rel="tag">raylib</a>
+            Tags: <a title="All pages tagged 'c'." href="../tags/c.html" rel="tag">c</a>, <a title="All pages tagged 'raylib'." href="../tags/raylib.html" rel="tag">raylib</a>, <a title="All pages tagged '3dp'." href="../tags/3dp.html" rel="tag">3dp</a>
         
     </div>
     <section>
-        <h1 id="instructions">instructions</h1>
-<p><a href="http://aavogt.github.io/filament/main.html">interactive web app</a></p>
-<p>Drag the circles and ticks. Watch the wye fall into place, but sometimes it gets lost so reload the page or press the space bar to reset. Sliders modify parameters to be explained.</p>
+        <p>March 14 edit: add screenshot; explain parameters; add AMS video; note AMS/ERCF designs</p>
+<h1 id="instructions">instructions</h1>
+<p><a href="http://aavogt.github.io/filament/main.html"><img src="../images/filament_small.png" alt="screenshot" /></a></p>
+<p>Open the web app by clicking on the image link. Drag the circles and ticks to adjust the initial tangent. Watch the wye defined by the interpolation of the small gray circles slide into place, but sometimes it gets lost so reload the page or press the space bar to reset. Sliders modify parameters:</p>
+<ul>
+<li><p>EI[0]: stiffness of the (starting at) yellow filament</p></li>
+<li><p>EI[1]: stiffness of the (starting at) blue filament</p></li>
+<li><p>EI[0] + EI[1]: decrease or increase both stiffnesses while maintaining their ratio</p></li>
+<li><p>w: high values prioritize yellow tension, low values prioritize blue tension</p></li>
+<li><p>lambda: penalty for sharp bends at the junction</p></li>
+</ul>
 <p><a href="http://aavogt.github.io/filament/main.c">source</a></p>
 <h1 id="background">background</h1>
-<p>Continuing from <a href="https://aavogt.github.io/blog/posts/2026-02-04-spline.html">spline decimation 2026-02-04</a>, I try to answer: is the
-usual symmetrical <a href="https://makerworld.com/en/models/18174-the-smoothy-y-splitter-connector#profileId-17021">wye connector like the one here</a> optimal? Maybe asymmetry is better, since the filaments have different properties, and the one more likely to clog can go on the straight path.</p>
+<p>Using the same tools as <a href="https://aavogt.github.io/blog/posts/2026-02-04-spline.html">spline decimation 2026-02-04</a>, I try to solve a different problem: is the
+usual symmetrical 3d printer filament wye fitting such as <a href="https://makerworld.com/en/models/18174-the-smoothy-y-splitter-connector#profileId-17021k">the smoothy</a> optimal? This fitting is used in a system like Bambu AMS to allow a single nozzle 3d printer to automatically switch between filaments for different colors or material properties in the same print. ERCF_v2 avoids this fitting by moving the outlet PTFE tube, but my design will be more like AMS.</p>
+<p>It’s possible that asymmetry is better, since the filaments have different properties, and the filament more likely to snap or clog can go on the straight path:</p>
 <figure>
-<img src="../images/wye.png" alt="wye" />
-<figcaption aria-hidden="true">wye</figcaption>
+<img src="../images/wye.png" alt="Freecad screenshot of a PTFE tubing guide" />
+<figcaption aria-hidden="true">Freecad screenshot of a PTFE tubing guide</figcaption>
 </figure>
-<p>The <a href="https://en.wikipedia.org/wiki/Capstan_equation">capstan equation</a> is for flexible materials. There’s an optimal path that’s circular arcs or maybe a logarithmic spiral, and the examples give an intuition we don’t need to develop. For that model, the smoothy y has outputs parallel but this adds extra turns unless the input filament reels are 1cm wide. But filament stiffness might change things, since bending might oppose tension. So the objective is the final filament tension (<span class="math inline"><em>T</em>(1)</span>) solved using:</p>
+<figure>
+<video src="../images/wye.webm" controls><a href="../images/wye.webm">Assembly with two (byj48+ mk8 extruders), one sg90 to select between. The white PLA part holds low friction PTFE tubing that guides the filament except for a small gap at the junction.</a></video>
+<figcaption aria-hidden="true">Assembly with two (byj48+ mk8 extruders), one sg90 to select between. The white PLA part holds low friction PTFE tubing that guides the filament except for a small gap at the junction.</figcaption>
+</figure>
+<h2 id="theory">theory</h2>
+<p>The <a href="https://en.wikipedia.org/wiki/Capstan_equation">capstan equation</a> is for ropes that don’t resist bending. Many paths are optimal for that model. The examples on the wikipedia page give an intuition we don’t need to develop farther: looking at the smoothy fitting, the inputs are parallel and 1cm apart, which adds extra turns and friction when the filament reels are side-by-side in a dry box. An unnecessary second s-curve is needed to reduce the inlets from ~10cm apart to 1cm apart, which needs extra PTFE tubing to do it over a long distance like 30cm to keep the extra turning angle small. But filament stiffness might matter, since the force applied to achieve a specified bend might oppose the normal force due to filament tension, and so end up invalidating the capstan equation intuition.</p>
+<p>Instead of finishing Bigoni’s Solid Mechanics book, for now I assume we can just add a term to the capstan equation to account for filament stiffness as follows:</p>
 <p><span class="math inline"><em>d</em><em>T</em>/<em>d</em><em>t</em> = <em>μ</em><em>v</em>(<em>T</em><em>κ</em> + <em>E</em><em>I</em><em>κ</em><sup>″</sup>)</span></p>
 <p><span class="math inline"><em>T</em>(0) = 0</span></p>
 <p><span class="math inline"><em>v</em> = <em>h</em><em>y</em><em>p</em><em>o</em><em>t</em>(<em>d</em><em>x</em><em>d</em><em>t</em>, <em>d</em><em>y</em><em>d</em><em>t</em>)</span></p>
-<p>where <span class="math inline"><em>κ</em></span> is the <a href="https://en.wikipedia.org/wiki/Curvature#Signed_curvature">curvature</a>, and we have some complications because the x(t) y(t) splines are parameterized by an arbitrary parameter not arc length and <span class="math inline"><em>κ</em><sup>″</sup></span> should be a derivative with respect to arc length.</p>
-<p>Then <code>gsl_multimin_fminimizer_nmsimplex2</code> picks the points.</p>
+<p>here <span class="math inline"><em>κ</em></span> is the <a href="https://en.wikipedia.org/wiki/Curvature#Signed_curvature">curvature</a>, and we have some complications because the x(t) y(t) splines are parameterized by an arbitrary parameter not arc length and <span class="math inline"><em>κ</em><sup>″</sup></span> should be a derivative with respect to arc length, so there may be the wrong number of speed <span class="math inline"><em>v</em></span> terms involved.</p>
+<h2 id="limitations">limitations</h2>
+<p><code>gsl_multimin_fminimizer_nmsimplex2</code> picks the points that define the filament path. As I noted above it’s not great, and cobyla or simulated annealing would be better, and the lambda penalty could be a proper constraint (turn change the penalty according to augmented Lagrangian method if I stay with gsl_multimin).</p>
     </section>
 </article>
 
