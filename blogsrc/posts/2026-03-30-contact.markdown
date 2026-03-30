@@ -1,0 +1,18 @@
+---
+title: Tongue and Groove FEM
+tags: 3dp, freecad
+---
+
+[NeedItMakeIt Adapting the BEST Woodworking Joints for 3D Printing](https://www.youtube.com/watch?v=WY8yd191qVE) designs and tests a whole joint, but is the profile optimal? [aavogt/contact_fem](https://github.com/aavogt/contact_fem) is a simulation of such a profile. It sets up and solves a plane strain nonlinear geometry contact problem without friction. The left block is fixed and right block is pulled away. The faces on the bottom right can only move in the same axis as the pull (y). My intention is that the actual part will be mirrored across this face.
+
+![](../images/freecad_fem_small.png)
+
+I maximize the applied/reaction force when the most stressed element reaches 21 MPa by a linear interpolation of 4 fixed displacements. This is my guess for point at which something will break. The optimal tongue width W/2 - A - C looks too small, but because it's not red the above simulation result it seems possible. 
+
+![](../images/tongues.png)
+
+[Golconda-esque](https://en.wikipedia.org/wiki/Golconda_(Magritte)#)
+
+## TODO
+
+- [ ] shear or rotation instead of tension: this should help to decide between these equal designs
