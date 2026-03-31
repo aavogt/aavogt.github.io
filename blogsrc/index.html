@@ -1,0 +1,19 @@
+---
+title: Home
+---
+
+<h2>By Time</h2>
+$partial("templates/post-list.html")$
+
+<h2>By Tags</h2>
+  $for(tagsList)$
+<dl>
+    <dt id=$tag$> <a href="/tags/$tag$.html">$tag$</a> </dt>
+      <dd>
+        $for(words)$
+          <a href=$word_href$>$word_text$; </a>
+        $endfor$
+      </dd>
+    </dl>
+  $endfor$
+</dl>

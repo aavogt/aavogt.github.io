@@ -1,0 +1,14 @@
+# add commit/push
+watch:
+  xdg-open http://localhost:8004
+  site watch --port 8004
+
+install:
+  cabal install
+
+dev:
+  ghcid -Tghcid
+
+commit:
+  git add _site
+  git commit -m blogpost
