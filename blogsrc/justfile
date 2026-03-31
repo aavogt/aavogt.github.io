@@ -1,4 +1,3 @@
-# add commit/push
 watch:
   xdg-open http://localhost:8004
   site watch --port 8004
@@ -10,5 +9,10 @@ dev:
   ghcid -Tghcid
 
 commit:
-  git add _site
-  git commit -m blogpost
+  git add `find _site`
+  git commit -m generated
+  git add images/* posts/*
+  git commit
+
+push:
+  git push
