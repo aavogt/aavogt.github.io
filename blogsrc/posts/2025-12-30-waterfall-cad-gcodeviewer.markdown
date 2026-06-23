@@ -5,7 +5,9 @@ tags: c, gcode, 3dp, haskell, ide
 
 I have a [waterfall-cad](https://hackage.haskell.org/package/waterfall-cad) workflow now starting with a [template "aavogt/battery-adapter"](https://github.com/aavogt/battery-adapter/archive/refs/heads/main.zip). Saving the main.hs file results in previews and output files being updated right away if it's a small model.
 
-![](../images/workflow_small.png)
+EDIT: 2026-06-23 demo per-face coloring, config.ini parser
+
+![](../images/workflow_small_color.png)
 
 ## Installation
 
