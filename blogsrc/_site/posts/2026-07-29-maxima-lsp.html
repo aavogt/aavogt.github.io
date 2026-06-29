@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Blog - Maxima-lsp</title>
+        <link rel="stylesheet" href="../css/default.css" />
+    </head>
+    <body>
+        <header>
+            <div class="logo">
+                <a href="../">aavogt</a>
+            </div>
+            <nav>
+                <a href="../">Home</a>
+                <a href="../archive.html">Archive</a>
+            </nav>
+        </header>
+
+        <main role="main">
+            <h1>Maxima-lsp</h1>
+            <article>
+    <section class="header">
+        Posted on July 29, 2026
+        
+    </section>
+    <div>
+        
+            Tags: <a title="All pages tagged 'maxima'." href="../tags/maxima.html" rel="tag">maxima</a>
+        
+    </div>
+    <section>
+        <p><a href="https://microsoft.github.io/language-server-protocol/overviews/lsp/overview/">The language server protocol</a> the standard way to get deterministic help with code.
+I use <a href="http://neovim.io">neovim</a> to interact with R languageserver, clangd (c or c++), basedpyright (python), rust-analyzer or haskell-language-server. In any of those languages
+I use the same keybindings to get information or modify code with the following operations:</p>
+<ol type="1">
+<li>looking up documentation</li>
+<li>renaming an identifier</li>
+<li>jump-to-definition</li>
+<li>jump-to-use</li>
+<li>factor out sub-expression (common subexpression elimination – CSE)</li>
+<li>inline (unCSE)</li>
+<li>show inlay inferred types</li>
+<li>jump to/show errors</li>
+<li>complete a name adding imports if needed</li>
+</ol>
+<p><a href="https://maxima.sourceforge.io/">maxima</a> didn’t have a LSP. There are generic
+language servers that can usually get 2,3,4,8 right. None of the
+LSPs do 5&amp;6 well. LSP is difficult to learn because there can be too many
+layers written by different people that work together on a single task. For
+example neovim used to use <a href="https://github.com/neoclide/coc.nvim">coc.nvim</a> used
+<a href="https://microsoft.github.io/language-server-protocol/overviews/lsp/overview/">language server protocol</a> to request
+<a href="https://github.com/haskell/haskell-language-server/">haskell language server</a> to ask
+<a href="https://hackage.haskell.org/package/retrie">retrie</a> to make changes. When it
+doesn’t work correctly, where is the mistake? Which layer should I ask for a
+trace of what happened? Who has to change to fix the bug? Thankfully there’s
+common understanding of what the system is supposed to do.</p>
+<p>I’ll describe the process of putting <a href="https://github.com/aavogt/maxima-lsp">maxima-lsp</a> together. At first I tried
+the <a href="https://hackage-content.haskell.org/package/lsp">lsp</a>
+package, because this is used by haskell-language-server and futhark. But I stopped at <a href="https://github.com/aavogt/maxima-lsp/blob/cb4aacea38891e0911e783c7dabf20447563fd67/main.hs#L55">this point</a>. I was surprised that the <code>lsp</code> package does not generate the <code>initialize</code> response which tells the editor (neovim) what it is allowed to send. The <code>LSP.Handlers</code> looks similar to the haskell <code>servant</code> library, which can generate a description of the API from the code that usually responds to that API. At least in principle the type checker could confirm that the client handles all responses it requests without requiring the client to handle all responses. The final version of the <a href="https://github.com/aavogt/maxima-lsp/blob/21e66dc0c73aabf46672056c83da18b9ede6cf2f/src/main.hs#L50"><code>initialize</code> response is here for comparison</a>. Starting at the main in each version, we’ll look at how many steps it takes to reach the actual renaming logic:</p>
+<p>With lsp library, <code>main</code> runs a <code>LSP.ServerDefinition</code> which configures their main loop with 8 different values/callbacks. The <a href="https://github.com/aavogt/maxima-lsp/blob/cb4aacea38891e0911e783c7dabf20447563fd67/main.hs#L55">staticHandlers</a> includes the <a href="https://github.com/aavogt/maxima-lsp/blob/cb4aacea38891e0911e783c7dabf20447563fd67/main.hs#L137">handleRename2</a> function that uses <a href="https://hackage.haskell.org/package/lens-regex-pcre">lens-regex-pcre</a> to <a href="https://github.com/aavogt/maxima-lsp/blob/cb4aacea38891e0911e783c7dabf20447563fd67/main.hs#L148">apply the renaming</a>, and then callback’s callback needs to see the results packaged up into a <code>Either (LSP.TResponseError LSP.Method_TextDocumentRename) (LSP.WorkspaceEdit LSP.|? LSP.Null)</code>.</p>
+<p><a href="https://github.com/aavogt/maxima-lsp/blob/21e66dc0c73aabf46672056c83da18b9ede6cf2f/src/main.hs#L34">In the current version</a>, main sets up the server state and then has a loop to read requests and write the responses. <a href="https://github.com/aavogt/maxima-lsp/blob/21e66dc0c73aabf46672056c83da18b9ede6cf2f/src/main.hs#L208">rename</a> pattern matches on the json Value described by <a href="https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#renameParams">textDocument/rename</a>. Following that documentation has similar indirection to <a href="https://hackage-content.haskell.org/package/lsp">lsp</a>, except <a href="https://hackage-content.haskell.org/package/lsp">lsp</a> adds an extra newtype around row/column/uri values. Another difference is that types like <code>interface RenameParams extends TextDocumentPositionParams, WorkDoneProgressParams {</code> are missing from the latest code. In the first version, those constructors have to be named or the pieces extracted using functions like
+<code>position</code> indirectly referenced <a href="https://hackage-content.haskell.org/package/lsp-types-2.4.0.0/docs/Language-LSP-Protocol-Types.html#t:RenameParams">here</a>.
+haskell-language-server doesn’t treat the Has* classes/function specially. Essentially, the pattern <code>[json| _textDocument{uri} _position{line character} newName |]</code> can fit into short term memory, but the equivalent using <a href="https://hackage-content.haskell.org/package/lsp">lsp</a> doesn’t. The data definitions are spread across across many files and packages. I’ve collected the pieces which still takes me time and several passes to mentally fit together. Part of it is the use of names like <code>Language.LSP.Protocol.Internal.Types.TextDocumentIdentifier.TextDocumentIdentifier</code> instead of <code>Text</code> or <a href="https://hackage-content.haskell.org/package/base-4.22.0.0/docs/Data-Tuple.html#t:Solo"><code>Solo</code></a> <code>Text</code> in case the extra indirection implied by <code>data</code> still has to happen with -XStrictData that lsp-types uses.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> <span class="dt">RenameParams</span> <span class="ot">=</span> <span class="dt">RenameParams</span> </span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  {<span class="ot"> _workDoneToken ::</span> (<span class="dt">Maybe</span> <span class="dt">Language.LSP.Protocol.Internal.Types.ProgressToken.ProgressToken</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  ,<span class="ot"> _textDocument ::</span> <span class="dt">Language.LSP.Protocol.Internal.Types.TextDocumentIdentifier.TextDocumentIdentifier</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  ,<span class="ot"> _position ::</span> <span class="dt">Language.LSP.Protocol.Internal.Types.Position.Position</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  ,<span class="ot"> _newName ::</span> <span class="dt">Data.Text.Text</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> <span class="dt">Position</span> <span class="ot">=</span> <span class="dt">Position</span> </span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  {<span class="ot"> _line ::</span> <span class="dt">Language.LSP.Protocol.Types.Common.UInt</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  ,<span class="ot"> _character ::</span> <span class="dt">Language.LSP.Protocol.Types.Common.UInt</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="kw">newtype</span> <span class="dt">UInt</span> <span class="ot">=</span> <span class="dt">UInt</span> (<span class="dt">Mod</span> (<span class="dv">2</span> <span class="op">^</span> <span class="dv">31</span>))</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="co">-- https://hackage-content.haskell.org/package/mod-0.2.1.0/docs/Data-Mod-Word.html#t:Mod</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="ot">unMod ::</span> <span class="dt">Mod</span> m <span class="ot">-&gt;</span> <span class="dt">Word</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> <span class="dt">TextDocumentIdentifier</span> <span class="ot">=</span> <span class="dt">TextDocumentIdentifier</span> </span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  {<span class="ot"> _uri ::</span> <span class="dt">Language.LSP.Protocol.Types.Uri.Uri</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="kw">newtype</span> <span class="dt">Uri</span> <span class="ot">=</span> <span class="dt">Uri</span> {<span class="ot">getUri ::</span> <span class="dt">Text</span>}</span></code></pre></div>
+<p>Maxima-lsp could have defined</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> <span class="dt">F</span> <span class="ot">=</span> <span class="dt">F</span> { uri,<span class="ot"> newName ::</span> <span class="dt">Text</span>, line,<span class="ot"> character ::</span> <span class="dt">Int</span> }</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ot">f ::</span> <span class="dt">RenameParams</span> <span class="ot">-&gt;</span> <span class="dt">F</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>f _ <span class="ot">=</span> _ <span class="co">-- boilerplate</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co">-- comparable to [json| qq version</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="ot">rename ::</span> <span class="dt">RenameParams</span> <span class="ot">-&gt;</span> _</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>rename (f <span class="ot">-&gt;</span> <span class="dt">F</span> {uri, newName, line, character}) <span class="ot">=</span> _</span></code></pre></div>
+<p>It seems increasingly common experience: the library promises to help, but by the time I understand what the preconditions are, which parts I actually need, I could have done it without the library.</p>
+<p>Maxima-lsp is by no means finished but it already helps. There is a cost to picking the wrong variable name. It could be too long and hides the structure or it could be too short and then fails to make a necessary distinction. It can fail to describe how it’s made, who needs it or what it’s for, and often the purpose is unknown or changes.</p>
+<p>The next post should be about using maxima-lsp for simulation or design of a 3D linkage.</p>
+    </section>
+</article>
+
+        </main>
+
+        <footer>
+            Site proudly generated by
+            <a href="http://jaspervdj.be/hakyll">Hakyll</a>
+        </footer>
+    </body>
+</html>

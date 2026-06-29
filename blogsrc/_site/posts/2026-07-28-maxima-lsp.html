@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Blog - Maxima-lsp</title>
+        <link rel="stylesheet" href="../css/default.css" />
+    </head>
+    <body>
+        <header>
+            <div class="logo">
+                <a href="../">aavogt</a>
+            </div>
+            <nav>
+                <a href="../">Home</a>
+                <a href="../archive.html">Archive</a>
+            </nav>
+        </header>
+
+        <main role="main">
+            <h1>Maxima-lsp</h1>
+            <article>
+    <section class="header">
+        Posted on July 28, 2026
+        
+    </section>
+    <div>
+        
+            Tags: <a title="All pages tagged 'maxima'." href="../tags/maxima.html" rel="tag">maxima</a>
+        
+    </div>
+    <section>
+        <p><a href="https://microsoft.github.io/language-server-protocol/overviews/lsp/overview/">The language server protocol</a> the standard way to get deterministic help with code.
+I use <a href="http://neovim.io">neovim</a> to interact with R languageserver, clangd (c or c++), basedpyright (python), rust-analyzer or haskell-language-server. In any of those languages
+I use the same keybindings to get information or modify code</p>
+<ol type="1">
+<li>looking up documentation (hover)</li>
+<li>renaming an identifier</li>
+<li>jump-to-definition</li>
+<li>jump-to-use</li>
+<li>factor out sub-expression (common subexpression elimination – CSE)</li>
+<li>inline (unCSE)</li>
+<li>inlay inferred types</li>
+<li>type, syntax errors</li>
+</ol>
+<p><a href="https://maxima.sourceforge.io/">maxima</a> didn’t have a LSP. There are generic
+language servers that can usually get 2,3,4,8 right. None of the
+LSPs do 5&amp;6 well. LSP is difficult to learn because there can be too many
+layers written by different people that work together on a single task. For
+example neovim used to use <a href="https://github.com/neoclide/coc.nvim">coc.nvim</a> used
+<a href="https://microsoft.github.io/language-server-protocol/overviews/lsp/overview/">language server protocol</a> to request
+<a href="https://github.com/haskell/haskell-language-server/">haskell language server</a> to ask
+<a href="https://hackage.haskell.org/package/retrie">retrie</a> to make changes. When it
+doesn’t work correctly, where is the mistake? Which layer should I ask for a
+trace of what happened? Who has to change to fix the bug? Thankfully there’s
+common understanding of what the system is supposed to do.</p>
+<p>I’ll describe the process of putting <a href="https://github.com/aavogt/maxima-lsp">maxima-lsp</a> together. At first I tried
+the <a href="https://hackage-content.haskell.org/package/lsp">lsp</a>
+package, because this is used by haskell-language-server and futhark. But I stopped at <a href="https://github.com/aavogt/maxima-lsp/blob/cb4aacea38891e0911e783c7dabf20447563fd67/main.hs#L55">this point</a>. I was surprised that the <code>lsp</code> package will not generate the <code>initialize</code> response which tells the editor (neovim) what it is allowed to send. The <code>LSP.Handlers</code> looks similar to the haskell <code>servant</code> library can generate a description of the API from the code that usually responds to that API. At least in principle the type checker could confirm that the client handles all responses it requests. The final version of the <a href="https://github.com/aavogt/maxima-lsp/blob/21e66dc0c73aabf46672056c83da18b9ede6cf2f/src/main.hs#L50"><code>initialize</code> response is here for comparison</a>. Starting at the main in each version, look how many steps reach the actual renaming logic:</p>
+<p>With lsp library, <code>main</code> runs a <code>LSP.ServerDefinition</code> which configures their main loop with 8 different values/callbacks. The <a href="https://github.com/aavogt/maxima-lsp/blob/cb4aacea38891e0911e783c7dabf20447563fd67/main.hs#L55">staticHandlers</a> includes the <a href="https://github.com/aavogt/maxima-lsp/blob/cb4aacea38891e0911e783c7dabf20447563fd67/main.hs#L137">handleRename2</a> function that uses <a href="https://hackage.haskell.org/package/lens-regex-pcre">lens-regex-pcre</a> to <a href="https://github.com/aavogt/maxima-lsp/blob/cb4aacea38891e0911e783c7dabf20447563fd67/main.hs#L148">apply the renaming</a>, and then callback’s callback needs to see the results packaged up into a <code>Either (LSP.TResponseError LSP.Method_TextDocumentRename) (LSP.WorkspaceEdit LSP.|? LSP.Null)</code>.</p>
+<p><a href="https://github.com/aavogt/maxima-lsp/blob/21e66dc0c73aabf46672056c83da18b9ede6cf2f/src/main.hs#L34">In the current version</a>, main sets up the server state and then has a loop to read requests and write the responses. <a href="https://github.com/aavogt/maxima-lsp/blob/21e66dc0c73aabf46672056c83da18b9ede6cf2f/src/main.hs#L208">rename</a> pattern matches on the json Value described by <a href="https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#renameParams">textDocument/rename</a>. Following that documentation has similar indirection to <a href="https://hackage-content.haskell.org/package/lsp">lsp</a>, except <a href="https://hackage-content.haskell.org/package/lsp">lsp</a> adds an extra newtype around row/column/uri values. Another difference is that <code>interface RenameParams extends TextDocumentPositionParams, WorkDoneProgressParams {</code> are missing from the latest code. In the first version haskell imagine support for wildcards for constructor names, By this I mean having <code>_</code> stand in for the constructor(s) with the right number of fields. For example the language might let you make progress without naming <code>Just</code>:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> <span class="dt">Maybe</span> a <span class="ot">=</span> <span class="dt">Nothing</span> <span class="op">|</span> <span class="dt">Just</span> a</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">maybe</span><span class="ot"> ::</span> b <span class="ot">-&gt;</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> <span class="dt">Maybe</span> a <span class="ot">-&gt;</span> b</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">maybe</span> _ ab (_ a) <span class="ot">=</span> ab a</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">maybe</span> b _   _    <span class="ot">=</span> b</span></code></pre></div>
+<p>. I only need to know the field names and use the values bound to the field names at types that can be parsed from the json matched using <a href="https://github.com/aavogt/maxima-lsp/blob/21e66dc0c73aabf46672056c83da18b9ede6cf2f/src/Pun.hs">Pun.json</a>.</p>
+    </section>
+</article>
+
+        </main>
+
+        <footer>
+            Site proudly generated by
+            <a href="http://jaspervdj.be/hakyll">Hakyll</a>
+        </footer>
+    </body>
+</html>
