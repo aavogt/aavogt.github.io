@@ -54,9 +54,12 @@ axis transform).</p>
 <p><img src="../images/centerline.png" /></p>
 <p>Next I use akima::interpp to resample the scan <code>(x,y,v)</code> tuples into <code>j</code> samples in the centerline Frenet frame <code>(u,w,v)</code> with <code>u</code> measuring parallel to the tangent and <code>w</code> measuring a 90° rotation. The pixel values relative to the center are then:</p>
 <p><img src="../images/centerline_dv.png" /></p>
-<p>The middle wire is the straightest. So here are absolute image values and here each panel is</p>
+<p>The next two plots only include <code>n == arr_2</code> because the straightest wire makes z height (<code>mm</code>) easy to calculate from distance along the curve (<code>j</code>).</p>
 <p><img src="../images/centerline_along.png" /></p>
-<p>The here is a Gaussian width (sigma) that best fits each panel above. j=1 is the end touching the glass, and j=4 is 14 mm above the glass. Sigma alone isn’t enough for the calibration because it’s flat and the inverse is multi-valued. Given sigma=10 could mean the wire is 2 mm, 6 mm or 12.4 mm above the glass. The other parameter in the Gaussian should help, but it’s likely that other options may be needed. There should be better options than Gaussian here.</p>
+<p>j=1 is the end touching the glass, and j=4 is 14 mm above the glass.
+A Gaussian with different parameters fits each panel above giving sigma(j) or sigma(mm).
+The plot of sigma(mm) below is promising.
+But sigma alone isn’t enough for the calibration because it’s flat in two areas and the inverse is multi-valued. So given sigma=10 could mean the wire is 2 mm, 6 mm or 12.4 mm above the glass. The other parameter in the Gaussian should help, but it’s likely that other options may be needed. There should be better options than Gaussian here.</p>
 <p><img src="../images/calib.png" /></p>
 <p>Plotting the same sigma.rel = sigma / max(sigma) for each wire in scan coordinates:</p>
 <p><img src="../images/sigmas.png" /></p>
