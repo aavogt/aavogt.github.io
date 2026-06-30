@@ -38,11 +38,14 @@ Next I use akima::interpp to resample the scan `(x,y,v)` tuples into `j` samples
 
 ![](../images/centerline_dv.png)
 
-The middle wire is the straightest. So here are absolute image values and here each panel is 
+The next two plots only include `n == arr_2` because the straightest wire makes z height (`mm`) easy to calculate from distance along the curve (`j`).
 
 ![](../images/centerline_along.png)
 
-The here is a Gaussian width (sigma) that best fits each panel above. j=1 is the end touching the glass, and j=4 is 14 mm above the glass. Sigma alone isn't enough for the calibration because it's flat and the inverse is multi-valued. Given sigma=10 could mean the wire is 2 mm, 6 mm or 12.4 mm above the glass. The other parameter in the Gaussian should help, but it's likely that other options may be needed. There should be better options than Gaussian here.
+j=1 is the end touching the glass, and j=4 is 14 mm above the glass.
+A Gaussian with different parameters fits each panel above giving sigma(j) or sigma(mm).
+The plot of sigma(mm) below is promising.
+But sigma alone isn't enough for the calibration because it's flat in two areas and the inverse is multi-valued. So given sigma=10 could mean the wire is 2 mm, 6 mm or 12.4 mm above the glass. The other parameter in the Gaussian should help, but it's likely that other options may be needed. There should be better options than Gaussian here.
 
 ![](../images/calib.png)
 
