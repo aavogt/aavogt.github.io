@@ -40,7 +40,7 @@ explicit_imports/%.hs: %.hs
 
 .ONESHELL:
 
-%.html: %.hs %.annot inject.py Makefile
+%.html: %.hs %.annot annot.html inject.py Makefile
 	f=`mktemp`
 	HsColour -css -partial -o$$f $<
 	python3 inject.py $*.annot.json < $$f > $@
