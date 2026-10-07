@@ -19,6 +19,11 @@ index.html: index.html.proto $(HTMLS) $(GLBS) annot.html
 	  echo '</body></html>'; \
 	} > $@
 
+
+commit: index.html $(GLBS) annot.html
+	git add $< $(HS) *.svg
+	git commit -m 'rapids_examples'
+
 .PHONY: serve clean allclean
 serve: index.html annot.html
 	python3 -m http.server 8080 --bind 127.0.0.1

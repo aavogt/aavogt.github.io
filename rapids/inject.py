@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """stdin: HsColour -css -partial html; argv[1]: .annot.json; stdout: html with doc links and tooltips."""
-import sys, json, html
+import sys, json, html, re
 from html.parser import HTMLParser
 from urllib.parse import quote
+
+SVG_LITERAL = re.compile(r'"((?:[^"\\]|\\.)+\.svg)"')
 
 ann = {(l, c): (e - c, t) for l, c, e, t in json.load(open(sys.argv[1]))}
 
@@ -36,7 +38,12 @@ class Inject(HTMLParser):
             else:
                 self.out.append(span + html.escape(data[n:]))
         else:
-            self.out.append(html.escape(data, quote=False))
+            svg = SVG_LITERAL.fullmatch(data)
+            if svg:
+                href = html.escape(quote(svg.group(1), safe="/"), quote=True)
+                self.out.append(f'<a href="{href}">{html.escape(data, quote=False)}</a>')
+            else:
+                self.out.append(html.escape(data, quote=False))
         self.advance(data)
 
 p = Inject(); p.feed(sys.stdin.read()); print("".join(p.out), end="")
