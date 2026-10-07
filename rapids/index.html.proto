@@ -75,6 +75,7 @@
     { glb: [0, 228 / 255, 48 / 255], step: [0, 0.951932222166, 0.471071252604] },
     { glb: [253 / 255, 249 / 255, 0], step: [0.996544368051, 0.989584985951, 0] },
   ];
+  const stepColorBrightness = 0.5;
 
   await customElements.whenDefined("model-viewer");
   for (const viewer of document.querySelectorAll("model-viewer")) {
@@ -85,7 +86,7 @@
         const match = stepColors.find(({ glb }) =>
           Math.hypot(r - glb[0], g - glb[1], b - glb[2]) < 0.05
         );
-        if (match) pbr.setBaseColorFactor([...match.step, alpha]);
+        if (match) pbr.setBaseColorFactor([...match.step.map(channel => channel * stepColorBrightness), alpha]);
       }
     };
 
