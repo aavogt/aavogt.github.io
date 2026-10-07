@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Haskell annotations</title>
+<style>
+body { background: #ddd; color: #222; font: 16px/1.5 system-ui, sans-serif; margin: 2rem auto; max-width: 72rem; padding: 0 1rem; }
+nav { background: #eee; padding: 1rem 2rem; }
+nav ol { columns: 3; }
+.entry { border-top: 1px solid #999; margin-top: 2rem; padding-top: 1rem; scroll-margin-top: 1rem; }
+.signature { overflow-wrap: anywhere; }
+.defined-in { color: #555; font-size: .9rem; }
+.uses { color: #555; font-size: .85rem; }
+</style></head><body>
+<h1>Haskell annotations</h1>
+<nav aria-label="Annotations by usage frequency"><ol>
+<li><a href="#offset"><code>offset</code></a> <span class="uses">(6 uses)</span></li>
+<li><a href="#writeSTEPColor"><code>writeSTEPColor</code></a> <span class="uses">(6 uses)</span></li>
+<li><a href="#red"><code>red</code></a> <span class="uses">(5 uses)</span></li>
+<li><a href="#blue"><code>blue</code></a> <span class="uses">(4 uses)</span></li>
+<li><a href="#intersperse"><code>intersperse</code></a> <span class="uses">(4 uses)</span></li>
+<li><a href="#pad"><code>pad</code></a> <span class="uses">(4 uses)</span></li>
+<li><a href="#rotate"><code>rotate</code></a> <span class="uses">(4 uses)</span></li>
+<li><a href="#stacked"><code>stacked</code></a> <span class="uses">(4 uses)</span></li>
+<li><a href="#unitCircle"><code>unitCircle</code></a> <span class="uses">(4 uses)</span></li>
+<li><a href="#unitGap"><code>unitGap</code></a> <span class="uses">(4 uses)</span></li>
+<li><a href="#green"><code>green</code></a> <span class="uses">(3 uses)</span></li>
+<li><a href="#rectangle"><code>rectangle</code></a> <span class="uses">(3 uses)</span></li>
+<li><a href="#unitCube"><code>unitCube</code></a> <span class="uses">(3 uses)</span></li>
+<li><a href="#revolution"><code>revolution</code></a> <span class="uses">(2 uses)</span></li>
+<li><a href="#scale"><code>scale</code></a> <span class="uses">(2 uses)</span></li>
+<li><a href="#sweep"><code>sweep</code></a> <span class="uses">(2 uses)</span></li>
+<li><a href="#unitCylinder"><code>unitCylinder</code></a> <span class="uses">(2 uses)</span></li>
+<li><a href="#unitPolygon"><code>unitPolygon</code></a> <span class="uses">(2 uses)</span></li>
+<li><a href="#unitSpiral"><code>unitSpiral</code></a> <span class="uses">(2 uses)</span></li>
+<li><a href="#V3"><code>V3</code></a> <span class="uses">(1 uses)</span></li>
+<li><a href="#_translated"><code>_translated</code></a> <span class="uses">(1 uses)</span></li>
+<li><a href="#circle"><code>circle</code></a> <span class="uses">(1 uses)</span></li>
+<li><a href="#mirror"><code>mirror</code></a> <span class="uses">(1 uses)</span></li>
+<li><a href="#rotated"><code>rotated</code></a> <span class="uses">(1 uses)</span></li>
+<li><a href="#sweepRuled"><code>sweepRuled</code></a> <span class="uses">(1 uses)</span></li>
+<li><a href="#uScale2D"><code>uScale2D</code></a> <span class="uses">(1 uses)</span></li>
+<li><a href="#unions"><code>unions</code></a> <span class="uses">(1 uses)</span></li>
+<li><a href="#yellow"><code>yellow</code></a> <span class="uses">(1 uses)</span></li>
+</ol></nav>
+<main>
+<section class="entry">
+<h2><code class="signature" id="offset">offset :: Rapids.Offset.Offset a =&gt; Double -&gt; a</code></h2>
+<p class="defined-in">Defined in <code>Rapids.Offset</code></p>
+<div class="documentation"><p><code>join</code> is optional (default 0) and selects how corners are treated (see &lt;https://occt3d.com/dev/doc/refman/html/_geom_abs___join_type_8hxx.html GeomAbs_JoinType&gt;):</p>
+<pre><code>&gt; offset amount &lt;join&gt; &lt;openfaces&gt; solid|shape|path|path2d</code></pre>
+<p><code>openfaces :: [CInt]</code> contains 1-based indices of faces (for solid) to remove from each solid component. Currently ignored for shape<a href="##SUBST##|path|">|path|</a>path2d.</p>
+<pre><code>&gt; offset amount solid   -- round corners
+&gt; offset amount 0 solid -- round corners (Arc)
+&gt; offset amount 1 solid -- Tangent
+&gt; offset amount 2 solid -- sharp corners (Intersection)</code></pre>
+<pre><code>&gt; offset 0.1 [1,2] unitCube -- round box without top and bottom
+&gt; offset 0.1 2 [1,2] unitCube -- sharp box without top and bottom</code></pre></div>
+</section>
+<section class="entry">
+<h2><code class="signature" id="writeSTEPColor">writeSTEPColor :: FilePath -&gt; Solid -&gt; IO ()</code></h2>
+<p class="defined-in">Defined in <code>Rapids.Color</code></p>
+<div class="documentation"><p><code>writeSTEPColor path solid</code> is like <code>Waterfall.writeSTEP</code> but also writes face colors and the source location notes left by <code>tagLoc</code> and the color names (<code>$red</code> ...)</p></div>
+</section>
+<section class="entry">
+<h2><code class="signature" id="red">red :: template-haskell-2.20.0.0:Language.Haskell.TH.Lib.Internal.ExpQ</code></h2>
+<p class="defined-in">Defined in <code>Rapids.Color</code></p>
+<div class="documentation"><p>A named color, spliced with <code>$</code> (needs <code>TemplateHaskell</code>), for example <code>$red :: 'Solid' -&gt; 'Solid'</code> sets the color of all faces and tags them with the source location (see <code>tagLoc</code> and <code>Rapids.Color.Query</code>)</p></div>
+</section>
+<section class="entry">
+<h2><code class="signature" id="blue">blue :: template-haskell-2.20.0.0:Language.Haskell.TH.Lib.Internal.ExpQ</code></h2>
+<p class="defined-in">Defined in <code>Rapids.Color</code></p>
+<div class="documentation"><p>A named color, spliced with <code>$</code> (needs <code>TemplateHaskell</code>), for example <code>$red :: 'Solid' -&gt; 'Solid'</code> sets the color of all faces and tags them with the source location (see <code>tagLoc</code> and <code>Rapids.Color.Query</code>)</p></div>
+</section>
+<section class="entry">
+<h2><code class="signature" id="intersperse">intersperse :: a -&gt; [a] -&gt; [a]</code></h2>
+<p class="defined-in">Defined in <code>base-4.18.3.0:Data.OldList</code></p>
+<div class="documentation"><p>(mathcal{O}(n)). The <code>intersperse</code> function takes an element and a list and `intersperses' that element between the elements of the list. For example,</p>
+<pre><code>&gt;&gt;&gt; intersperse &#39;,&#39; &quot;abcde&quot;
+&quot;a,b,c,d,e&quot;</code></pre></div>
+</section>
+<section class="entry">
+<h2><code class="signature" id="pad">pad :: Rapids.Pad.Pad a =&gt; a</code></h2>
+<p class="defined-in">Defined in <code>Rapids.Pad</code></p>
+<div class="documentation"><p>The direction is <code>z</code> (like <code>Waterfall.Solids.prism</code>), <code>x y z</code>, or <code>v3</code>; the optional <code>taperFrac</code> is the factor the far end is scaled by. The last argument is any <code>ToShape</code> value:</p>
+<pre><code>&gt; pad z &lt;taperFrac&gt; shape
+&gt; pad x y z &lt;taperFrac&gt; shape
+&gt; pad v3 &lt;taperFrac&gt; shape</code></pre></div>
+</section>
+<section class="entry">
+<h2><code class="signature" id="rotate">rotate :: Rapids.Transforms.Rotate.Go.RotateGo r t =&gt; r</code></h2>
+<p class="defined-in">Defined in <code>Rapids.Transforms.Rotate</code></p>
+<div class="documentation"><p>Rotate a <code>Transformable</code> by radians around an axis specified in one of these ways:</p>
+<pre><code>&gt; rotate x y z radians :: Transformable a =&gt; a -&gt; a
+&gt; rotate v3    radians
+&gt; rotate q
+&gt; rotate ex    radians</code></pre></div>
+</section>
+<section class="entry">
+<h2><code class="signature" id="stacked">stacked :: E V3 -&gt; Solid -&gt; Solid -&gt; Solid</code></h2>
+<p class="defined-in">Defined in <code>Rapids.AABB.Align</code></p>
+<div class="documentation"><p><code>stacked ez a b = a + stack ez a b</code></p>
+<p>the analogue of <code>mirrored</code> for <code>stack</code></p></div>
+</section>
+<section class="entry">
+<h2><code class="signature" id="unitCircle">unitCircle :: Shape</code></h2>
+<p class="defined-in">Defined in <code>waterfall-cad-0.6.3.2:Waterfall.TwoD.Shape</code></p>
+<div class="documentation"><p>Circle with radius 1, centered on the origin</p></div>
+</section>
+<section class="entry">
+<h2><code class="signature" id="unitGap">unitGap :: Solid</code></h2>
+<p class="defined-in">Defined in <code>Rapids.AABB.Align</code></p>
+<div class="documentation"><p><code>unitCube</code> has the same aabb as <code>unitCube</code></p></div>
+</section>
+<section class="entry">
+<h2><code class="signature" id="green">green :: template-haskell-2.20.0.0:Language.Haskell.TH.Lib.Internal.ExpQ</code></h2>
+<p class="defined-in">Defined in <code>Rapids.Color</code></p>
+<div class="documentation"><p>A named color, spliced with <code>$</code> (needs <code>TemplateHaskell</code>), for example <code>$red :: 'Solid' -&gt; 'Solid'</code> sets the color of all faces and tags them with the source location (see <code>tagLoc</code> and <code>Rapids.Color.Query</code>)</p></div>
+</section>
+<section class="entry">
+<h2><code class="signature" id="rectangle">rectangle :: Double -&gt; Double -&gt; Path2D</code></h2>
+<p class="defined-in">Defined in <code>Rapids.Path</code></p>
+<div class="documentation"><p><code>rectangle w h</code> has one corner at the origin and the opposite corner at (w, h). These have equivalent geometry:</p>
+<pre><code>&gt; rectangle w h
+&gt; section (box (V3 w h 1))
+&gt; section (scale w h 1 unitCube)</code></pre>
+<p>also <code>unitSquare</code></p></div>
+</section>
+<section class="entry">
+<h2><code class="signature" id="unitCube">unitCube :: Solid</code></h2>
+<p class="defined-in">Defined in <code>waterfall-cad-0.6.3.2:Waterfall.Solids</code></p>
+<div class="documentation"><p>A cube with side lengths of 1, one vertex on the origin, another on ( (1, 1, 1) )</p></div>
+</section>
+<section class="entry">
+<h2><code class="signature" id="revolution">revolution :: Rapids.Revolution.Revolution a =&gt; a</code></h2>
+<p class="defined-in">Defined in <code>Rapids.Revolution</code></p>
+<div class="documentation"><p>rotate around the shape y axis (which becomes the solid z axis) with an optional angle for how far around the axis to go (clockwise with the camera pointed down (towards z= -infinity))</p>
+<pre><code>&gt; revolution &lt;radians&gt; shape</code></pre></div>
+</section>
+<section class="entry">
+<h2><code class="signature" id="scale">scale :: Rapids.Transforms.Scale.Go.ScaleGo r t =&gt; r</code></h2>
+<p class="defined-in">Defined in <code>Rapids.Transforms.Scale</code></p>
+<div class="documentation"><p>Scale along one or more directions.</p></div>
+</section>
+<section class="entry">
+<h2><code class="signature" id="sweep">sweep :: (ToPath path, ToShape shape) =&gt; path -&gt; shape -&gt; Solid</code></h2>
+<p class="defined-in">Defined in <code>Rapids.Pad</code></p>
+<div class="documentation"><p><code>sweep path shape</code> sweeps a <code>ToShape</code> along a <code>ToPath</code>.</p>
+<pre><code>&gt; sweep [0, V3 0 0 1e-3, V3 (-2) 0 (h / 2), V3 0 0 h] (rectangle 3 4)</code></pre>
+<p>the first segment 1e-3 fixes the bottom face orientation</p></div>
+</section>
+<section class="entry">
+<h2><code class="signature" id="unitCylinder">unitCylinder :: Solid</code></h2>
+<p class="defined-in">Defined in <code>waterfall-cad-0.6.3.2:Waterfall.Solids</code></p>
+<div class="documentation"><p>A cylinder with radius 1, length 1, one of its circular faces centered on the origin, the other centered on ( (0, 0, 1) )</p></div>
+</section>
+<section class="entry">
+<h2><code class="signature" id="unitPolygon">unitPolygon :: Integer -&gt; Shape</code></h2>
+<p class="defined-in">Defined in <code>waterfall-cad-0.6.3.2:Waterfall.TwoD.Shape</code></p>
+<div class="documentation"><p>(n) sided Polygon, centered on the origin</p>
+<p>Empty when n &lt;= 2</p></div>
+</section>
+<section class="entry">
+<h2><code class="signature" id="unitSpiral">unitSpiral :: Rapids.Spiral.UnitSpiral a =&gt; Double -&gt; a</code></h2>
+<p class="defined-in">Defined in <code>Rapids.Spiral</code></p>
+<div class="documentation"><p>follow a helix with radius 1 and pitch 1 for <code>turns</code> turns with a shape (any <code>ToShape</code>). With <code>taperSlope</code> the radius decreases by that much per turn. Optional arguments are in angle brackets:</p>
+<pre><code>&gt; unitSpiral turns &lt;taperSlope&gt; shape</code></pre>
+<p>To get a different radius and pitch,</p>
+<pre><code>&gt; scale r pitch $ unitSpiral turns taperSlope $ rectangle w h</code></pre></div>
+</section>
+<section class="entry">
+<h2><code class="signature" id="V3">V3 :: * -&gt; *</code></h2>
+<div class="documentation"><p>Type constructor defined in ‘linear-1.23.3:Linear.V3’ A 3-dimensional vector</p></div>
+</section>
+<section class="entry">
+<h2><code class="signature" id="_translated">_translated :: Rapids.Transforms.Translate.Go.TranslatedGo</code></h2>
+<p class="defined-in">Defined in <code>Rapids.Transforms.Translate</code></p>
+<div class="documentation"><p><code>_translated</code> produces an <code>Control.Lens.Iso.Iso</code> using the same arguments as <code>translate</code></p></div>
+</section>
+<section class="entry">
+<h2><code class="signature" id="circle">circle :: Double -&gt; Path</code></h2>
+<p class="defined-in">Defined in <code>Rapids.Path</code></p>
+<div class="documentation"><p><code>circle diameter</code> in the xy plane (z=0)</p>
+<p>also <code>unitCircle</code></p></div>
+</section>
+<section class="entry">
+<h2><code class="signature" id="mirror">mirror :: Rapids.Transforms.Mirror.Go.MirrorGo r t =&gt; r</code></h2>
+<p class="defined-in">Defined in <code>Rapids.Transforms.Mirror</code></p>
+<div class="documentation"><p>Reflect across one or more planes through the origin.</p>
+<pre><code>&gt; mirror v3
+&gt;   x y z
+&gt;   ex x
+&gt;   ey y
+&gt;   ez z</code></pre></div>
+</section>
+<section class="entry">
+<h2><code class="signature" id="rotated">rotated :: (Num t, Rapids.Transforms.Rotate.Go.RotateGo r t) =&gt; r</code></h2>
+<p class="defined-in">Defined in <code>Rapids.Transforms.Rotate</code></p>
+<div class="documentation"><p><code>rotate</code> except it also returns the original</p></div>
+</section>
+<section class="entry">
+<h2><code class="signature" id="sweepRuled">sweepRuled :: (ToPath path, ToShape shape) =&gt;</code></h2>
+<p class="defined-in">Defined in <code>Rapids.Sweep</code></p>
+<div class="documentation"><p><code>sweepRuled (\\ _shapeVertex -&gt; path) shape = sweep path shape</code> at least for shapes with straight edges.</p>
+<p>sweepRuled creates ruled surfaces between adjacent paths. The shape and the resulting end shape are sewn to those surfaces and returned as a solid when the resulting shell is closed.</p></div>
+</section>
+<section class="entry">
+<h2><code class="signature" id="uScale2D">uScale2D :: Transformable2D a =&gt; Double -&gt; a -&gt; a</code></h2>
+<p class="defined-in">Defined in <code>waterfall-cad-0.6.3.2:Waterfall.TwoD.Transforms</code></p>
+<div class="documentation"><p>Scale uniformly along both axes</p></div>
+</section>
+<section class="entry">
+<h2><code class="signature" id="unions">unions :: [Solid] -&gt; Solid</code></h2>
+<p class="defined-in">Defined in <code>Rapids.Color</code></p>
+<div class="documentation"><p>n-ary boolean operations that propagate face colors from the inputs to the result</p></div>
+</section>
+<section class="entry">
+<h2><code class="signature" id="yellow">yellow :: template-haskell-2.20.0.0:Language.Haskell.TH.Lib.Internal.ExpQ</code></h2>
+<p class="defined-in">Defined in <code>Rapids.Color</code></p>
+<div class="documentation"><p>A named color, spliced with <code>$</code> (needs <code>TemplateHaskell</code>), for example <code>$red :: 'Solid' -&gt; 'Solid'</code> sets the color of all faces and tags them with the source location (see <code>tagLoc</code> and <code>Rapids.Color.Query</code>)</p></div>
+</section>
+</main>
+</body></html>
