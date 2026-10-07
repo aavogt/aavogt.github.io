@@ -32,15 +32,16 @@ nav ol { columns: 3; }
 <li><a href="#unitCylinder"><code>unitCylinder</code></a> <span class="uses">(2 uses)</span></li>
 <li><a href="#unitPolygon"><code>unitPolygon</code></a> <span class="uses">(2 uses)</span></li>
 <li><a href="#unitSpiral"><code>unitSpiral</code></a> <span class="uses">(2 uses)</span></li>
+<li><a href="#yellow"><code>yellow</code></a> <span class="uses">(2 uses)</span></li>
 <li><a href="#V3"><code>V3</code></a> <span class="uses">(1 uses)</span></li>
 <li><a href="#_translated"><code>_translated</code></a> <span class="uses">(1 uses)</span></li>
+<li><a href="#brown"><code>brown</code></a> <span class="uses">(1 uses)</span></li>
 <li><a href="#circle"><code>circle</code></a> <span class="uses">(1 uses)</span></li>
 <li><a href="#mirror"><code>mirror</code></a> <span class="uses">(1 uses)</span></li>
 <li><a href="#rotated"><code>rotated</code></a> <span class="uses">(1 uses)</span></li>
 <li><a href="#sweepRuled"><code>sweepRuled</code></a> <span class="uses">(1 uses)</span></li>
 <li><a href="#uScale2D"><code>uScale2D</code></a> <span class="uses">(1 uses)</span></li>
 <li><a href="#unions"><code>unions</code></a> <span class="uses">(1 uses)</span></li>
-<li><a href="#yellow"><code>yellow</code></a> <span class="uses">(1 uses)</span></li>
 </ol></nav>
 <main>
 <section class="entry">
@@ -168,6 +169,11 @@ nav ol { columns: 3; }
 <pre><code>&gt; scale r pitch $ unitSpiral turns taperSlope $ rectangle w h</code></pre></div>
 </section>
 <section class="entry">
+<h2><code class="signature" id="yellow">yellow :: template-haskell-2.20.0.0:Language.Haskell.TH.Lib.Internal.ExpQ</code></h2>
+<p class="defined-in">Defined in <code>Rapids.Color</code></p>
+<div class="documentation"><p>A named color, spliced with <code>$</code> (needs <code>TemplateHaskell</code>), for example <code>$red :: 'Solid' -&gt; 'Solid'</code> sets the color of all faces and tags them with the source location (see <code>tagLoc</code> and <code>Rapids.Color.Query</code>)</p></div>
+</section>
+<section class="entry">
 <h2><code class="signature" id="V3">V3 :: * -&gt; *</code></h2>
 <div class="documentation"><p>Type constructor defined in ‘linear-1.23.3:Linear.V3’ A 3-dimensional vector</p></div>
 </section>
@@ -175,6 +181,11 @@ nav ol { columns: 3; }
 <h2><code class="signature" id="_translated">_translated :: Rapids.Transforms.Translate.Go.TranslatedGo</code></h2>
 <p class="defined-in">Defined in <code>Rapids.Transforms.Translate</code></p>
 <div class="documentation"><p><code>_translated</code> produces an <code>Control.Lens.Iso.Iso</code> using the same arguments as <code>translate</code></p></div>
+</section>
+<section class="entry">
+<h2><code class="signature" id="brown">brown :: template-haskell-2.20.0.0:Language.Haskell.TH.Lib.Internal.ExpQ</code></h2>
+<p class="defined-in">Defined in <code>Rapids.Color</code></p>
+<div class="documentation"><p>A named color, spliced with <code>$</code> (needs <code>TemplateHaskell</code>), for example <code>$red :: 'Solid' -&gt; 'Solid'</code> sets the color of all faces and tags them with the source location (see <code>tagLoc</code> and <code>Rapids.Color.Query</code>)</p></div>
 </section>
 <section class="entry">
 <h2><code class="signature" id="circle">circle :: Double -&gt; Path</code></h2>
@@ -212,11 +223,6 @@ nav ol { columns: 3; }
 <h2><code class="signature" id="unions">unions :: [Solid] -&gt; Solid</code></h2>
 <p class="defined-in">Defined in <code>Rapids.Color</code></p>
 <div class="documentation"><p>n-ary boolean operations that propagate face colors from the inputs to the result</p></div>
-</section>
-<section class="entry">
-<h2><code class="signature" id="yellow">yellow :: template-haskell-2.20.0.0:Language.Haskell.TH.Lib.Internal.ExpQ</code></h2>
-<p class="defined-in">Defined in <code>Rapids.Color</code></p>
-<div class="documentation"><p>A named color, spliced with <code>$</code> (needs <code>TemplateHaskell</code>), for example <code>$red :: 'Solid' -&gt; 'Solid'</code> sets the color of all faces and tags them with the source location (see <code>tagLoc</code> and <code>Rapids.Color.Query</code>)</p></div>
 </section>
 </main>
 </body></html>
