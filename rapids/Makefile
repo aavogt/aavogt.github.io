@@ -8,6 +8,25 @@ PNGS := $(HS:.hs=.png)
 .SECONDARY: $(HS:.hs=.glb1)
 EXPL := $(addprefix explicit_imports/,$(HS))
 
+index.html: $(HTMLS) $(PNGS) annot.html Makefile
+	{ echo '<!doctype html>'; \
+	  echo '<html><head><meta charset="utf-8"><title>Rapids examples</title></head><body>'; \
+	  echo '<h1>Rapids examples</h1><ul><li><a href="annot.html">Annotations</a></li>'; \
+	  for f in $(HS); do b=$${f%.hs}; \
+	    echo "<li><a href=\"$$b.html\"><img src=$$b.png></img>view $$f</a></li>"; done; \
+	  echo '</ul></body></html>'; \
+	} > $@
+
+%.html: %.html1
+	{ cat index.html.proto; \
+	  for f in $<; do b=$${f%.html1}; \
+	    echo "<h1>$$f</h1>"; \
+	    cat $$b.html1; \
+			echo "<model-viewer src=\"$$b.glb\" camera-controls interaction-prompt=none camera-orbit=\"auto auto 25%\"></model-viewer>"; \
+	    echo '</section>'; done; \
+	  echo '</body></html>'; \
+	} > $@
+
 onepage.html: onepage.html.proto $(HTML1S) $(GLBS) annot.html
 	{ cat index.html.proto; \
 	  echo '<nav><ul><li><a href="annot.html">Annotations</a></li>'; \
@@ -45,7 +64,7 @@ annot.html: $(HS:.hs=.annot.json) annot_html.py Makefile
 	python3 add_specular.py $@
 
 %.png: %.glb
-	f3d $< --screenshot=$@
+	f3d $< --output=$@
 
 %.step: %.hs
 	runghc $<
