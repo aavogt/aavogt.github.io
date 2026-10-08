@@ -2,11 +2,13 @@ HS     := $(wildcard *.hs)
 ANNOTS := $(HS:.hs=.annot)
 ANNOTS_JSON := $(HS:.hs=.annot.json)
 HTMLS := $(HS:.hs=.html)
+HTML1S := $(HS:.hs=.html1)
 GLBS := $(HS:.hs=.glb)
+PNGS := $(HS:.hs=.png)
 .SECONDARY: $(HS:.hs=.glb1)
 EXPL := $(addprefix explicit_imports/,$(HS))
 
-index.html: index.html.proto $(HTMLS) $(GLBS) annot.html
+onepage.html: onepage.html.proto $(HTML1S) $(GLBS) annot.html
 	{ cat index.html.proto; \
 	  echo '<nav><ul><li><a href="annot.html">Annotations</a></li>'; \
 	  for f in $(HS); do b=$${f%.hs}; \
@@ -14,14 +16,14 @@ index.html: index.html.proto $(HTMLS) $(GLBS) annot.html
 	  echo '</ul></nav>'; \
 	  for f in $(HS); do b=$${f%.hs}; \
 	    echo "<section id=\"$$b\"><h1>$$f</h1>"; \
-	    cat $$b.html; \
+	    cat $$b.html1; \
 			echo "<model-viewer src=\"$$b.glb\" camera-controls interaction-prompt=none camera-orbit=\"auto auto 25%\"></model-viewer>"; \
 	    echo '</section>'; done; \
 	  echo '</body></html>'; \
 	} > $@
 
 
-commit: index.html $(GLBS) annot.html
+commit: index.html onepage.html $(HTMLS) $(GLBS) annot.html
 	git add $< $(HS) *.svg
 	git commit -m 'rapids_examples'
 
@@ -42,6 +44,9 @@ annot.html: $(HS:.hs=.annot.json) annot_html.py Makefile
 	cp $< $@
 	python3 add_specular.py $@
 
+%.png: %.glb
+	f3d $< --screenshot=$@
+
 %.step: %.hs
 	runghc $<
 
@@ -50,14 +55,14 @@ explicit_imports/%.hs: %.hs
 
 .ONESHELL:
 
-%.html: %.hs %.annot annot.html inject.py Makefile
+%.html1: %.hs %.annot annot.html inject.py Makefile
 	f=`mktemp`
 	HsColour -css -partial -o$$f $<
 	python3 inject.py $*.annot.json < $$f > $@
 	rm $$f # or trap
 
 clean:
-	rm $(EXPL) $(ANNOTS) $(ANNOTS_JSON) $(HS:.hs=.glb1) $(HS:.hs=.step) $(HTMLS)
+	rm $(EXPL) $(ANNOTS) $(ANNOTS_JSON) $(HS:.hs=.glb1) $(HS:.hs=.step) $(HTML1S)
 
 allclean:
-	rm $(GLBS) index.html annot.html
+	rm $(GLBS) index.html annot.html $(HTMLS) $(PNGS)
