@@ -3,6 +3,7 @@ ANNOTS := $(HS:.hs=.annot)
 ANNOTS_JSON := $(HS:.hs=.annot.json)
 HTMLS := $(HS:.hs=.html)
 GLBS := $(HS:.hs=.glb)
+.SECONDARY: $(HS:.hs=.glb1)
 EXPL := $(addprefix explicit_imports/,$(HS))
 
 index.html: index.html.proto $(HTMLS) $(GLBS) annot.html
@@ -34,8 +35,12 @@ $(ANNOTS) $(ANNOTS_JSON) &: $(HS) $(EXPL) annot.py
 annot.html: $(HS:.hs=.annot.json) annot_html.py Makefile
 	python3 annot_html.py $(HS:.hs=.annot.json) > $@
 
-%.glb: %.step
+%.glb1: %.step
 	python3 -c "import cascadio; cascadio.step_to_glb('$<', '$@')"
+
+%.glb: %.glb1 add_specular.py
+	cp $< $@
+	python3 add_specular.py $@
 
 %.step: %.hs
 	runghc $<
@@ -52,7 +57,7 @@ explicit_imports/%.hs: %.hs
 	rm $$f # or trap
 
 clean:
-	rm $(EXPL) $(ANNOTS) $(ANNOTS_JSON) $(HS:.hs=.step) $(HTMLS) annot.html
+	rm $(EXPL) $(ANNOTS) $(ANNOTS_JSON) $(HS:.hs=.glb1) $(HS:.hs=.step) $(HTMLS)
 
 allclean:
-	rm $(GLBS) index.html
+	rm $(GLBS) index.html annot.html
