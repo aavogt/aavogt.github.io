@@ -1,0 +1,98 @@
+<head>
+  <script type="module" src="https://cdn.jsdelivr.net/npm/@google/model-viewer/dist/model-viewer.min.js"></script>
+  <style>
+  :root {
+    --background: #282a36;
+    --foreground: #f8f8f2;
+    --border: #505450;
+    --underline: #6ad000;
+    --italic: #97a70b;
+    --red: #ff5555;
+    --bright-red: #ff6e67;
+    --green: #50fa7b;
+    --bright-green: #5af78e;
+    --yellow: #f1fa8c;
+    --bright-yellow: #f4f99d;
+    --purple: #bd93f9;
+    --bright-purple: #caa9fa;
+    --pink: #ff79c6;
+    --bright-pink: #ff92d0;
+    --cyan: #8be9fd;
+    --bright-cyan: #9aedfe;
+    --gray: #bfbfbf;
+    --bright-gray: #e6e6e6;
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+  }
+
+  a { color: var(--cyan); }
+  a:hover { color: var(--green); }
+
+  nav, section { border-color: var(--border); }
+  section { border-bottom: 1px solid var(--border); }
+  h1 { color: var(--bright-purple); }
+
+  pre {
+    background-color: var(--background);
+    color: var(--foreground);
+    overflow-x: auto;
+  }
+
+  .hs-comment { color: var(--italic); font-style: italic; }
+  .hs-keyword { color: var(--pink); }
+  .hs-conid { color: var(--cyan); }
+  .hs-definition { color: var(--green); font-weight: bold; }
+  .hs-keyglyph { color: var(--purple); }
+  .hs-varid { color: var(--foreground); }
+  .hs-varop { color: var(--bright-pink); }
+  .hs-layout { color: var(--gray); }
+  .hs-chr { color: var(--bright-yellow); }
+  .hs-sel { color: var(--bright-cyan); }
+  .hs-str { color: var(--yellow); }
+  .hs-num { color: var(--bright-red); }
+  .hs-doc {
+    text-decoration: underline dotted var(--underline);
+    text-underline-offset: 0.15em;
+    cursor: help;
+  }
+
+  model-viewer {
+    --poster-color: var(--background);
+    border: 5px solid var(--border);
+    margin-left: 5%;
+    height: 300px;
+    width: 90%;
+  }
+  </style>
+  <script type="module">
+  // Cascadio's GLB colors differ from the original STEP COLOUR_RGB values.
+  const stepColors = [
+    { glb: [0, 121 / 255, 241 / 255], step: [0, 0.71831177421, 0.97546794387] },
+    { glb: [230 / 255, 41 / 255, 55 / 255], step: [0.955603157106, 0.437629782502, 0.501773436191] },
+    { glb: [0, 228 / 255, 48 / 255], step: [0, 0.951932222166, 0.471071252604] },
+    { glb: [253 / 255, 249 / 255, 0], step: [0.996544368051, 0.989584985951, 0] },
+  ];
+  const stepColorBrightness = 0.5;
+
+  await customElements.whenDefined("model-viewer");
+  for (const viewer of document.querySelectorAll("model-viewer")) {
+    const restoreStepColors = () => {
+      for (const material of viewer.model.materials) {
+        const pbr = material.pbrMetallicRoughness;
+        const [r, g, b, alpha] = pbr.baseColorFactor;
+        const match = stepColors.find(({ glb }) =>
+          Math.hypot(r - glb[0], g - glb[1], b - glb[2]) < 0.05
+        );
+        if (match) pbr.setBaseColorFactor([...match.step.map(channel => channel * stepColorBrightness), alpha]);
+      }
+    };
+
+    viewer.addEventListener("load", restoreStepColors, { once: true });
+    if (viewer.loaded) restoreStepColors();
+  }
+  </script>
+</head>
+<body>
