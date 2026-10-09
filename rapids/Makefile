@@ -9,15 +9,17 @@ PNGS := $(HS:.hs=.png)
 EXPL := $(addprefix explicit_imports/,$(HS))
 
 index.html: $(HTMLS) $(PNGS) annot.html Makefile
-	{ echo '<!doctype html>'; \
-	  echo '<html><head><meta charset="utf-8"><title>Rapids examples</title></head><body>'; \
-	  echo '<h1>Rapids examples</h1><ul><li><a href="annot.html">Annotations</a></li>'; \
+	{ cat index.html.proto; \
+	  echo '<ul><li><a href="annot.html">Annotations</a></li>'; \
 	  for f in $(HS); do b=$${f%.hs}; \
-	    echo "<li><a href=\"$$b.html\"><img src=$$b.png></img>view $$f</a></li>"; done; \
+	    echo "<li><a href=\"$$b.html\"><img src=$$b.png></img>$$f</a></li>"; done; \
 	  echo '</ul></body></html>'; \
 	} > $@
 
-%.html: %.html1
+annot.html: $(HS:.hs=.annot.json) annot_html.py Makefile
+	python3 annot_html.py $(HS:.hs=.annot.json) > $@
+
+%.html: %.html1 index.html.proto
 	{ cat index.html.proto; \
 	  for f in $<; do b=$${f%.html1}; \
 	    echo "<h1>$$f</h1>"; \
@@ -27,7 +29,7 @@ index.html: $(HTMLS) $(PNGS) annot.html Makefile
 	  echo '</body></html>'; \
 	} > $@
 
-onepage.html: onepage.html.proto $(HTML1S) $(GLBS) annot.html
+onepage.html: onepage.html.proto index.html.proto $(HTML1S) $(GLBS) annot.html
 	{ cat index.html.proto; \
 	  echo '<nav><ul><li><a href="annot.html">Annotations</a></li>'; \
 	  for f in $(HS); do b=$${f%.hs}; \
@@ -53,8 +55,6 @@ serve: index.html annot.html
 $(ANNOTS) $(ANNOTS_JSON) &: $(HS) $(EXPL) annot.py
 	python3 annot.py
 
-annot.html: $(HS:.hs=.annot.json) annot_html.py Makefile
-	python3 annot_html.py $(HS:.hs=.annot.json) > $@
 
 %.glb1: %.step
 	python3 -c "import cascadio; cascadio.step_to_glb('$<', '$@')"
@@ -65,6 +65,7 @@ annot.html: $(HS:.hs=.annot.json) annot_html.py Makefile
 
 %.png: %.glb
 	f3d $< --output=$@
+	mogrify -trim +repage -scale 20% $@
 
 %.step: %.hs
 	runghc $<
