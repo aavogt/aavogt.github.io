@@ -4,6 +4,8 @@ import Waterfall.SVG
 
 main = do
   Right s <- readSVG "king.svg"
-  writeSTEPColor (takeWhile (/= '.') __FILE__ ++ ".step") $
-    rotate ey (pi/2) $ $red $ revolution s
+  write $ rotate ey (pi/2) $ $red $ revolution s
+
+write :: Solid -> IO ()
+write = writeSTEPColor (takeWhile (/= '.') __FILE__ ++ ".step")
 

@@ -7,6 +7,7 @@ GLBS := $(HS:.hs=.glb)
 PNGS := $(HS:.hs=.png)
 .SECONDARY: $(HS:.hs=.glb1)
 EXPL := $(addprefix explicit_imports/,$(HS))
+MAKEFLAGS += -j12
 
 index.html: $(HTMLS) $(PNGS) annot.html Makefile index.html.proto style.css
 	{ cat index.html.proto; \
@@ -26,7 +27,7 @@ annot.html: $(HS:.hs=.annot.json) annot_html.py Makefile style.css
 %.html: %.html1 index.html.proto style.css
 	{ cat index.html.proto; \
 	  for f in $<; do b=$${f%.html1}; \
-	    echo "<h1>$$f</h1>"; \
+	    echo "<h1>$$b</h1>"; \
 	    cat $$b.html1; \
 			echo "<model-viewer src=\"$$b.glb\" camera-controls interaction-prompt=none camera-orbit=\"auto auto 25%\"></model-viewer>"; \
 	    echo '</section>'; done; \

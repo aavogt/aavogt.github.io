@@ -6,12 +6,12 @@
 </head><body class="annotations">
 <h1>Haskell annotations</h1>
 <nav aria-label="Annotations by usage frequency"><ol>
-<li><a href="#rotate"><code>rotate</code></a> <span class="uses">(16 uses)</span></li>
-<li><a href="#Solid"><code>Solid</code></a> <span class="uses">(14 uses)</span></li>
-<li><a href="#centeredCube"><code>centeredCube</code></a> <span class="uses">(11 uses)</span></li>
-<li><a href="#translate"><code>translate</code></a> <span class="uses">(10 uses)</span></li>
+<li><a href="#Solid"><code>Solid</code></a> <span class="uses">(36 uses)</span></li>
+<li><a href="#rotate"><code>rotate</code></a> <span class="uses">(17 uses)</span></li>
+<li><a href="#centeredCube"><code>centeredCube</code></a> <span class="uses">(10 uses)</span></li>
 <li><a href="#writeSTEPColor"><code>writeSTEPColor</code></a> <span class="uses">(10 uses)</span></li>
 <li><a href="#red"><code>red</code></a> <span class="uses">(9 uses)</span></li>
+<li><a href="#translate"><code>translate</code></a> <span class="uses">(9 uses)</span></li>
 <li><a href="#blue"><code>blue</code></a> <span class="uses">(8 uses)</span></li>
 <li><a href="#green"><code>green</code></a> <span class="uses">(7 uses)</span></li>
 <li><a href="#pad"><code>pad</code></a> <span class="uses">(7 uses)</span></li>
@@ -20,8 +20,9 @@
 <li><a href="#offset"><code>offset</code></a> <span class="uses">(6 uses)</span></li>
 <li><a href="#stacked"><code>stacked</code></a> <span class="uses">(6 uses)</span></li>
 <li><a href="#unitGap"><code>unitGap</code></a> <span class="uses">(6 uses)</span></li>
-<li><a href="#scale"><code>scale</code></a> <span class="uses">(5 uses)</span></li>
+<li><a href="#Path"><code>Path</code></a> <span class="uses">(4 uses)</span></li>
 <li><a href="#V3"><code>V3</code></a> <span class="uses">(4 uses)</span></li>
+<li><a href="#scale"><code>scale</code></a> <span class="uses">(4 uses)</span></li>
 <li><a href="#unitCircle"><code>unitCircle</code></a> <span class="uses">(4 uses)</span></li>
 <li><a href="#yellow"><code>yellow</code></a> <span class="uses">(4 uses)</span></li>
 <li><a href="#purple"><code>purple</code></a> <span class="uses">(3 uses)</span></li>
@@ -30,17 +31,17 @@
 <li><a href="#unitCube"><code>unitCube</code></a> <span class="uses">(3 uses)</span></li>
 <li><a href="#unitCylinder"><code>unitCylinder</code></a> <span class="uses">(3 uses)</span></li>
 <li><a href="#unitPolygon"><code>unitPolygon</code></a> <span class="uses">(3 uses)</span></li>
-<li><a href="#black"><code>black</code></a> <span class="uses">(2 uses)</span></li>
 <li><a href="#hull"><code>hull</code></a> <span class="uses">(2 uses)</span></li>
 <li><a href="#revolution"><code>revolution</code></a> <span class="uses">(2 uses)</span></li>
 <li><a href="#rotateDeg"><code>rotateDeg</code></a> <span class="uses">(2 uses)</span></li>
 <li><a href="#sweep"><code>sweep</code></a> <span class="uses">(2 uses)</span></li>
 <li><a href="#torus"><code>torus</code></a> <span class="uses">(2 uses)</span></li>
-<li><a href="#translated"><code>translated</code></a> <span class="uses">(2 uses)</span></li>
 <li><a href="#unitSpiral"><code>unitSpiral</code></a> <span class="uses">(2 uses)</span></li>
 <li><a href="#white"><code>white</code></a> <span class="uses">(2 uses)</span></li>
 <li><a href="#Lens%27"><code>Lens&#x27;</code></a> <span class="uses">(1 uses)</span></li>
+<li><a href="#V2"><code>V2</code></a> <span class="uses">(1 uses)</span></li>
 <li><a href="#_translated"><code>_translated</code></a> <span class="uses">(1 uses)</span></li>
+<li><a href="#black"><code>black</code></a> <span class="uses">(1 uses)</span></li>
 <li><a href="#brown"><code>brown</code></a> <span class="uses">(1 uses)</span></li>
 <li><a href="#circle"><code>circle</code></a> <span class="uses">(1 uses)</span></li>
 <li><a href="#mirror"><code>mirror</code></a> <span class="uses">(1 uses)</span></li>
@@ -48,10 +49,19 @@
 <li><a href="#section"><code>section</code></a> <span class="uses">(1 uses)</span></li>
 <li><a href="#silhouette"><code>silhouette</code></a> <span class="uses">(1 uses)</span></li>
 <li><a href="#sweepRuled"><code>sweepRuled</code></a> <span class="uses">(1 uses)</span></li>
+<li><a href="#translated"><code>translated</code></a> <span class="uses">(1 uses)</span></li>
 <li><a href="#uScale2D"><code>uScale2D</code></a> <span class="uses">(1 uses)</span></li>
 <li><a href="#unions"><code>unions</code></a> <span class="uses">(1 uses)</span></li>
 </ol></nav>
 <main>
+<section class="entry">
+<h2><code class="signature" id="Solid">Solid :: *</code></h2>
+<div class="documentation"><p>Type constructor defined in ‘waterfall-cad-0.6.3.2:Waterfall.Internal.Solid’ The Boundary Representation of a solid object.</p>
+<p>Alternatively, a region of 3d Space.</p>
+<p>Under the hood, this is represented by an OpenCascade <span class="title-ref">TopoDS.Shape</span>. The underlying shape should either be a Solid, or a CompSolid.</p>
+<p>While you shouldn't need to know what this means to use the library, please feel free to report a bug if you're able to construct a <span class="title-ref">Solid</span> where this isnt' the case (without using internal functions).</p></div>
+<ul class="used-in"><li><a href="chamfer.html">chamfer.hs</a></li><li><a href="offset.html">offset.hs</a></li><li><a href="pad.html">pad.hs</a></li><li><a href="revolution.html">revolution.hs</a></li><li><a href="rubik.html">rubik.hs</a></li><li><a href="section.html">section.hs</a></li><li><a href="sweep.html">sweep.hs</a></li><li><a href="sweepRuled.html">sweepRuled.hs</a></li><li><a href="unitSpiral.html">unitSpiral.hs</a></li></ul>
+</section>
 <section class="entry">
 <h2><code class="signature" id="rotate">rotate :: Rapids.Transforms.Rotate.Go.RotateGo r t =&gt; r</code></h2>
 <p class="defined-in">Defined in <code>Rapids.Transforms.Rotate</code></p>
@@ -63,30 +73,10 @@
 <ul class="used-in"><li><a href="revolution.html">revolution.hs</a></li><li><a href="rubik.html">rubik.hs</a></li><li><a href="sweepRuled.html">sweepRuled.hs</a></li><li><a href="unitSpiral.html">unitSpiral.hs</a></li></ul>
 </section>
 <section class="entry">
-<h2><code class="signature" id="Solid">Solid :: *</code></h2>
-<div class="documentation"><p>Type constructor defined in ‘waterfall-cad-0.6.3.2:Waterfall.Internal.Solid’ The Boundary Representation of a solid object.</p>
-<p>Alternatively, a region of 3d Space.</p>
-<p>Under the hood, this is represented by an OpenCascade <span class="title-ref">TopoDS.Shape</span>. The underlying shape should either be a Solid, or a CompSolid.</p>
-<p>While you shouldn't need to know what this means to use the library, please feel free to report a bug if you're able to construct a <span class="title-ref">Solid</span> where this isnt' the case (without using internal functions).</p></div>
-<ul class="used-in"><li><a href="chamfer.html">chamfer.hs</a></li><li><a href="rubik.html">rubik.hs</a></li></ul>
-</section>
-<section class="entry">
 <h2><code class="signature" id="centeredCube">centeredCube :: Solid</code></h2>
 <p class="defined-in">Defined in <code>waterfall-cad-0.6.3.2:Waterfall.Solids</code></p>
 <div class="documentation"><p>A cube with side lengths of 1, centered on the origin</p></div>
 <ul class="used-in"><li><a href="chamfer.html">chamfer.hs</a></li><li><a href="rubik.html">rubik.hs</a></li></ul>
-</section>
-<section class="entry">
-<h2><code class="signature" id="translate">translate :: Rapids.Transforms.Translate.Go.TranslateGo t r =&gt; r</code></h2>
-<p class="defined-in">Defined in <code>Rapids.Transforms.Translate</code></p>
-<div class="documentation"><pre><code>&gt; translate
-&gt;    x y z
-&gt;    v3
-&gt;    ex x
-&gt;    ey y
-&gt;    ez z
-&gt;  solid|v3|path</code></pre></div>
-<ul class="used-in"><li><a href="chamfer.html">chamfer.hs</a></li><li><a href="rubik.html">rubik.hs</a></li><li><a href="section.html">section.hs</a></li></ul>
 </section>
 <section class="entry">
 <h2><code class="signature" id="writeSTEPColor">writeSTEPColor :: FilePath -&gt; Solid -&gt; IO ()</code></h2>
@@ -99,6 +89,18 @@
 <p class="defined-in">Defined in <code>Rapids.Color</code></p>
 <div class="documentation"><p>A named color, spliced with <code>$</code> (needs <code>TemplateHaskell</code>), for example <code>$red :: 'Solid' -&gt; 'Solid'</code> sets the color of all faces and tags them with the source location (see <code>tagLoc</code> and <code>Rapids.Color.Query</code>)</p></div>
 <ul class="used-in"><li><a href="chamfer.html">chamfer.hs</a></li><li><a href="hull.html">hull.hs</a></li><li><a href="offset.html">offset.hs</a></li><li><a href="pad.html">pad.hs</a></li><li><a href="revolution.html">revolution.hs</a></li><li><a href="rubik.html">rubik.hs</a></li><li><a href="section.html">section.hs</a></li><li><a href="sweep.html">sweep.hs</a></li><li><a href="unitSpiral.html">unitSpiral.hs</a></li></ul>
+</section>
+<section class="entry">
+<h2><code class="signature" id="translate">translate :: Rapids.Transforms.Translate.Go.TranslateGo t r =&gt; r</code></h2>
+<p class="defined-in">Defined in <code>Rapids.Transforms.Translate</code></p>
+<div class="documentation"><pre><code>&gt; translate
+&gt;    x y z
+&gt;    v3
+&gt;    ex x
+&gt;    ey y
+&gt;    ez z
+&gt;  solid|v3|path</code></pre></div>
+<ul class="used-in"><li><a href="chamfer.html">chamfer.hs</a></li><li><a href="rubik.html">rubik.hs</a></li><li><a href="section.html">section.hs</a></li></ul>
 </section>
 <section class="entry">
 <h2><code class="signature" id="blue">blue :: template-haskell-2.20.0.0:Language.Haskell.TH.Lib.Internal.ExpQ</code></h2>
@@ -174,6 +176,18 @@ hello
 <ul class="used-in"><li><a href="hull.html">hull.hs</a></li><li><a href="offset.html">offset.hs</a></li><li><a href="pad.html">pad.hs</a></li><li><a href="section.html">section.hs</a></li><li><a href="sweep.html">sweep.hs</a></li><li><a href="unitSpiral.html">unitSpiral.hs</a></li></ul>
 </section>
 <section class="entry">
+<h2><code class="signature" id="Path">Path :: *</code></h2>
+<div class="documentation"><p>Type constructor defined in ‘waterfall-cad-0.6.3.2:Waterfall.Internal.Path’ A Path in 3D Space</p>
+<p>Under the hood, this is represented by an OpenCascade <span class="title-ref">TopoDS.Wire</span>.</p>
+<p>The monoid instance Joins <span class="title-ref">Path`s, </span><span class="title-ref"> a &lt;&gt; b </span><span class="title-ref"> connects the end point of </span><span class="title-ref"> a </span><span class="title-ref"> to the start of </span><span class="title-ref"> b </span>`, if these points are not coincident, a line is created between them.</p></div>
+<ul class="used-in"><li><a href="sweep.html">sweep.hs</a></li><li><a href="sweepRuled.html">sweepRuled.hs</a></li></ul>
+</section>
+<section class="entry">
+<h2><code class="signature" id="V3">V3 :: * -&gt; *</code></h2>
+<div class="documentation"><p>Type constructor defined in ‘linear-1.23.3:Linear.V3’ A 3-dimensional vector</p></div>
+<ul class="used-in"><li><a href="chamfer.html">chamfer.hs</a></li><li><a href="pad.html">pad.hs</a></li><li><a href="rubik.html">rubik.hs</a></li></ul>
+</section>
+<section class="entry">
 <h2><code class="signature" id="scale">scale :: Rapids.Transforms.Scale.Go.ScaleGo r t =&gt; r</code></h2>
 <p class="defined-in">Defined in <code>Rapids.Transforms.Scale</code></p>
 <div class="documentation"><p>Scale by one or more vectors</p>
@@ -184,12 +198,7 @@ hello
 &gt;  xyz
 &gt;  v3
 &gt;  solid|path|v3</code></pre></div>
-<ul class="used-in"><li><a href="chamfer.html">chamfer.hs</a></li><li><a href="rubik.html">rubik.hs</a></li><li><a href="unitSpiral.html">unitSpiral.hs</a></li></ul>
-</section>
-<section class="entry">
-<h2><code class="signature" id="V3">V3 :: * -&gt; *</code></h2>
-<div class="documentation"><p>Type constructor defined in ‘linear-1.23.3:Linear.V3’ A 3-dimensional vector</p></div>
-<ul class="used-in"><li><a href="chamfer.html">chamfer.hs</a></li><li><a href="pad.html">pad.hs</a></li><li><a href="rubik.html">rubik.hs</a></li></ul>
+<ul class="used-in"><li><a href="rubik.html">rubik.hs</a></li><li><a href="unitSpiral.html">unitSpiral.hs</a></li></ul>
 </section>
 <section class="entry">
 <h2><code class="signature" id="unitCircle">unitCircle :: Shape</code></h2>
@@ -245,12 +254,6 @@ hello
 <ul class="used-in"><li><a href="hull.html">hull.hs</a></li><li><a href="pad.html">pad.hs</a></li><li><a href="sweepRuled.html">sweepRuled.hs</a></li></ul>
 </section>
 <section class="entry">
-<h2><code class="signature" id="black">black :: template-haskell-2.20.0.0:Language.Haskell.TH.Lib.Internal.ExpQ</code></h2>
-<p class="defined-in">Defined in <code>Rapids.Color</code></p>
-<div class="documentation"><p>A named color, spliced with <code>$</code> (needs <code>TemplateHaskell</code>), for example <code>$red :: 'Solid' -&gt; 'Solid'</code> sets the color of all faces and tags them with the source location (see <code>tagLoc</code> and <code>Rapids.Color.Query</code>)</p></div>
-<ul class="used-in"><li><a href="chamfer.html">chamfer.hs</a></li><li><a href="rubik.html">rubik.hs</a></li></ul>
-</section>
-<section class="entry">
 <h2><code class="signature" id="hull">hull :: Rapids.ConvexHull.Hull a =&gt; a -&gt; Solid</code></h2>
 <p class="defined-in">Defined in <code>Rapids.ConvexHull</code></p>
 <div class="documentation"><p>produce convex hull of the vertices within the argument</p>
@@ -290,13 +293,6 @@ hello
 <ul class="used-in"><li><a href="section.html">section.hs</a></li></ul>
 </section>
 <section class="entry">
-<h2><code class="signature" id="translated">translated :: (Num t,</code></h2>
-<p class="defined-in">Defined in <code>Rapids.Transforms.Translate</code></p>
-<div class="documentation"><p><code>translated ... a = a + translate ... a</code></p>
-<p>doesn't make much with Transformable (V3 Double)</p></div>
-<ul class="used-in"><li><a href="chamfer.html">chamfer.hs</a></li><li><a href="rubik.html">rubik.hs</a></li></ul>
-</section>
-<section class="entry">
 <h2><code class="signature" id="unitSpiral">unitSpiral :: Rapids.Spiral.UnitSpiral a =&gt; Double -&gt; a</code></h2>
 <p class="defined-in">Defined in <code>Rapids.Spiral</code></p>
 <div class="documentation"><p>follow a helix with radius 1 and pitch 1 for <code>turns</code> turns with a shape (any <code>ToShape</code>). With <code>taperSlope</code> the radius decreases by that much per turn. Optional arguments are in angle brackets:</p>
@@ -317,10 +313,29 @@ hello
 <ul class="used-in"><li><a href="rubik.html">rubik.hs</a></li></ul>
 </section>
 <section class="entry">
+<h2><code class="signature" id="V2">V2 :: * -&gt; *</code></h2>
+<div class="documentation"><p>Type constructor defined in ‘linear-1.23.3:Linear.V2’ A 2-dimensional vector</p>
+<pre><code>&gt;&gt;&gt; pure 1 :: V2 Int
+V2 1 1</code></pre>
+<pre><code>&gt;&gt;&gt; V2 1 2 + V2 3 4
+V2 4 6</code></pre>
+<pre><code>&gt;&gt;&gt; V2 1 2 * V2 3 4
+V2 3 8</code></pre>
+<pre><code>&gt;&gt;&gt; sum (V2 1 2)
+3</code></pre></div>
+<ul class="used-in"><li><a href="sweepRuled.html">sweepRuled.hs</a></li></ul>
+</section>
+<section class="entry">
 <h2><code class="signature" id="_translated">_translated :: Rapids.Transforms.Translate.Go.TranslatedGo</code></h2>
 <p class="defined-in">Defined in <code>Rapids.Transforms.Translate</code></p>
 <div class="documentation"><p><code>_translated ... :: Iso a b a b</code> where ... is as in <code>'translate' ...</code></p></div>
 <ul class="used-in"><li><a href="unitSpiral.html">unitSpiral.hs</a></li></ul>
+</section>
+<section class="entry">
+<h2><code class="signature" id="black">black :: template-haskell-2.20.0.0:Language.Haskell.TH.Lib.Internal.ExpQ</code></h2>
+<p class="defined-in">Defined in <code>Rapids.Color</code></p>
+<div class="documentation"><p>A named color, spliced with <code>$</code> (needs <code>TemplateHaskell</code>), for example <code>$red :: 'Solid' -&gt; 'Solid'</code> sets the color of all faces and tags them with the source location (see <code>tagLoc</code> and <code>Rapids.Color.Query</code>)</p></div>
+<ul class="used-in"><li><a href="rubik.html">rubik.hs</a></li></ul>
 </section>
 <section class="entry">
 <h2><code class="signature" id="brown">brown :: template-haskell-2.20.0.0:Language.Haskell.TH.Lib.Internal.ExpQ</code></h2>
@@ -373,6 +388,13 @@ hello
 <div class="documentation"><p><code>sweepRuled (\\ _shapeVertex -&gt; path) shape = sweep path shape</code> at least for shapes with straight edges.</p>
 <p>sweepRuled creates ruled surfaces between adjacent paths. The shape and the resulting end shape are sewn to those surfaces and returned as a solid when the resulting shell is closed.</p></div>
 <ul class="used-in"><li><a href="sweepRuled.html">sweepRuled.hs</a></li></ul>
+</section>
+<section class="entry">
+<h2><code class="signature" id="translated">translated :: (Num t,</code></h2>
+<p class="defined-in">Defined in <code>Rapids.Transforms.Translate</code></p>
+<div class="documentation"><p><code>translated ... a = a + translate ... a</code></p>
+<p>doesn't make much with Transformable (V3 Double)</p></div>
+<ul class="used-in"><li><a href="rubik.html">rubik.hs</a></li></ul>
 </section>
 <section class="entry">
 <h2><code class="signature" id="uScale2D">uScale2D :: Transformable2D a =&gt; Double -&gt; a -&gt; a</code></h2>

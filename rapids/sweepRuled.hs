@@ -1,18 +1,25 @@
-{-# LANGUAGE CPP #-}
+{-# LANGUAGE CPP, ImplicitParams #-}
 import Rapids
 import Waterfall.SVG
 
 main = do
-  Right s <- readSVG "king.svg"
-  writeSTEPColor (takeWhile (/= '.') __FILE__ ++ ".step") $ spikes s
+  Right king <- readSVG "king.svg"
+  let ?king = foldMap toPath king
+  write spikes
 
-spikes s = unitPolygon 3
-  & sweepRuled f
+spikes :: (?king::Path) => Solid
+spikes = unitPolygon 3
+  & sweepRuled orientKing
   & rotated
       ez (pi/3)
       ez (pi/6)
   & rotate ey (pi/2)
-  where f v = rotate
-                ez (unangle v)
-                ex (pi/2)
-                (foldMap toPath s)
+
+orientKing :: (?king::Path) => V2 Double -> Path
+orientKing v = rotate
+  ez (unangle v)
+  ex (pi/2)
+  ?king
+
+write :: Solid -> IO ()
+write = writeSTEPColor (takeWhile (/= '.') __FILE__ ++ ".step")
