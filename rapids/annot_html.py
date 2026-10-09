@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Build an HTML index of the Haskell annotations by usage frequency."""
-from collections import Counter
+from collections import Counter, defaultdict
 from html import escape
 import json
 import re
@@ -86,11 +86,13 @@ def render_rst(text):
 
 
 def main(paths):
+    source_files = defaultdict(set)
     frequencies = Counter()
     annotations = {}
     for path in paths:
         with open(path, encoding="utf-8") as source:
             records = json.load(source)
+        source = path.rsplit("/", 1)[-1].removesuffix(".annot.json") + ".hs"
         for _line, _start, _end, text in records:
             annotation = parse_annotation(text)
             if annotation is None:
@@ -98,6 +100,7 @@ def main(paths):
             name, signature, module, body = annotation
             frequencies[name] += 1
             annotations.setdefault(name, (signature, module, body))
+            source_files[name].add(source)
 
     ordered = sorted(annotations, key=lambda name: (-frequencies[name], name))
     output = [
@@ -113,6 +116,8 @@ def main(paths):
         ".signature { overflow-wrap: anywhere; }",
         ".defined-in { color: #555; font-size: .9rem; }",
         ".uses { color: #555; font-size: .85rem; }",
+        ".used-in { display: flex; flex-wrap: wrap; gap: .15rem .6rem; list-style: none; margin: .2rem 0 .5rem; padding: 0; }",
+        ".used-in li { white-space: nowrap; }",
         "</style></head><body>",
         "<h1>Haskell annotations</h1>",
         "<nav aria-label=\"Annotations by usage frequency\"><ol>",
@@ -135,6 +140,12 @@ def main(paths):
         if module:
             output.append(f'<p class="defined-in">Defined in <code>{escape(module)}</code></p>')
         output.append(f'<div class="documentation">{render_rst(body)}</div>')
+        files = "".join(
+            f'<li><a href="{escape(quote(source[:-3] + ".html", safe="/"), quote=True)}">'
+            f'{escape(source)}</a></li>'
+            for source in sorted(source_files[name])
+        )
+        output.append(f'<ul class="used-in">{files}</ul>')
         output.append("</section>")
 
     output.extend(["</main>", "</body></html>"])
