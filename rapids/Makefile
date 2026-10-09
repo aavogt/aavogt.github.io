@@ -10,7 +10,11 @@ EXPL := $(addprefix explicit_imports/,$(HS))
 
 index.html: $(HTMLS) $(PNGS) annot.html Makefile index.html.proto style.css
 	{ cat index.html.proto; \
-	  echo '<ul><li><a href="annot.html">Annotations</a></li>'; \
+		echo '<h1>Rapids</h1><p><a href="http://github.com/aavogt/rapids">aavogt/rapids</a> is my take on cad-as-code.'; \
+		echo 'An index of functions with documentation is in <a href="annot.html">annot.html</a></p>'; \
+		echo 'To see code and interact with the 3d models, click the thumbnails or filenames below,'; \
+		echo 'or open <a href=onepage.html>onepage.html</a></p>'; \
+	  echo '<ul>'; \
 	  for f in $(HS); do b=$${f%.hs}; \
 	    echo "<li><a href=\"$$b.html\"><img src=$$b.png></img>$$f</a></li>"; done; \
 	  echo '</ul></body></html>'; \
