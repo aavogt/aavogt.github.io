@@ -8,7 +8,7 @@ PNGS := $(HS:.hs=.png)
 .SECONDARY: $(HS:.hs=.glb1)
 EXPL := $(addprefix explicit_imports/,$(HS))
 
-index.html: $(HTMLS) $(PNGS) annot.html Makefile
+index.html: $(HTMLS) $(PNGS) annot.html Makefile index.html.proto style.css
 	{ cat index.html.proto; \
 	  echo '<ul><li><a href="annot.html">Annotations</a></li>'; \
 	  for f in $(HS); do b=$${f%.hs}; \
@@ -16,10 +16,10 @@ index.html: $(HTMLS) $(PNGS) annot.html Makefile
 	  echo '</ul></body></html>'; \
 	} > $@
 
-annot.html: $(HS:.hs=.annot.json) annot_html.py Makefile
+annot.html: $(HS:.hs=.annot.json) annot_html.py Makefile style.css
 	python3 annot_html.py $(HS:.hs=.annot.json) > $@
 
-%.html: %.html1 index.html.proto
+%.html: %.html1 index.html.proto style.css
 	{ cat index.html.proto; \
 	  for f in $<; do b=$${f%.html1}; \
 	    echo "<h1>$$f</h1>"; \
@@ -29,7 +29,7 @@ annot.html: $(HS:.hs=.annot.json) annot_html.py Makefile
 	  echo '</body></html>'; \
 	} > $@
 
-onepage.html: onepage.html.proto index.html.proto $(HTML1S) $(GLBS) annot.html
+onepage.html: onepage.html.proto index.html.proto $(HTML1S) $(GLBS) annot.html style.css
 	{ cat index.html.proto; \
 	  echo '<nav><ul><li><a href="annot.html">Annotations</a></li>'; \
 	  for f in $(HS); do b=$${f%.hs}; \
@@ -45,7 +45,7 @@ onepage.html: onepage.html.proto index.html.proto $(HTML1S) $(GLBS) annot.html
 
 
 commit: index.html onepage.html $(HTMLS) $(GLBS) annot.html
-	git add $< $(HS) *.svg
+	git add $< $(HS) *.svg style.css
 	git commit -m 'rapids_examples'
 
 .PHONY: serve clean allclean

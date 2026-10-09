@@ -1,0 +1,112 @@
+:root {
+  --background: #282a36;
+  --foreground: #f8f8f2;
+  --border: #505450;
+  --underline: #6ad000;
+  --italic: #97a70b;
+  --red: #ff5555;
+  --bright-red: #ff6e67;
+  --green: #50fa7b;
+  --bright-green: #5af78e;
+  --yellow: #f1fa8c;
+  --bright-yellow: #f4f99d;
+  --purple: #bd93f9;
+  --bright-purple: #caa9fa;
+  --pink: #ff79c6;
+  --bright-pink: #ff92d0;
+  --cyan: #8be9fd;
+  --bright-cyan: #9aedfe;
+  --gray: #bfbfbf;
+  --bright-gray: #e6e6e6;
+  --panel: #343746;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+body.annotations {
+  font: 16px/1.5 system-ui, sans-serif;
+  margin: 2rem auto;
+  max-width: 72rem;
+  padding: 0 1rem;
+}
+
+a { color: var(--cyan); }
+a:hover { color: var(--green); }
+
+ul { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+@media (max-width: 800px) {
+  ul { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 500px) {
+  ul { grid-template-columns: 1fr; }
+}
+
+nav, section { border-color: var(--border); }
+section { border-bottom: 1px solid var(--border); }
+h1 { color: var(--bright-purple); }
+
+pre {
+  background-color: var(--background);
+  color: var(--foreground);
+  overflow-x: auto;
+}
+
+.hs-comment { color: var(--italic); font-style: italic; }
+.hs-keyword { color: var(--pink); }
+.hs-conid { color: var(--cyan); }
+.hs-definition { color: var(--green); font-weight: bold; }
+.hs-keyglyph { color: var(--purple); }
+.hs-varid { color: var(--foreground); }
+.hs-varop { color: var(--bright-pink); }
+.hs-layout { color: var(--gray); }
+.hs-chr { color: var(--bright-yellow); }
+.hs-sel { color: var(--bright-cyan); }
+.hs-str { color: var(--yellow); }
+.hs-num { color: var(--bright-red); }
+.hs-doc {
+  text-decoration: underline dotted var(--underline);
+  text-underline-offset: 0.15em;
+  cursor: help;
+}
+
+model-viewer {
+  --poster-color: var(--background);
+  border: 5px solid var(--border);
+  margin-left: 5%;
+  height: 300px;
+  width: 90%;
+}
+
+body.annotations nav {
+  background: var(--panel);
+  padding: 1rem 2rem;
+}
+body.annotations nav ol { columns: 3; }
+body.annotations .entry {
+  border-top: 1px solid var(--border);
+  border-bottom: 0;
+  margin-top: 2rem;
+  padding-top: 1rem;
+  scroll-margin-top: 1rem;
+}
+body.annotations .signature {
+  color: var(--bright-purple);
+  overflow-wrap: anywhere;
+}
+body.annotations .defined-in,
+body.annotations .uses { color: var(--gray); }
+body.annotations .defined-in { font-size: .9rem; }
+body.annotations .uses { font-size: .85rem; }
+body.annotations .used-in {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .15rem .6rem;
+  list-style: none;
+  margin: .2rem 0 .5rem;
+  padding: 0;
+}
+body.annotations .used-in li { white-space: nowrap; }
