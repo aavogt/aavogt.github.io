@@ -3,13 +3,15 @@
 from collections import Counter, defaultdict
 from html import escape
 import json
+from pathlib import Path
 import re
 import subprocess
 import sys
 from urllib.parse import quote
 
-MODULE = re.compile(r"--\s*Identifier defined in [‘'](.+?)[’']")
+MODULE = re.compile(r"--\s*(?:Identifier|Type constructor) defined in [‘'](.+?)[’']")
 HADDOCK_MARKUP = re.compile(r"@([^@\n]+)@|'([A-Za-z_][\w'.]*)'|\"([A-Z][\w.]*)\"")
+TAGS = Path.home() / "wip/rapids/tags"
 
 
 def parse_annotation(text):
@@ -85,6 +87,40 @@ def render_rst(text):
     return rendered
 
 
+def load_source_tags(names):
+    tags = defaultdict(dict)
+    if not TAGS.is_file():
+        return tags
+    with TAGS.open(encoding="utf-8") as source:
+        for line in source:
+            name, separator, entry = line.rstrip("\n").partition("\t")
+            if not separator or name not in names:
+                continue
+            path, separator, line_number = entry.partition("\t")
+            if separator and path.startswith("lib/Rapids/") and line_number.isdecimal():
+                tags[name][path] = line_number
+    return tags
+
+
+def defined_in_url(name, module, tags):
+    if module.startswith("Rapids."):
+        path = f"lib/{module.replace('.', '/')}.hs"
+        url = f"https://github.com/aavogt/rapids/blob/main/{quote(path, safe='/')}"
+        line_number = tags.get(name, {}).get(path)
+        return f"{url}#L{line_number}" if line_number else url
+
+    package, separator, module_name = module.partition(":")
+    if not separator:
+        return None
+    module_path = quote(module_name.replace(".", "-"), safe="-")
+    anchor_type = "t" if name[:1].isupper() else "v"
+    anchor = quote(name.replace("'", "-39-"), safe="-")
+    return (
+        f"https://hackage-content.haskell.org/package/{quote(package, safe='.-')}/docs/"
+        f"{module_path}.html#{anchor_type}:{anchor}"
+    )
+
+
 def main(paths):
     source_files = defaultdict(set)
     frequencies = Counter()
@@ -103,6 +139,7 @@ def main(paths):
             source_files[name].add(source)
 
     ordered = sorted(annotations, key=lambda name: (-frequencies[name], name))
+    source_tags = load_source_tags(annotations)
     output = [
         "<!doctype html>",
         '<html lang="en">',
@@ -125,18 +162,24 @@ def main(paths):
         signature, module, body = annotations[name]
         output.append('<section class="entry">')
         output.append(
-            f'<h2><code class="signature" id="{escape(name, quote=True)}">'
-            f"{escape(signature)}</code></h2>"
+            f'<h2 class="signature-heading"><code class="signature" id="{escape(name, quote=True)}">'
+            f"{escape(signature)}</code>"
+            f'<a class="signature signature-anchor" href="#{escape(name, quote=True)}">#</a></h2>'
         )
-        if module:
-            output.append(f'<p class="defined-in">Defined in <code>{escape(module)}</code></p>')
-        output.append(f'<div class="documentation">{render_rst(body)}</div>')
         files = "".join(
             f'<li><a href="{escape(quote(source[:-3] + ".html", safe="/"), quote=True)}">'
             f'{escape(source)}</a></li>'
             for source in sorted(source_files[name])
         )
-        output.append(f'<ul class="used-in">{files}</ul>')
+        output.append(f'<ul class="used-in">Used in {files}</ul>')
+        if module:
+            url = defined_in_url(name, module, source_tags)
+            linked_module = (
+                f'<a href="{escape(url, quote=True)}"><code>{escape(module)}</code></a>'
+                if url else f'<code>{escape(module)}</code>'
+            )
+            output.append(f'<p class="defined-in">, defined in {linked_module}</p>')
+        output.append(f'<div class="documentation">{render_rst(body)}</div>')
         output.append("</section>")
 
     output.extend(["</main>", "</body></html>"])

@@ -55,44 +55,46 @@
 </ol></nav>
 <main>
 <section class="entry">
-<h2><code class="signature" id="Solid">Solid :: *</code></h2>
-<div class="documentation"><p>Type constructor defined in ‘waterfall-cad-0.6.3.2:Waterfall.Internal.Solid’ The Boundary Representation of a solid object.</p>
+<h2 class="signature-heading"><code class="signature" id="Solid">Solid :: *</code><a class="signature signature-anchor" href="#Solid">#</a></h2>
+<ul class="used-in">Used in <li><a href="chamfer.html">chamfer.hs</a></li><li><a href="offset.html">offset.hs</a></li><li><a href="pad.html">pad.hs</a></li><li><a href="revolution.html">revolution.hs</a></li><li><a href="rubik.html">rubik.hs</a></li><li><a href="section.html">section.hs</a></li><li><a href="sweep.html">sweep.hs</a></li><li><a href="sweepRuled.html">sweepRuled.hs</a></li><li><a href="unitSpiral.html">unitSpiral.hs</a></li></ul>
+<p class="defined-in">, defined in <a href="https://hackage-content.haskell.org/package/waterfall-cad-0.6.3.2/docs/Waterfall-Internal-Solid.html#t:Solid"><code>waterfall-cad-0.6.3.2:Waterfall.Internal.Solid</code></a></p>
+<div class="documentation"><p>The Boundary Representation of a solid object.</p>
 <p>Alternatively, a region of 3d Space.</p>
 <p>Under the hood, this is represented by an OpenCascade <span class="title-ref">TopoDS.Shape</span>. The underlying shape should either be a Solid, or a CompSolid.</p>
 <p>While you shouldn't need to know what this means to use the library, please feel free to report a bug if you're able to construct a <span class="title-ref">Solid</span> where this isnt' the case (without using internal functions).</p></div>
-<ul class="used-in"><li><a href="chamfer.html">chamfer.hs</a></li><li><a href="offset.html">offset.hs</a></li><li><a href="pad.html">pad.hs</a></li><li><a href="revolution.html">revolution.hs</a></li><li><a href="rubik.html">rubik.hs</a></li><li><a href="section.html">section.hs</a></li><li><a href="sweep.html">sweep.hs</a></li><li><a href="sweepRuled.html">sweepRuled.hs</a></li><li><a href="unitSpiral.html">unitSpiral.hs</a></li></ul>
 </section>
 <section class="entry">
-<h2><code class="signature" id="rotate">rotate :: Rapids.Transforms.Rotate.Go.RotateGo r t =&gt; r</code></h2>
-<p class="defined-in">Defined in <code>Rapids.Transforms.Rotate</code></p>
+<h2 class="signature-heading"><code class="signature" id="rotate">rotate :: Rapids.Transforms.Rotate.Go.RotateGo r t =&gt; r</code><a class="signature signature-anchor" href="#rotate">#</a></h2>
+<ul class="used-in">Used in <li><a href="revolution.html">revolution.hs</a></li><li><a href="rubik.html">rubik.hs</a></li><li><a href="sweepRuled.html">sweepRuled.hs</a></li><li><a href="unitSpiral.html">unitSpiral.hs</a></li></ul>
+<p class="defined-in">, defined in <a href="https://github.com/aavogt/rapids/blob/main/lib/Rapids/Transforms/Rotate.hs#L15"><code>Rapids.Transforms.Rotate</code></a></p>
 <div class="documentation"><p>Rotate a <code>Transformable</code> by radians around an axis specified in one of these ways:</p>
 <pre><code>&gt; rotate x y z radians :: Transformable a =&gt; a -&gt; a
 &gt; rotate v3    radians
 &gt; rotate q
 &gt; rotate ex    radians</code></pre></div>
-<ul class="used-in"><li><a href="revolution.html">revolution.hs</a></li><li><a href="rubik.html">rubik.hs</a></li><li><a href="sweepRuled.html">sweepRuled.hs</a></li><li><a href="unitSpiral.html">unitSpiral.hs</a></li></ul>
 </section>
 <section class="entry">
-<h2><code class="signature" id="centeredCube">centeredCube :: Solid</code></h2>
-<p class="defined-in">Defined in <code>waterfall-cad-0.6.3.2:Waterfall.Solids</code></p>
+<h2 class="signature-heading"><code class="signature" id="centeredCube">centeredCube :: Solid</code><a class="signature signature-anchor" href="#centeredCube">#</a></h2>
+<ul class="used-in">Used in <li><a href="chamfer.html">chamfer.hs</a></li><li><a href="rubik.html">rubik.hs</a></li></ul>
+<p class="defined-in">, defined in <a href="https://hackage-content.haskell.org/package/waterfall-cad-0.6.3.2/docs/Waterfall-Solids.html#v:centeredCube"><code>waterfall-cad-0.6.3.2:Waterfall.Solids</code></a></p>
 <div class="documentation"><p>A cube with side lengths of 1, centered on the origin</p></div>
-<ul class="used-in"><li><a href="chamfer.html">chamfer.hs</a></li><li><a href="rubik.html">rubik.hs</a></li></ul>
 </section>
 <section class="entry">
-<h2><code class="signature" id="writeSTEPColor">writeSTEPColor :: FilePath -&gt; Solid -&gt; IO ()</code></h2>
-<p class="defined-in">Defined in <code>Rapids.Color</code></p>
+<h2 class="signature-heading"><code class="signature" id="writeSTEPColor">writeSTEPColor :: FilePath -&gt; Solid -&gt; IO ()</code><a class="signature signature-anchor" href="#writeSTEPColor">#</a></h2>
+<ul class="used-in">Used in <li><a href="chamfer.html">chamfer.hs</a></li><li><a href="hull.html">hull.hs</a></li><li><a href="offset.html">offset.hs</a></li><li><a href="pad.html">pad.hs</a></li><li><a href="revolution.html">revolution.hs</a></li><li><a href="rubik.html">rubik.hs</a></li><li><a href="section.html">section.hs</a></li><li><a href="sweep.html">sweep.hs</a></li><li><a href="sweepRuled.html">sweepRuled.hs</a></li><li><a href="unitSpiral.html">unitSpiral.hs</a></li></ul>
+<p class="defined-in">, defined in <a href="https://github.com/aavogt/rapids/blob/main/lib/Rapids/Color.hs#L542"><code>Rapids.Color</code></a></p>
 <div class="documentation"><p><code>writeSTEPColor path solid</code> is like <code>Waterfall.writeSTEP</code> but also writes face colors and the source location notes left by <code>tagLoc</code> and the color names (<code>$red</code> ...)</p></div>
-<ul class="used-in"><li><a href="chamfer.html">chamfer.hs</a></li><li><a href="hull.html">hull.hs</a></li><li><a href="offset.html">offset.hs</a></li><li><a href="pad.html">pad.hs</a></li><li><a href="revolution.html">revolution.hs</a></li><li><a href="rubik.html">rubik.hs</a></li><li><a href="section.html">section.hs</a></li><li><a href="sweep.html">sweep.hs</a></li><li><a href="sweepRuled.html">sweepRuled.hs</a></li><li><a href="unitSpiral.html">unitSpiral.hs</a></li></ul>
 </section>
 <section class="entry">
-<h2><code class="signature" id="red">red :: template-haskell-2.20.0.0:Language.Haskell.TH.Lib.Internal.ExpQ</code></h2>
-<p class="defined-in">Defined in <code>Rapids.Color</code></p>
+<h2 class="signature-heading"><code class="signature" id="red">red :: template-haskell-2.20.0.0:Language.Haskell.TH.Lib.Internal.ExpQ</code><a class="signature signature-anchor" href="#red">#</a></h2>
+<ul class="used-in">Used in <li><a href="chamfer.html">chamfer.hs</a></li><li><a href="hull.html">hull.hs</a></li><li><a href="offset.html">offset.hs</a></li><li><a href="pad.html">pad.hs</a></li><li><a href="revolution.html">revolution.hs</a></li><li><a href="rubik.html">rubik.hs</a></li><li><a href="section.html">section.hs</a></li><li><a href="sweep.html">sweep.hs</a></li><li><a href="unitSpiral.html">unitSpiral.hs</a></li></ul>
+<p class="defined-in">, defined in <a href="https://github.com/aavogt/rapids/blob/main/lib/Rapids/Color.hs#L780"><code>Rapids.Color</code></a></p>
 <div class="documentation"><p>A named color, spliced with <code>$</code> (needs <code>TemplateHaskell</code>), for example <code>$red :: 'Solid' -&gt; 'Solid'</code> sets the color of all faces and tags them with the source location (see <code>tagLoc</code> and <code>Rapids.Color.Query</code>)</p></div>
-<ul class="used-in"><li><a href="chamfer.html">chamfer.hs</a></li><li><a href="hull.html">hull.hs</a></li><li><a href="offset.html">offset.hs</a></li><li><a href="pad.html">pad.hs</a></li><li><a href="revolution.html">revolution.hs</a></li><li><a href="rubik.html">rubik.hs</a></li><li><a href="section.html">section.hs</a></li><li><a href="sweep.html">sweep.hs</a></li><li><a href="unitSpiral.html">unitSpiral.hs</a></li></ul>
 </section>
 <section class="entry">
-<h2><code class="signature" id="translate">translate :: Rapids.Transforms.Translate.Go.TranslateGo t r =&gt; r</code></h2>
-<p class="defined-in">Defined in <code>Rapids.Transforms.Translate</code></p>
+<h2 class="signature-heading"><code class="signature" id="translate">translate :: Rapids.Transforms.Translate.Go.TranslateGo t r =&gt; r</code><a class="signature signature-anchor" href="#translate">#</a></h2>
+<ul class="used-in">Used in <li><a href="chamfer.html">chamfer.hs</a></li><li><a href="rubik.html">rubik.hs</a></li><li><a href="section.html">section.hs</a></li></ul>
+<p class="defined-in">, defined in <a href="https://github.com/aavogt/rapids/blob/main/lib/Rapids/Transforms/Translate.hs#L20"><code>Rapids.Transforms.Translate</code></a></p>
 <div class="documentation"><pre><code>&gt; translate
 &gt;    x y z
 &gt;    v3
@@ -100,32 +102,32 @@
 &gt;    ey y
 &gt;    ez z
 &gt;  solid|v3|path</code></pre></div>
-<ul class="used-in"><li><a href="chamfer.html">chamfer.hs</a></li><li><a href="rubik.html">rubik.hs</a></li><li><a href="section.html">section.hs</a></li></ul>
 </section>
 <section class="entry">
-<h2><code class="signature" id="blue">blue :: template-haskell-2.20.0.0:Language.Haskell.TH.Lib.Internal.ExpQ</code></h2>
-<p class="defined-in">Defined in <code>Rapids.Color</code></p>
+<h2 class="signature-heading"><code class="signature" id="blue">blue :: template-haskell-2.20.0.0:Language.Haskell.TH.Lib.Internal.ExpQ</code><a class="signature signature-anchor" href="#blue">#</a></h2>
+<ul class="used-in">Used in <li><a href="chamfer.html">chamfer.hs</a></li><li><a href="hull.html">hull.hs</a></li><li><a href="offset.html">offset.hs</a></li><li><a href="pad.html">pad.hs</a></li><li><a href="rubik.html">rubik.hs</a></li><li><a href="section.html">section.hs</a></li><li><a href="sweep.html">sweep.hs</a></li><li><a href="unitSpiral.html">unitSpiral.hs</a></li></ul>
+<p class="defined-in">, defined in <a href="https://github.com/aavogt/rapids/blob/main/lib/Rapids/Color.hs#L786"><code>Rapids.Color</code></a></p>
 <div class="documentation"><p>A named color, spliced with <code>$</code> (needs <code>TemplateHaskell</code>), for example <code>$red :: 'Solid' -&gt; 'Solid'</code> sets the color of all faces and tags them with the source location (see <code>tagLoc</code> and <code>Rapids.Color.Query</code>)</p></div>
-<ul class="used-in"><li><a href="chamfer.html">chamfer.hs</a></li><li><a href="hull.html">hull.hs</a></li><li><a href="offset.html">offset.hs</a></li><li><a href="pad.html">pad.hs</a></li><li><a href="rubik.html">rubik.hs</a></li><li><a href="section.html">section.hs</a></li><li><a href="sweep.html">sweep.hs</a></li><li><a href="unitSpiral.html">unitSpiral.hs</a></li></ul>
 </section>
 <section class="entry">
-<h2><code class="signature" id="green">green :: template-haskell-2.20.0.0:Language.Haskell.TH.Lib.Internal.ExpQ</code></h2>
-<p class="defined-in">Defined in <code>Rapids.Color</code></p>
+<h2 class="signature-heading"><code class="signature" id="green">green :: template-haskell-2.20.0.0:Language.Haskell.TH.Lib.Internal.ExpQ</code><a class="signature signature-anchor" href="#green">#</a></h2>
+<ul class="used-in">Used in <li><a href="chamfer.html">chamfer.hs</a></li><li><a href="hull.html">hull.hs</a></li><li><a href="offset.html">offset.hs</a></li><li><a href="pad.html">pad.hs</a></li><li><a href="rubik.html">rubik.hs</a></li><li><a href="section.html">section.hs</a></li><li><a href="unitSpiral.html">unitSpiral.hs</a></li></ul>
+<p class="defined-in">, defined in <a href="https://github.com/aavogt/rapids/blob/main/lib/Rapids/Color.hs#L782"><code>Rapids.Color</code></a></p>
 <div class="documentation"><p>A named color, spliced with <code>$</code> (needs <code>TemplateHaskell</code>), for example <code>$red :: 'Solid' -&gt; 'Solid'</code> sets the color of all faces and tags them with the source location (see <code>tagLoc</code> and <code>Rapids.Color.Query</code>)</p></div>
-<ul class="used-in"><li><a href="chamfer.html">chamfer.hs</a></li><li><a href="hull.html">hull.hs</a></li><li><a href="offset.html">offset.hs</a></li><li><a href="pad.html">pad.hs</a></li><li><a href="rubik.html">rubik.hs</a></li><li><a href="section.html">section.hs</a></li><li><a href="unitSpiral.html">unitSpiral.hs</a></li></ul>
 </section>
 <section class="entry">
-<h2><code class="signature" id="pad">pad :: Rapids.Pad.Pad a =&gt; a</code></h2>
-<p class="defined-in">Defined in <code>Rapids.Pad</code></p>
+<h2 class="signature-heading"><code class="signature" id="pad">pad :: Rapids.Pad.Pad a =&gt; a</code><a class="signature signature-anchor" href="#pad">#</a></h2>
+<ul class="used-in">Used in <li><a href="hull.html">hull.hs</a></li><li><a href="pad.html">pad.hs</a></li><li><a href="section.html">section.hs</a></li></ul>
+<p class="defined-in">, defined in <a href="https://github.com/aavogt/rapids/blob/main/lib/Rapids/Pad.hs#L42"><code>Rapids.Pad</code></a></p>
 <div class="documentation"><p>The direction is <code>z</code> (like <code>Waterfall.Solids.prism</code>), <code>x y z</code>, or <code>v3</code>; the optional <code>taperFrac</code> is the factor the far end is scaled by. The last argument is any <code>ToShape</code> value:</p>
 <pre><code>&gt; pad z &lt;taperFrac&gt; shape
 &gt; pad x y z &lt;taperFrac&gt; shape
 &gt; pad v3 &lt;taperFrac&gt; shape</code></pre></div>
-<ul class="used-in"><li><a href="hull.html">hull.hs</a></li><li><a href="pad.html">pad.hs</a></li><li><a href="section.html">section.hs</a></li></ul>
 </section>
 <section class="entry">
-<h2><code class="signature" id="_1">_1 :: Field1 s t a b =&gt; Lens s t a b</code></h2>
-<p class="defined-in">Defined in <code>lens-5.3.6:Control.Lens.Tuple</code></p>
+<h2 class="signature-heading"><code class="signature" id="_1">_1 :: Field1 s t a b =&gt; Lens s t a b</code><a class="signature signature-anchor" href="#_1">#</a></h2>
+<ul class="used-in">Used in <li><a href="rubik.html">rubik.hs</a></li></ul>
+<p class="defined-in">, defined in <a href="https://hackage-content.haskell.org/package/lens-5.3.6/docs/Control-Lens-Tuple.html#v:_1"><code>lens-5.3.6:Control.Lens.Tuple</code></a></p>
 <div class="documentation"><p>Access the 1st field of a tuple (and possibly change its type).</p>
 <pre><code>&gt;&gt;&gt; (1,2)^._1
 1</code></pre>
@@ -140,17 +142,17 @@ hello
 <pre><code>&gt;&gt;&gt; (1,2,3,4,5) &amp; _1 +~ 41
 (42,2,3,4,5)</code></pre>
 <p>@ <code>_1</code> :: <code>Lens</code> (a,b) (a',b) a a' <code>_1</code> :: <code>Lens</code> (a,b,c) (a',b,c) a a' <code>_1</code> :: <code>Lens</code> (a,b,c,d) (a',b,c,d) a a' ... <code>_1</code> :: <code>Lens</code> (a,b,c,d,e,f,g,h,i) (a',b,c,d,e,f,g,h,i) a a' @</p></div>
-<ul class="used-in"><li><a href="rubik.html">rubik.hs</a></li></ul>
 </section>
 <section class="entry">
-<h2><code class="signature" id="_3">_3 :: Field3 s t a b =&gt; Lens s t a b</code></h2>
-<p class="defined-in">Defined in <code>lens-5.3.6:Control.Lens.Tuple</code></p>
+<h2 class="signature-heading"><code class="signature" id="_3">_3 :: Field3 s t a b =&gt; Lens s t a b</code><a class="signature signature-anchor" href="#_3">#</a></h2>
+<ul class="used-in">Used in <li><a href="rubik.html">rubik.hs</a></li></ul>
+<p class="defined-in">, defined in <a href="https://hackage-content.haskell.org/package/lens-5.3.6/docs/Control-Lens-Tuple.html#v:_3"><code>lens-5.3.6:Control.Lens.Tuple</code></a></p>
 <div class="documentation"><p>Access the 3rd field of a tuple.</p></div>
-<ul class="used-in"><li><a href="rubik.html">rubik.hs</a></li></ul>
 </section>
 <section class="entry">
-<h2><code class="signature" id="offset">offset :: Rapids.Offset.Offset a =&gt; Double -&gt; a</code></h2>
-<p class="defined-in">Defined in <code>Rapids.Offset</code></p>
+<h2 class="signature-heading"><code class="signature" id="offset">offset :: Rapids.Offset.Offset a =&gt; Double -&gt; a</code><a class="signature signature-anchor" href="#offset">#</a></h2>
+<ul class="used-in">Used in <li><a href="offset.html">offset.hs</a></li><li><a href="sweep.html">sweep.hs</a></li><li><a href="unitSpiral.html">unitSpiral.hs</a></li></ul>
+<p class="defined-in">, defined in <a href="https://github.com/aavogt/rapids/blob/main/lib/Rapids/Offset.hs#L74"><code>Rapids.Offset</code></a></p>
 <div class="documentation"><p><code>join</code> is optional (default 0) and selects how corners are treated (see &lt;https://occt3d.com/dev/doc/refman/html/_geom_abs___join_type_8hxx.html GeomAbs_JoinType&gt;):</p>
 <pre><code>&gt; offset amount &lt;join&gt; &lt;openfaces&gt; solid|shape|path|path2d</code></pre>
 <p><code>openfaces :: [CInt]</code> contains 1-based indices of faces (for solid) to remove from each solid component. Currently ignored for shape<a href="##SUBST##|path|">|path|</a>path2d.</p>
@@ -160,36 +162,38 @@ hello
 &gt; offset amount 2 solid -- sharp corners (Intersection)</code></pre>
 <pre><code>&gt; offset 0.1 [1,2] unitCube -- round box without top and bottom
 &gt; offset 0.1 2 [1,2] unitCube -- sharp box without top and bottom</code></pre></div>
-<ul class="used-in"><li><a href="offset.html">offset.hs</a></li><li><a href="sweep.html">sweep.hs</a></li><li><a href="unitSpiral.html">unitSpiral.hs</a></li></ul>
 </section>
 <section class="entry">
-<h2><code class="signature" id="stacked">stacked :: E V3 -&gt; Solid -&gt; Solid -&gt; Solid</code></h2>
-<p class="defined-in">Defined in <code>Rapids.AABB.Align</code></p>
+<h2 class="signature-heading"><code class="signature" id="stacked">stacked :: E V3 -&gt; Solid -&gt; Solid -&gt; Solid</code><a class="signature signature-anchor" href="#stacked">#</a></h2>
+<ul class="used-in">Used in <li><a href="hull.html">hull.hs</a></li><li><a href="offset.html">offset.hs</a></li><li><a href="pad.html">pad.hs</a></li><li><a href="section.html">section.hs</a></li><li><a href="sweep.html">sweep.hs</a></li><li><a href="unitSpiral.html">unitSpiral.hs</a></li></ul>
+<p class="defined-in">, defined in <a href="https://github.com/aavogt/rapids/blob/main/lib/Rapids/AABB/Align.hs#L75"><code>Rapids.AABB.Align</code></a></p>
 <div class="documentation"><p><code>stacked ez a b = a + stack ez a b</code></p>
 <p>the analogue of <code>mirrored</code> for <code>stack</code></p></div>
-<ul class="used-in"><li><a href="hull.html">hull.hs</a></li><li><a href="offset.html">offset.hs</a></li><li><a href="pad.html">pad.hs</a></li><li><a href="section.html">section.hs</a></li><li><a href="sweep.html">sweep.hs</a></li><li><a href="unitSpiral.html">unitSpiral.hs</a></li></ul>
 </section>
 <section class="entry">
-<h2><code class="signature" id="unitGap">unitGap :: Solid</code></h2>
-<p class="defined-in">Defined in <code>Rapids.AABB.Align</code></p>
+<h2 class="signature-heading"><code class="signature" id="unitGap">unitGap :: Solid</code><a class="signature signature-anchor" href="#unitGap">#</a></h2>
+<ul class="used-in">Used in <li><a href="hull.html">hull.hs</a></li><li><a href="offset.html">offset.hs</a></li><li><a href="pad.html">pad.hs</a></li><li><a href="section.html">section.hs</a></li><li><a href="sweep.html">sweep.hs</a></li><li><a href="unitSpiral.html">unitSpiral.hs</a></li></ul>
+<p class="defined-in">, defined in <a href="https://github.com/aavogt/rapids/blob/main/lib/Rapids/AABB/Align.hs"><code>Rapids.AABB.Align</code></a></p>
 <div class="documentation"><p><code>unitCube</code> has the same aabb as <code>unitCube</code></p></div>
-<ul class="used-in"><li><a href="hull.html">hull.hs</a></li><li><a href="offset.html">offset.hs</a></li><li><a href="pad.html">pad.hs</a></li><li><a href="section.html">section.hs</a></li><li><a href="sweep.html">sweep.hs</a></li><li><a href="unitSpiral.html">unitSpiral.hs</a></li></ul>
 </section>
 <section class="entry">
-<h2><code class="signature" id="Path">Path :: *</code></h2>
-<div class="documentation"><p>Type constructor defined in ‘waterfall-cad-0.6.3.2:Waterfall.Internal.Path’ A Path in 3D Space</p>
+<h2 class="signature-heading"><code class="signature" id="Path">Path :: *</code><a class="signature signature-anchor" href="#Path">#</a></h2>
+<ul class="used-in">Used in <li><a href="sweep.html">sweep.hs</a></li><li><a href="sweepRuled.html">sweepRuled.hs</a></li></ul>
+<p class="defined-in">, defined in <a href="https://hackage-content.haskell.org/package/waterfall-cad-0.6.3.2/docs/Waterfall-Internal-Path.html#t:Path"><code>waterfall-cad-0.6.3.2:Waterfall.Internal.Path</code></a></p>
+<div class="documentation"><p>A Path in 3D Space</p>
 <p>Under the hood, this is represented by an OpenCascade <span class="title-ref">TopoDS.Wire</span>.</p>
 <p>The monoid instance Joins <span class="title-ref">Path`s, </span><span class="title-ref"> a &lt;&gt; b </span><span class="title-ref"> connects the end point of </span><span class="title-ref"> a </span><span class="title-ref"> to the start of </span><span class="title-ref"> b </span>`, if these points are not coincident, a line is created between them.</p></div>
-<ul class="used-in"><li><a href="sweep.html">sweep.hs</a></li><li><a href="sweepRuled.html">sweepRuled.hs</a></li></ul>
 </section>
 <section class="entry">
-<h2><code class="signature" id="V3">V3 :: * -&gt; *</code></h2>
-<div class="documentation"><p>Type constructor defined in ‘linear-1.23.3:Linear.V3’ A 3-dimensional vector</p></div>
-<ul class="used-in"><li><a href="chamfer.html">chamfer.hs</a></li><li><a href="pad.html">pad.hs</a></li><li><a href="rubik.html">rubik.hs</a></li></ul>
+<h2 class="signature-heading"><code class="signature" id="V3">V3 :: * -&gt; *</code><a class="signature signature-anchor" href="#V3">#</a></h2>
+<ul class="used-in">Used in <li><a href="chamfer.html">chamfer.hs</a></li><li><a href="pad.html">pad.hs</a></li><li><a href="rubik.html">rubik.hs</a></li></ul>
+<p class="defined-in">, defined in <a href="https://hackage-content.haskell.org/package/linear-1.23.3/docs/Linear-V3.html#t:V3"><code>linear-1.23.3:Linear.V3</code></a></p>
+<div class="documentation"><p>A 3-dimensional vector</p></div>
 </section>
 <section class="entry">
-<h2><code class="signature" id="scale">scale :: Rapids.Transforms.Scale.Go.ScaleGo r t =&gt; r</code></h2>
-<p class="defined-in">Defined in <code>Rapids.Transforms.Scale</code></p>
+<h2 class="signature-heading"><code class="signature" id="scale">scale :: Rapids.Transforms.Scale.Go.ScaleGo r t =&gt; r</code><a class="signature signature-anchor" href="#scale">#</a></h2>
+<ul class="used-in">Used in <li><a href="rubik.html">rubik.hs</a></li><li><a href="unitSpiral.html">unitSpiral.hs</a></li></ul>
+<p class="defined-in">, defined in <a href="https://github.com/aavogt/rapids/blob/main/lib/Rapids/Transforms/Scale.hs#L10"><code>Rapids.Transforms.Scale</code></a></p>
 <div class="documentation"><p>Scale by one or more vectors</p>
 <pre><code>&gt; scale
 &gt;  ez z
@@ -198,123 +202,125 @@ hello
 &gt;  xyz
 &gt;  v3
 &gt;  solid|path|v3</code></pre></div>
-<ul class="used-in"><li><a href="rubik.html">rubik.hs</a></li><li><a href="unitSpiral.html">unitSpiral.hs</a></li></ul>
 </section>
 <section class="entry">
-<h2><code class="signature" id="unitCircle">unitCircle :: Shape</code></h2>
-<p class="defined-in">Defined in <code>waterfall-cad-0.6.3.2:Waterfall.TwoD.Shape</code></p>
+<h2 class="signature-heading"><code class="signature" id="unitCircle">unitCircle :: Shape</code><a class="signature signature-anchor" href="#unitCircle">#</a></h2>
+<ul class="used-in">Used in <li><a href="pad.html">pad.hs</a></li><li><a href="sweep.html">sweep.hs</a></li></ul>
+<p class="defined-in">, defined in <a href="https://hackage-content.haskell.org/package/waterfall-cad-0.6.3.2/docs/Waterfall-TwoD-Shape.html#v:unitCircle"><code>waterfall-cad-0.6.3.2:Waterfall.TwoD.Shape</code></a></p>
 <div class="documentation"><p>Circle with radius 1, centered on the origin</p></div>
-<ul class="used-in"><li><a href="pad.html">pad.hs</a></li><li><a href="sweep.html">sweep.hs</a></li></ul>
 </section>
 <section class="entry">
-<h2><code class="signature" id="yellow">yellow :: template-haskell-2.20.0.0:Language.Haskell.TH.Lib.Internal.ExpQ</code></h2>
-<p class="defined-in">Defined in <code>Rapids.Color</code></p>
+<h2 class="signature-heading"><code class="signature" id="yellow">yellow :: template-haskell-2.20.0.0:Language.Haskell.TH.Lib.Internal.ExpQ</code><a class="signature signature-anchor" href="#yellow">#</a></h2>
+<ul class="used-in">Used in <li><a href="chamfer.html">chamfer.hs</a></li><li><a href="pad.html">pad.hs</a></li><li><a href="rubik.html">rubik.hs</a></li><li><a href="unitSpiral.html">unitSpiral.hs</a></li></ul>
+<p class="defined-in">, defined in <a href="https://github.com/aavogt/rapids/blob/main/lib/Rapids/Color.hs#L776"><code>Rapids.Color</code></a></p>
 <div class="documentation"><p>A named color, spliced with <code>$</code> (needs <code>TemplateHaskell</code>), for example <code>$red :: 'Solid' -&gt; 'Solid'</code> sets the color of all faces and tags them with the source location (see <code>tagLoc</code> and <code>Rapids.Color.Query</code>)</p></div>
-<ul class="used-in"><li><a href="chamfer.html">chamfer.hs</a></li><li><a href="pad.html">pad.hs</a></li><li><a href="rubik.html">rubik.hs</a></li><li><a href="unitSpiral.html">unitSpiral.hs</a></li></ul>
 </section>
 <section class="entry">
-<h2><code class="signature" id="purple">purple :: template-haskell-2.20.0.0:Language.Haskell.TH.Lib.Internal.ExpQ</code></h2>
-<p class="defined-in">Defined in <code>Rapids.Color</code></p>
+<h2 class="signature-heading"><code class="signature" id="purple">purple :: template-haskell-2.20.0.0:Language.Haskell.TH.Lib.Internal.ExpQ</code><a class="signature signature-anchor" href="#purple">#</a></h2>
+<ul class="used-in">Used in <li><a href="chamfer.html">chamfer.hs</a></li><li><a href="hull.html">hull.hs</a></li><li><a href="rubik.html">rubik.hs</a></li></ul>
+<p class="defined-in">, defined in <a href="https://github.com/aavogt/rapids/blob/main/lib/Rapids/Color.hs#L788"><code>Rapids.Color</code></a></p>
 <div class="documentation"><p>A named color, spliced with <code>$</code> (needs <code>TemplateHaskell</code>), for example <code>$red :: 'Solid' -&gt; 'Solid'</code> sets the color of all faces and tags them with the source location (see <code>tagLoc</code> and <code>Rapids.Color.Query</code>)</p></div>
-<ul class="used-in"><li><a href="chamfer.html">chamfer.hs</a></li><li><a href="hull.html">hull.hs</a></li><li><a href="rubik.html">rubik.hs</a></li></ul>
 </section>
 <section class="entry">
-<h2><code class="signature" id="rectangle">rectangle :: Double -&gt; Double -&gt; Path2D</code></h2>
-<p class="defined-in">Defined in <code>Rapids.Path</code></p>
+<h2 class="signature-heading"><code class="signature" id="rectangle">rectangle :: Double -&gt; Double -&gt; Path2D</code><a class="signature signature-anchor" href="#rectangle">#</a></h2>
+<ul class="used-in">Used in <li><a href="unitSpiral.html">unitSpiral.hs</a></li></ul>
+<p class="defined-in">, defined in <a href="https://github.com/aavogt/rapids/blob/main/lib/Rapids/Path.hs#L12"><code>Rapids.Path</code></a></p>
 <div class="documentation"><p><code>rectangle w h</code> has one corner at the origin and the opposite corner at (w, h). These have equivalent geometry:</p>
 <pre><code>&gt; rectangle w h
 &gt; section (box (V3 w h 1))
 &gt; section (scale w h 1 unitCube)</code></pre>
 <p>also <code>unitSquare</code></p></div>
-<ul class="used-in"><li><a href="unitSpiral.html">unitSpiral.hs</a></li></ul>
 </section>
 <section class="entry">
-<h2><code class="signature" id="rotatedDeg">rotatedDeg :: (Num t, Rapids.Transforms.Rotate.Go.RotateGo r t) =&gt;</code></h2>
-<p class="defined-in">Defined in <code>Rapids.Transforms.Rotate</code></p>
+<h2 class="signature-heading"><code class="signature" id="rotatedDeg">rotatedDeg :: (Num t, Rapids.Transforms.Rotate.Go.RotateGo r t) =&gt;</code><a class="signature signature-anchor" href="#rotatedDeg">#</a></h2>
+<ul class="used-in">Used in <li><a href="hull.html">hull.hs</a></li><li><a href="rubik.html">rubik.hs</a></li></ul>
+<p class="defined-in">, defined in <a href="https://github.com/aavogt/rapids/blob/main/lib/Rapids/Transforms/Rotate.hs#L32"><code>Rapids.Transforms.Rotate</code></a></p>
 <div class="documentation"><p><code>rotatedDeg ... x = x + rotateDeg ... x</code></p></div>
-<ul class="used-in"><li><a href="hull.html">hull.hs</a></li><li><a href="rubik.html">rubik.hs</a></li></ul>
 </section>
 <section class="entry">
-<h2><code class="signature" id="unitCube">unitCube :: Solid</code></h2>
-<p class="defined-in">Defined in <code>waterfall-cad-0.6.3.2:Waterfall.Solids</code></p>
+<h2 class="signature-heading"><code class="signature" id="unitCube">unitCube :: Solid</code><a class="signature signature-anchor" href="#unitCube">#</a></h2>
+<ul class="used-in">Used in <li><a href="offset.html">offset.hs</a></li></ul>
+<p class="defined-in">, defined in <a href="https://hackage-content.haskell.org/package/waterfall-cad-0.6.3.2/docs/Waterfall-Solids.html#v:unitCube"><code>waterfall-cad-0.6.3.2:Waterfall.Solids</code></a></p>
 <div class="documentation"><p>A cube with side lengths of 1, one vertex on the origin, another on ( (1, 1, 1) )</p></div>
-<ul class="used-in"><li><a href="offset.html">offset.hs</a></li></ul>
 </section>
 <section class="entry">
-<h2><code class="signature" id="unitCylinder">unitCylinder :: Solid</code></h2>
-<p class="defined-in">Defined in <code>waterfall-cad-0.6.3.2:Waterfall.Solids</code></p>
+<h2 class="signature-heading"><code class="signature" id="unitCylinder">unitCylinder :: Solid</code><a class="signature signature-anchor" href="#unitCylinder">#</a></h2>
+<ul class="used-in">Used in <li><a href="hull.html">hull.hs</a></li><li><a href="unitSpiral.html">unitSpiral.hs</a></li></ul>
+<p class="defined-in">, defined in <a href="https://hackage-content.haskell.org/package/waterfall-cad-0.6.3.2/docs/Waterfall-Solids.html#v:unitCylinder"><code>waterfall-cad-0.6.3.2:Waterfall.Solids</code></a></p>
 <div class="documentation"><p>A cylinder with radius 1, length 1, one of its circular faces centered on the origin, the other centered on ( (0, 0, 1) )</p></div>
-<ul class="used-in"><li><a href="hull.html">hull.hs</a></li><li><a href="unitSpiral.html">unitSpiral.hs</a></li></ul>
 </section>
 <section class="entry">
-<h2><code class="signature" id="unitPolygon">unitPolygon :: Integer -&gt; Shape</code></h2>
-<p class="defined-in">Defined in <code>waterfall-cad-0.6.3.2:Waterfall.TwoD.Shape</code></p>
+<h2 class="signature-heading"><code class="signature" id="unitPolygon">unitPolygon :: Integer -&gt; Shape</code><a class="signature signature-anchor" href="#unitPolygon">#</a></h2>
+<ul class="used-in">Used in <li><a href="hull.html">hull.hs</a></li><li><a href="pad.html">pad.hs</a></li><li><a href="sweepRuled.html">sweepRuled.hs</a></li></ul>
+<p class="defined-in">, defined in <a href="https://hackage-content.haskell.org/package/waterfall-cad-0.6.3.2/docs/Waterfall-TwoD-Shape.html#v:unitPolygon"><code>waterfall-cad-0.6.3.2:Waterfall.TwoD.Shape</code></a></p>
 <div class="documentation"><p>(n) sided Polygon, centered on the origin</p>
 <p>Empty when n &lt;= 2</p></div>
-<ul class="used-in"><li><a href="hull.html">hull.hs</a></li><li><a href="pad.html">pad.hs</a></li><li><a href="sweepRuled.html">sweepRuled.hs</a></li></ul>
 </section>
 <section class="entry">
-<h2><code class="signature" id="hull">hull :: Rapids.ConvexHull.Hull a =&gt; a -&gt; Solid</code></h2>
-<p class="defined-in">Defined in <code>Rapids.ConvexHull</code></p>
+<h2 class="signature-heading"><code class="signature" id="hull">hull :: Rapids.ConvexHull.Hull a =&gt; a -&gt; Solid</code><a class="signature signature-anchor" href="#hull">#</a></h2>
+<ul class="used-in">Used in <li><a href="hull.html">hull.hs</a></li></ul>
+<p class="defined-in">, defined in <a href="https://github.com/aavogt/rapids/blob/main/lib/Rapids/ConvexHull.hs#L204"><code>Rapids.ConvexHull</code></a></p>
 <div class="documentation"><p>produce convex hull of the vertices within the argument</p>
 <p><code>hull :: [V3 Double]|[Path]|Path|Solid -&gt; Solid</code></p></div>
-<ul class="used-in"><li><a href="hull.html">hull.hs</a></li></ul>
 </section>
 <section class="entry">
-<h2><code class="signature" id="revolution">revolution :: Rapids.Revolution.Revolution a =&gt; a</code></h2>
-<p class="defined-in">Defined in <code>Rapids.Revolution</code></p>
+<h2 class="signature-heading"><code class="signature" id="revolution">revolution :: Rapids.Revolution.Revolution a =&gt; a</code><a class="signature signature-anchor" href="#revolution">#</a></h2>
+<ul class="used-in">Used in <li><a href="revolution.html">revolution.hs</a></li><li><a href="unitSpiral.html">unitSpiral.hs</a></li></ul>
+<p class="defined-in">, defined in <a href="https://github.com/aavogt/rapids/blob/main/lib/Rapids/Revolution.hs#L49"><code>Rapids.Revolution</code></a></p>
 <div class="documentation"><p>rotate around the shape y axis (which becomes the solid z axis) with an optional angle for how far around the axis to go (clockwise with the camera pointed down (towards z= -infinity))</p>
 <pre><code>&gt; revolution &lt;radians&gt; shape</code></pre></div>
-<ul class="used-in"><li><a href="revolution.html">revolution.hs</a></li><li><a href="unitSpiral.html">unitSpiral.hs</a></li></ul>
 </section>
 <section class="entry">
-<h2><code class="signature" id="rotateDeg">rotateDeg :: Rapids.Transforms.Rotate.Go.RotateGo r t =&gt; r</code></h2>
-<p class="defined-in">Defined in <code>Rapids.Transforms.Rotate</code></p>
+<h2 class="signature-heading"><code class="signature" id="rotateDeg">rotateDeg :: Rapids.Transforms.Rotate.Go.RotateGo r t =&gt; r</code><a class="signature signature-anchor" href="#rotateDeg">#</a></h2>
+<ul class="used-in">Used in <li><a href="rubik.html">rubik.hs</a></li><li><a href="section.html">section.hs</a></li></ul>
+<p class="defined-in">, defined in <a href="https://github.com/aavogt/rapids/blob/main/lib/Rapids/Transforms/Rotate.hs#L28"><code>Rapids.Transforms.Rotate</code></a></p>
 <div class="documentation"><p>Rotate a <code>Transformable</code> by degrees around an axis specified in one of these ways:</p>
 <pre><code>&gt; rotateDeg x y z deg
 &gt; rotateDeg v3 deg
 &gt; rotateDeg q  deg -- ignore the quaternion&#39;s magnitude
 &gt; rotateDeg ey deg</code></pre></div>
-<ul class="used-in"><li><a href="rubik.html">rubik.hs</a></li><li><a href="section.html">section.hs</a></li></ul>
 </section>
 <section class="entry">
-<h2><code class="signature" id="sweep">sweep :: (ToPath path, ToShape shape) =&gt; path -&gt; shape -&gt; Solid</code></h2>
-<p class="defined-in">Defined in <code>Rapids.Pad</code></p>
+<h2 class="signature-heading"><code class="signature" id="sweep">sweep :: (ToPath path, ToShape shape) =&gt; path -&gt; shape -&gt; Solid</code><a class="signature signature-anchor" href="#sweep">#</a></h2>
+<ul class="used-in">Used in <li><a href="sweep.html">sweep.hs</a></li></ul>
+<p class="defined-in">, defined in <a href="https://github.com/aavogt/rapids/blob/main/lib/Rapids/Pad.hs#L54"><code>Rapids.Pad</code></a></p>
 <div class="documentation"><p><code>sweep path shape</code> sweeps a <code>ToShape</code> along a <code>ToPath</code>.</p>
 <pre><code>&gt; sweep [0, V3 0 0 1e-3, V3 (-2) 0 (h / 2), V3 0 0 h] (rectangle 3 4)</code></pre>
 <p>the first segment 1e-3 fixes the bottom face orientation</p></div>
-<ul class="used-in"><li><a href="sweep.html">sweep.hs</a></li></ul>
 </section>
 <section class="entry">
-<h2><code class="signature" id="torus">torus :: Double -&gt; Double -&gt; Solid</code></h2>
-<p class="defined-in">Defined in <code>waterfall-cad-0.6.3.2:Waterfall.Solids</code></p>
+<h2 class="signature-heading"><code class="signature" id="torus">torus :: Double -&gt; Double -&gt; Solid</code><a class="signature signature-anchor" href="#torus">#</a></h2>
+<ul class="used-in">Used in <li><a href="section.html">section.hs</a></li></ul>
+<p class="defined-in">, defined in <a href="https://hackage-content.haskell.org/package/waterfall-cad-0.6.3.2/docs/Waterfall-Solids.html#v:torus"><code>waterfall-cad-0.6.3.2:Waterfall.Solids</code></a></p>
 <div class="documentation"><p>A Torus, with the axis of revolution about the Z axis</p>
 <p>Warning, this will fail to generate geometry if asked to generate a Spindle Torus (when the Major Radius is smaller than the Minor Radius)</p></div>
-<ul class="used-in"><li><a href="section.html">section.hs</a></li></ul>
 </section>
 <section class="entry">
-<h2><code class="signature" id="unitSpiral">unitSpiral :: Rapids.Spiral.UnitSpiral a =&gt; Double -&gt; a</code></h2>
-<p class="defined-in">Defined in <code>Rapids.Spiral</code></p>
+<h2 class="signature-heading"><code class="signature" id="unitSpiral">unitSpiral :: Rapids.Spiral.UnitSpiral a =&gt; Double -&gt; a</code><a class="signature signature-anchor" href="#unitSpiral">#</a></h2>
+<ul class="used-in">Used in <li><a href="unitSpiral.html">unitSpiral.hs</a></li></ul>
+<p class="defined-in">, defined in <a href="https://github.com/aavogt/rapids/blob/main/lib/Rapids/Spiral.hs#L70"><code>Rapids.Spiral</code></a></p>
 <div class="documentation"><p>follow a helix with radius 1 and pitch 1 for <code>turns</code> turns with a shape (any <code>ToShape</code>). With <code>taperSlope</code> the radius decreases by that much per turn. Optional arguments are in angle brackets:</p>
 <pre><code>&gt; unitSpiral turns &lt;taperSlope&gt; shape</code></pre>
 <p>To get a different radius and pitch,</p>
 <pre><code>&gt; scale r pitch $ unitSpiral turns taperSlope $ rectangle w h</code></pre></div>
-<ul class="used-in"><li><a href="unitSpiral.html">unitSpiral.hs</a></li></ul>
 </section>
 <section class="entry">
-<h2><code class="signature" id="white">white :: template-haskell-2.20.0.0:Language.Haskell.TH.Lib.Internal.ExpQ</code></h2>
-<p class="defined-in">Defined in <code>Rapids.Color</code></p>
+<h2 class="signature-heading"><code class="signature" id="white">white :: template-haskell-2.20.0.0:Language.Haskell.TH.Lib.Internal.ExpQ</code><a class="signature signature-anchor" href="#white">#</a></h2>
+<ul class="used-in">Used in <li><a href="chamfer.html">chamfer.hs</a></li><li><a href="rubik.html">rubik.hs</a></li></ul>
+<p class="defined-in">, defined in <a href="https://github.com/aavogt/rapids/blob/main/lib/Rapids/Color.hs#L794"><code>Rapids.Color</code></a></p>
 <div class="documentation"><p>A named color, spliced with <code>$</code> (needs <code>TemplateHaskell</code>), for example <code>$red :: 'Solid' -&gt; 'Solid'</code> sets the color of all faces and tags them with the source location (see <code>tagLoc</code> and <code>Rapids.Color.Query</code>)</p></div>
-<ul class="used-in"><li><a href="chamfer.html">chamfer.hs</a></li><li><a href="rubik.html">rubik.hs</a></li></ul>
 </section>
 <section class="entry">
-<h2><code class="signature" id="Lens&#x27;">Lens&#x27; :: * -&gt; * -&gt; *</code></h2>
-<div class="documentation"><p>Type constructor defined in ‘lens-5.3.6:Control.Lens.Type’ @ type <code>Lens'</code> = <code>Simple</code> <code>Lens</code> @</p></div>
-<ul class="used-in"><li><a href="rubik.html">rubik.hs</a></li></ul>
+<h2 class="signature-heading"><code class="signature" id="Lens&#x27;">Lens&#x27; :: * -&gt; * -&gt; *</code><a class="signature signature-anchor" href="#Lens&#x27;">#</a></h2>
+<ul class="used-in">Used in <li><a href="rubik.html">rubik.hs</a></li></ul>
+<p class="defined-in">, defined in <a href="https://hackage-content.haskell.org/package/lens-5.3.6/docs/Control-Lens-Type.html#t:Lens-39-"><code>lens-5.3.6:Control.Lens.Type</code></a></p>
+<div class="documentation"><p>@ type <code>Lens'</code> = <code>Simple</code> <code>Lens</code> @</p></div>
 </section>
 <section class="entry">
-<h2><code class="signature" id="V2">V2 :: * -&gt; *</code></h2>
-<div class="documentation"><p>Type constructor defined in ‘linear-1.23.3:Linear.V2’ A 2-dimensional vector</p>
+<h2 class="signature-heading"><code class="signature" id="V2">V2 :: * -&gt; *</code><a class="signature signature-anchor" href="#V2">#</a></h2>
+<ul class="used-in">Used in <li><a href="sweepRuled.html">sweepRuled.hs</a></li></ul>
+<p class="defined-in">, defined in <a href="https://hackage-content.haskell.org/package/linear-1.23.3/docs/Linear-V2.html#t:V2"><code>linear-1.23.3:Linear.V2</code></a></p>
+<div class="documentation"><p>A 2-dimensional vector</p>
 <pre><code>&gt;&gt;&gt; pure 1 :: V2 Int
 V2 1 1</code></pre>
 <pre><code>&gt;&gt;&gt; V2 1 2 + V2 3 4
@@ -323,36 +329,36 @@ V2 4 6</code></pre>
 V2 3 8</code></pre>
 <pre><code>&gt;&gt;&gt; sum (V2 1 2)
 3</code></pre></div>
-<ul class="used-in"><li><a href="sweepRuled.html">sweepRuled.hs</a></li></ul>
 </section>
 <section class="entry">
-<h2><code class="signature" id="_translated">_translated :: Rapids.Transforms.Translate.Go.TranslatedGo</code></h2>
-<p class="defined-in">Defined in <code>Rapids.Transforms.Translate</code></p>
+<h2 class="signature-heading"><code class="signature" id="_translated">_translated :: Rapids.Transforms.Translate.Go.TranslatedGo</code><a class="signature signature-anchor" href="#_translated">#</a></h2>
+<ul class="used-in">Used in <li><a href="unitSpiral.html">unitSpiral.hs</a></li></ul>
+<p class="defined-in">, defined in <a href="https://github.com/aavogt/rapids/blob/main/lib/Rapids/Transforms/Translate.hs#L30"><code>Rapids.Transforms.Translate</code></a></p>
 <div class="documentation"><p><code>_translated ... :: Iso a b a b</code> where ... is as in <code>'translate' ...</code></p></div>
-<ul class="used-in"><li><a href="unitSpiral.html">unitSpiral.hs</a></li></ul>
 </section>
 <section class="entry">
-<h2><code class="signature" id="black">black :: template-haskell-2.20.0.0:Language.Haskell.TH.Lib.Internal.ExpQ</code></h2>
-<p class="defined-in">Defined in <code>Rapids.Color</code></p>
+<h2 class="signature-heading"><code class="signature" id="black">black :: template-haskell-2.20.0.0:Language.Haskell.TH.Lib.Internal.ExpQ</code><a class="signature signature-anchor" href="#black">#</a></h2>
+<ul class="used-in">Used in <li><a href="rubik.html">rubik.hs</a></li></ul>
+<p class="defined-in">, defined in <a href="https://github.com/aavogt/rapids/blob/main/lib/Rapids/Color.hs#L795"><code>Rapids.Color</code></a></p>
 <div class="documentation"><p>A named color, spliced with <code>$</code> (needs <code>TemplateHaskell</code>), for example <code>$red :: 'Solid' -&gt; 'Solid'</code> sets the color of all faces and tags them with the source location (see <code>tagLoc</code> and <code>Rapids.Color.Query</code>)</p></div>
-<ul class="used-in"><li><a href="rubik.html">rubik.hs</a></li></ul>
 </section>
 <section class="entry">
-<h2><code class="signature" id="brown">brown :: template-haskell-2.20.0.0:Language.Haskell.TH.Lib.Internal.ExpQ</code></h2>
-<p class="defined-in">Defined in <code>Rapids.Color</code></p>
+<h2 class="signature-heading"><code class="signature" id="brown">brown :: template-haskell-2.20.0.0:Language.Haskell.TH.Lib.Internal.ExpQ</code><a class="signature signature-anchor" href="#brown">#</a></h2>
+<ul class="used-in">Used in <li><a href="unitSpiral.html">unitSpiral.hs</a></li></ul>
+<p class="defined-in">, defined in <a href="https://github.com/aavogt/rapids/blob/main/lib/Rapids/Color.hs#L792"><code>Rapids.Color</code></a></p>
 <div class="documentation"><p>A named color, spliced with <code>$</code> (needs <code>TemplateHaskell</code>), for example <code>$red :: 'Solid' -&gt; 'Solid'</code> sets the color of all faces and tags them with the source location (see <code>tagLoc</code> and <code>Rapids.Color.Query</code>)</p></div>
-<ul class="used-in"><li><a href="unitSpiral.html">unitSpiral.hs</a></li></ul>
 </section>
 <section class="entry">
-<h2><code class="signature" id="circle">circle :: Double -&gt; Path</code></h2>
-<p class="defined-in">Defined in <code>Rapids.Path</code></p>
+<h2 class="signature-heading"><code class="signature" id="circle">circle :: Double -&gt; Path</code><a class="signature signature-anchor" href="#circle">#</a></h2>
+<ul class="used-in">Used in <li><a href="pad.html">pad.hs</a></li></ul>
+<p class="defined-in">, defined in <a href="https://github.com/aavogt/rapids/blob/main/lib/Rapids/Path.hs#L18"><code>Rapids.Path</code></a></p>
 <div class="documentation"><p><code>circle diameter</code> in the xy plane (z=0)</p>
 <p>also <code>unitCircle</code></p></div>
-<ul class="used-in"><li><a href="pad.html">pad.hs</a></li></ul>
 </section>
 <section class="entry">
-<h2><code class="signature" id="mirror">mirror :: Rapids.Transforms.Mirror.Go.MirrorGo r t =&gt; r</code></h2>
-<p class="defined-in">Defined in <code>Rapids.Transforms.Mirror</code></p>
+<h2 class="signature-heading"><code class="signature" id="mirror">mirror :: Rapids.Transforms.Mirror.Go.MirrorGo r t =&gt; r</code><a class="signature signature-anchor" href="#mirror">#</a></h2>
+<ul class="used-in">Used in <li><a href="unitSpiral.html">unitSpiral.hs</a></li></ul>
+<p class="defined-in">, defined in <a href="https://github.com/aavogt/rapids/blob/main/lib/Rapids/Transforms/Mirror.hs#L16"><code>Rapids.Transforms.Mirror</code></a></p>
 <div class="documentation"><p>Reflect across one or more planes through the origin.</p>
 <pre><code>&gt; mirror
 &gt;   v3
@@ -361,52 +367,51 @@ V2 3 8</code></pre>
 &gt;   ey y
 &gt;   ez z
 &gt;   solid|v3|path</code></pre></div>
-<ul class="used-in"><li><a href="unitSpiral.html">unitSpiral.hs</a></li></ul>
 </section>
 <section class="entry">
-<h2><code class="signature" id="rotated">rotated :: (Num t, Rapids.Transforms.Rotate.Go.RotateGo r t) =&gt; r</code></h2>
-<p class="defined-in">Defined in <code>Rapids.Transforms.Rotate</code></p>
+<h2 class="signature-heading"><code class="signature" id="rotated">rotated :: (Num t, Rapids.Transforms.Rotate.Go.RotateGo r t) =&gt; r</code><a class="signature signature-anchor" href="#rotated">#</a></h2>
+<ul class="used-in">Used in <li><a href="sweepRuled.html">sweepRuled.hs</a></li></ul>
+<p class="defined-in">, defined in <a href="https://github.com/aavogt/rapids/blob/main/lib/Rapids/Transforms/Rotate.hs#L19"><code>Rapids.Transforms.Rotate</code></a></p>
 <div class="documentation"><p><code>rotate</code> except it also returns the original</p></div>
-<ul class="used-in"><li><a href="sweepRuled.html">sweepRuled.hs</a></li></ul>
 </section>
 <section class="entry">
-<h2><code class="signature" id="section">section :: Solid -&gt; Shape</code></h2>
-<p class="defined-in">Defined in <code>Rapids.Section</code></p>
+<h2 class="signature-heading"><code class="signature" id="section">section :: Solid -&gt; Shape</code><a class="signature signature-anchor" href="#section">#</a></h2>
+<ul class="used-in">Used in <li><a href="section.html">section.hs</a></li></ul>
+<p class="defined-in">, defined in <a href="https://github.com/aavogt/rapids/blob/main/lib/Rapids/Section.hs#L93"><code>Rapids.Section</code></a></p>
 <div class="documentation"><p><code>shape = section s</code></p>
 <p>section a solid <code>s</code> with the xy plane returning a planar shape whose inner contours are holes</p></div>
-<ul class="used-in"><li><a href="section.html">section.hs</a></li></ul>
 </section>
 <section class="entry">
-<h2><code class="signature" id="silhouette">silhouette :: Rapids.Silhouette.Silhouette a =&gt; a -&gt; Shape</code></h2>
-<p class="defined-in">Defined in <code>Rapids.Silhouette</code></p>
+<h2 class="signature-heading"><code class="signature" id="silhouette">silhouette :: Rapids.Silhouette.Silhouette a =&gt; a -&gt; Shape</code><a class="signature signature-anchor" href="#silhouette">#</a></h2>
+<ul class="used-in">Used in <li><a href="section.html">section.hs</a></li></ul>
+<p class="defined-in">, defined in <a href="https://github.com/aavogt/rapids/blob/main/lib/Rapids/Silhouette.hs#L63"><code>Rapids.Silhouette</code></a></p>
 <div class="documentation"><p><code>silhouette Solid|Shape|[Path2D]</code> projects the argument into the XY plane</p></div>
-<ul class="used-in"><li><a href="section.html">section.hs</a></li></ul>
 </section>
 <section class="entry">
-<h2><code class="signature" id="sweepRuled">sweepRuled :: (ToPath path, ToShape shape) =&gt;</code></h2>
-<p class="defined-in">Defined in <code>Rapids.Sweep</code></p>
+<h2 class="signature-heading"><code class="signature" id="sweepRuled">sweepRuled :: (ToPath path, ToShape shape) =&gt;</code><a class="signature signature-anchor" href="#sweepRuled">#</a></h2>
+<ul class="used-in">Used in <li><a href="sweepRuled.html">sweepRuled.hs</a></li></ul>
+<p class="defined-in">, defined in <a href="https://github.com/aavogt/rapids/blob/main/lib/Rapids/Sweep.hs#L53"><code>Rapids.Sweep</code></a></p>
 <div class="documentation"><p><code>sweepRuled (\\ _shapeVertex -&gt; path) shape = sweep path shape</code> at least for shapes with straight edges.</p>
 <p>sweepRuled creates ruled surfaces between adjacent paths. The shape and the resulting end shape are sewn to those surfaces and returned as a solid when the resulting shell is closed.</p></div>
-<ul class="used-in"><li><a href="sweepRuled.html">sweepRuled.hs</a></li></ul>
 </section>
 <section class="entry">
-<h2><code class="signature" id="translated">translated :: (Num t,</code></h2>
-<p class="defined-in">Defined in <code>Rapids.Transforms.Translate</code></p>
+<h2 class="signature-heading"><code class="signature" id="translated">translated :: (Num t,</code><a class="signature signature-anchor" href="#translated">#</a></h2>
+<ul class="used-in">Used in <li><a href="rubik.html">rubik.hs</a></li></ul>
+<p class="defined-in">, defined in <a href="https://github.com/aavogt/rapids/blob/main/lib/Rapids/Transforms/Translate.hs#L26"><code>Rapids.Transforms.Translate</code></a></p>
 <div class="documentation"><p><code>translated ... a = a + translate ... a</code></p>
 <p>doesn't make much with Transformable (V3 Double)</p></div>
-<ul class="used-in"><li><a href="rubik.html">rubik.hs</a></li></ul>
 </section>
 <section class="entry">
-<h2><code class="signature" id="uScale2D">uScale2D :: Transformable2D a =&gt; Double -&gt; a -&gt; a</code></h2>
-<p class="defined-in">Defined in <code>waterfall-cad-0.6.3.2:Waterfall.TwoD.Transforms</code></p>
+<h2 class="signature-heading"><code class="signature" id="uScale2D">uScale2D :: Transformable2D a =&gt; Double -&gt; a -&gt; a</code><a class="signature signature-anchor" href="#uScale2D">#</a></h2>
+<ul class="used-in">Used in <li><a href="sweep.html">sweep.hs</a></li></ul>
+<p class="defined-in">, defined in <a href="https://hackage-content.haskell.org/package/waterfall-cad-0.6.3.2/docs/Waterfall-TwoD-Transforms.html#v:uScale2D"><code>waterfall-cad-0.6.3.2:Waterfall.TwoD.Transforms</code></a></p>
 <div class="documentation"><p>Scale uniformly along both axes</p></div>
-<ul class="used-in"><li><a href="sweep.html">sweep.hs</a></li></ul>
 </section>
 <section class="entry">
-<h2><code class="signature" id="unions">unions :: [Solid] -&gt; Solid</code></h2>
-<p class="defined-in">Defined in <code>Rapids.Color</code></p>
+<h2 class="signature-heading"><code class="signature" id="unions">unions :: [Solid] -&gt; Solid</code><a class="signature signature-anchor" href="#unions">#</a></h2>
+<ul class="used-in">Used in <li><a href="unitSpiral.html">unitSpiral.hs</a></li></ul>
+<p class="defined-in">, defined in <a href="https://github.com/aavogt/rapids/blob/main/lib/Rapids/Color.hs#L556"><code>Rapids.Color</code></a></p>
 <div class="documentation"><p>n-ary boolean operations that propagate face colors from the inputs to the result</p></div>
-<ul class="used-in"><li><a href="unitSpiral.html">unitSpiral.hs</a></li></ul>
 </section>
 </main>
 </body></html>

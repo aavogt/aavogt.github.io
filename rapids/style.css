@@ -97,12 +97,15 @@ body.annotations .signature {
   color: var(--bright-purple);
   overflow-wrap: anywhere;
 }
+body.annotations .signature-heading { display: flex; }
+body.annotations .signature-anchor { margin-left: auto; }
 body.annotations .defined-in,
 body.annotations .uses { color: var(--gray); }
-body.annotations .defined-in { font-size: .9rem; }
+body.annotations .defined-in { display: inline; font-size: .9rem; margin: 0; }
 body.annotations .uses { font-size: .85rem; }
 body.annotations .used-in {
-  display: flex;
+  display: inline-flex;
+  color: var(--gray); 
   flex-wrap: wrap;
   gap: .15rem .6rem;
   list-style: none;
