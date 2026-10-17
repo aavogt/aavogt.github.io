@@ -71,7 +71,7 @@ var ENVIRONMENT_IS_SHELL = !ENVIRONMENT_IS_WEB && !ENVIRONMENT_IS_NODE && !ENVIR
 
 // --pre-jses are emitted after the Module integration code, so that they can
 // refer to Module (if they choose; they can also define Module)
-// include: /tmp/tmpj2j03h05.js
+// include: /tmp/tmp531efctq.js
 
   if (!Module['expectedDataFileDownloads']) Module['expectedDataFileDownloads'] = 0;
   Module['expectedDataFileDownloads']++;
@@ -204,21 +204,52 @@ Module['FS_createPath']("/", "imgs", true, true);
 
   })();
 
-// end include: /tmp/tmpj2j03h05.js
-// include: /tmp/tmpx9zvkiqq.js
+// end include: /tmp/tmp531efctq.js
+// include: /tmp/tmpk9__e26i.js
 
     // All the pre-js content up to here must remain later on, we need to run
     // it.
     if ((typeof ENVIRONMENT_IS_WASM_WORKER != 'undefined' && ENVIRONMENT_IS_WASM_WORKER) || (typeof ENVIRONMENT_IS_PTHREAD != 'undefined' && ENVIRONMENT_IS_PTHREAD) || (typeof ENVIRONMENT_IS_AUDIO_WORKLET != 'undefined' && ENVIRONMENT_IS_AUDIO_WORKLET)) Module['preRun'] = [];
     var necessaryPreJSTasks = Module['preRun'].slice();
-  // end include: /tmp/tmpx9zvkiqq.js
-// include: /tmp/tmpystze5ja.js
+  // end include: /tmp/tmpk9__e26i.js
+// include: web-fullscreen.js
+(function() {
+  if (!window.matchMedia || !window.matchMedia("(pointer: coarse)").matches) return;
+
+  var button = document.createElement("button");
+  button.type = "button";
+  button.textContent = "Fullscreen";
+  button.disabled = true;
+  button.setAttribute("aria-label", "Enter fullscreen");
+  button.style.cssText = "position:fixed;right:1rem;bottom:1rem;z-index:10;padding:.75rem 1rem;border:1px solid white;border-radius:.4rem;background:rgba(0,0,0,.8);color:white;font:inherit;touch-action:manipulation";
+  document.body.appendChild(button);
+
+  var previousOnRuntimeInitialized = Module.onRuntimeInitialized;
+  Module.onRuntimeInitialized = function() {
+    if (typeof previousOnRuntimeInitialized === "function") previousOnRuntimeInitialized();
+    button.disabled = false;
+  };
+
+  button.addEventListener("click", function() {
+    if (typeof Module.requestFullscreen === "function") {
+      Module.requestFullscreen(false, true);
+    }
+  });
+
+  var syncButton = function() {
+    button.style.display = document.fullscreenElement || document.webkitFullscreenElement ? "none" : "";
+  };
+  document.addEventListener("fullscreenchange", syncButton);
+  document.addEventListener("webkitfullscreenchange", syncButton);
+})();
+// end include: web-fullscreen.js
+// include: /tmp/tmpt1x238uo.js
 
     if (!Module['preRun']) throw 'Module.preRun should exist because file support used it; did a pre-js delete it?';
     necessaryPreJSTasks.forEach((task) => {
       if (Module['preRun'].indexOf(task) < 0) throw 'All preRun tasks that exist before user pre-js code should remain after; did you replace Module or modify Module.preRun?';
     });
-  // end include: /tmp/tmpystze5ja.js
+  // end include: /tmp/tmpt1x238uo.js
 
 
 var arguments_ = [];
@@ -8253,6 +8284,8 @@ var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
 
 
 
+  var requestFullscreen = Browser.requestFullscreen;
+
   var FS_createPath = (...args) => FS.createPath(...args);
 
 
@@ -8327,6 +8360,7 @@ if (Module['wasmBinary']) wasmBinary = Module['wasmBinary'];
 // Begin runtime exports
   Module['addRunDependency'] = addRunDependency;
   Module['removeRunDependency'] = removeRunDependency;
+  Module['requestFullscreen'] = requestFullscreen;
   Module['FS_preloadFile'] = FS_preloadFile;
   Module['FS_unlink'] = FS_unlink;
   Module['FS_createPath'] = FS_createPath;
@@ -8566,7 +8600,6 @@ missingLibrarySymbols.forEach(missingLibrarySymbol)
   'exceptionLast',
   'exceptionCaught',
   'Browser',
-  'requestFullscreen',
   'requestFullScreen',
   'setCanvasSize',
   'getUserMedia',
