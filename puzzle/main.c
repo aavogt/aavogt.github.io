@@ -102,20 +102,24 @@ IJ board_index(Vector2 p) {
   return (IJ){p.x * nw / w, p.y * nh / h};
 }
 
+bool screen_contains(Vector2 p) {
+  return p.x >= 0 && p.x < GetScreenWidth() && p.y >= 0 &&
+         p.y < GetScreenHeight();
+}
+
 void draw_tile(IJ source, Rectangle dest) {
   Vector2 origin = Vector2Zero();
   float rotation = 0;
   if (rotate_board) {
-    Rectangle rotated = {dest.x + (dest.width - dest.height) / 2,
-                         dest.y + (dest.height - dest.width) / 2,
-                         dest.height, dest.width};
+    Rectangle rotated = {dest.x + dest.width, dest.y, dest.height, dest.width};
     dest = rotated;
-    origin = (Vector2){dest.width / 2, dest.height / 2};
+    origin = Vector2Zero();
     rotation = 90;
   }
-  DrawTexturePro(img, boards[source.i][source.j], dest, origin, rotation, WHITE);
+  Rectangle source_rect =
+      boards[source.i][rotate_board ? nh - 1 - source.j : source.j];
+  DrawTexturePro(img, source_rect, dest, origin, rotation, WHITE);
 }
-
 
 void place1(int i, int j) {
   Rectangle base = boardd[i][j];
@@ -238,10 +242,11 @@ void drag_mouse() {
   static bool down = false;
   static int k0 = -1;
   Vector2 p = GetMousePosition();
-  IJ cell = board_index(p);
+  bool inside = screen_contains(p);
+  IJ cell = inside ? board_index(p) : (IJ){-1, -1};
   int i = cell.i, j = cell.j;
-  int k = drag_find(i, j);
-  if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) { // press
+  int k = inside ? drag_find(i, j) : -1;
+  if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && inside) { // press
     if (correct(i, j)) {
       pulse_correct(i, j);
     } else if (k < 0) { // not found
@@ -255,7 +260,7 @@ void drag_mouse() {
     }
   } else if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON) && down) { // release
     Drag src = drags[k0];
-    if (src.i != i || src.j != j) {
+    if (inside && (src.i != i || src.j != j)) {
       if (correct(i, j)) {
         pulse_correct(i, j);
         animate_putdown(src.i, src.j);
@@ -283,7 +288,7 @@ void drag_mouse() {
   }
 
   if (down)
-    drags[k0].pos = GetMousePosition();
+    drags[k0].pos = p;
 }
 
 void drag_touch() {
@@ -308,8 +313,7 @@ void drag_touch() {
       k0[t] = -1;
 
       Vector2 p = GetTouchPosition(n);
-      if (p.x >= 0 && p.x < GetScreenWidth() && p.y >= 0 &&
-          p.y < GetScreenHeight()) {
+      if (screen_contains(p)) {
         IJ cell = board_index(p);
         int i = cell.i, j = cell.j;
         if (correct(i, j)) {
@@ -346,8 +350,7 @@ void drag_touch() {
       Drag src = drags[k0[t]];
       float dx = src.pos.x - src.pos0.x;
       float dy = src.pos.y - src.pos0.y;
-      if (src.pos.x >= 0 && src.pos.x < GetScreenWidth() && src.pos.y >= 0 &&
-          src.pos.y < GetScreenHeight()) {
+      if (screen_contains(src.pos)) {
         IJ cell = board_index(src.pos);
         int i = cell.i, j = cell.j;
         if (i != src.i || j != src.j) {
@@ -462,13 +465,11 @@ void boardd_reset() {
       for (int j = 0; j < nh; j++) {
         if (rotate_board)
           boardd[i][j] =
-              (Rectangle){j * w / nh, i * h / nw,
-                          (j + 1) * w / nh - j * w / nh,
+              (Rectangle){j * w / nh, i * h / nw, (j + 1) * w / nh - j * w / nh,
                           (i + 1) * h / nw - i * h / nw};
         else
           boardd[i][j] =
-              (Rectangle){i * w / nw, j * h / nh,
-                          (i + 1) * w / nw - i * w / nw,
+              (Rectangle){i * w / nw, j * h / nh, (i + 1) * w / nw - i * w / nw,
                           (j + 1) * h / nh - j * h / nh};
       }
     if (inited)
@@ -495,7 +496,8 @@ bool replace_image(const char *path) {
     TraceLog(LOG_WARNING, "Unable to load image: %s", path);
     return false;
   }
-  if (IsTextureValid(img)) UnloadTexture(img);
+  if (IsTextureValid(img))
+    UnloadTexture(img);
   img = next;
   boards_reset();
   board_dirty = true;
@@ -539,7 +541,8 @@ int main() {
 
   InitWindow(800, 600, "main.c");
 #if defined(PLATFORM_WEB)
-  replace_image(FileExists("/user-image.png") ? "/user-image.png" : "imgs/lake.jpg");
+  replace_image(FileExists("/user-image.png") ? "/user-image.png"
+                                              : "imgs/lake.jpg");
 #else
   replace_image("imgs/lake.jpg");
 #endif
