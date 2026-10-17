@@ -489,6 +489,25 @@ void boards_reset() {
     }
 }
 
+bool replace_image(const char *path) {
+  Texture next = LoadTexture(path);
+  if (!IsTextureValid(next)) {
+    TraceLog(LOG_WARNING, "Unable to load image: %s", path);
+    return false;
+  }
+  if (IsTextureValid(img)) UnloadTexture(img);
+  img = next;
+  boards_reset();
+  board_dirty = true;
+  return true;
+}
+
+#if defined(PLATFORM_WEB)
+EMSCRIPTEN_KEEPALIVE bool load_image_from_browser(const char *path) {
+  return replace_image(path);
+}
+#endif
+
 // nh*nw swaps
 // compare https://okmij.org/ftp/Haskell/perfect-shuffle.txt or TAOCP
 void perm_reset() {
@@ -519,9 +538,12 @@ int main() {
   SetConfigFlags(FLAG_MSAA_4X_HINT | FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT);
 
   InitWindow(800, 600, "main.c");
-  img = LoadTexture("imgs/lake.jpg");
+#if defined(PLATFORM_WEB)
+  replace_image(FileExists("/user-image.png") ? "/user-image.png" : "imgs/lake.jpg");
+#else
+  replace_image("imgs/lake.jpg");
+#endif
   perm_reset();
-  boards_reset();
 #if defined(PLATFORM_WEB)
   emscripten_set_main_loop(UpdateDrawFrame, 60, 1);
 #else

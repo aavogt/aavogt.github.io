@@ -71,7 +71,7 @@ var ENVIRONMENT_IS_SHELL = !ENVIRONMENT_IS_WEB && !ENVIRONMENT_IS_NODE && !ENVIR
 
 // --pre-jses are emitted after the Module integration code, so that they can
 // refer to Module (if they choose; they can also define Module)
-// include: /tmp/tmp531efctq.js
+// include: /tmp/tmp5pz__4hc.js
 
   if (!Module['expectedDataFileDownloads']) Module['expectedDataFileDownloads'] = 0;
   Module['expectedDataFileDownloads']++;
@@ -204,14 +204,14 @@ Module['FS_createPath']("/", "imgs", true, true);
 
   })();
 
-// end include: /tmp/tmp531efctq.js
-// include: /tmp/tmpk9__e26i.js
+// end include: /tmp/tmp5pz__4hc.js
+// include: /tmp/tmpgpqyycpo.js
 
     // All the pre-js content up to here must remain later on, we need to run
     // it.
     if ((typeof ENVIRONMENT_IS_WASM_WORKER != 'undefined' && ENVIRONMENT_IS_WASM_WORKER) || (typeof ENVIRONMENT_IS_PTHREAD != 'undefined' && ENVIRONMENT_IS_PTHREAD) || (typeof ENVIRONMENT_IS_AUDIO_WORKLET != 'undefined' && ENVIRONMENT_IS_AUDIO_WORKLET)) Module['preRun'] = [];
     var necessaryPreJSTasks = Module['preRun'].slice();
-  // end include: /tmp/tmpk9__e26i.js
+  // end include: /tmp/tmpgpqyycpo.js
 // include: web-fullscreen.js
 (function() {
   if (!window.matchMedia || !window.matchMedia("(pointer: coarse)").matches) return;
@@ -242,14 +242,107 @@ Module['FS_createPath']("/", "imgs", true, true);
   document.addEventListener("fullscreenchange", syncButton);
   document.addEventListener("webkitfullscreenchange", syncButton);
 })();
+
+(function() {
+  var imageInput = document.createElement("input");
+  imageInput.type = "file";
+  imageInput.accept = "image/*";
+  imageInput.hidden = true;
+
+  var picker = document.createElement("div");
+  picker.style.cssText = "position:fixed;top:.5rem;right:.5rem;z-index:10;display:flex;align-items:center;gap:.5rem;font:14px sans-serif";
+
+  var chooseImage = document.createElement("button");
+  chooseImage.type = "button";
+  chooseImage.textContent = "Choose image";
+  chooseImage.disabled = true;
+  picker.appendChild(chooseImage);
+  picker.appendChild(imageInput);
+
+  var imageStatus = document.createElement("span");
+  imageStatus.style.cssText = "color:white;background:#000a;padding:.35rem .5rem";
+  imageStatus.setAttribute("aria-live", "polite");
+  picker.appendChild(imageStatus);
+  document.body.appendChild(picker);
+
+  function setImageStatus(message) {
+    imageStatus.textContent = message;
+  }
+
+  async function writeImageToFS(blob) {
+    var bitmap = await createImageBitmap(blob);
+    var canvas = document.createElement("canvas");
+    canvas.width = bitmap.width;
+    canvas.height = bitmap.height;
+    try {
+      var context = canvas.getContext("2d");
+      if (!context) throw new Error("Could not create image canvas");
+      context.drawImage(bitmap, 0, 0);
+    } finally {
+      bitmap.close();
+    }
+    var png = await new Promise(function(resolve, reject) {
+      canvas.toBlob(function(image) {
+        if (image) resolve(image);
+        else reject(new Error("Could not convert image"));
+      }, "image/png");
+    });
+    var path = "/user-image.png";
+    FS.writeFile(path, new Uint8Array(await png.arrayBuffer()));
+    return path;
+  }
+
+  chooseImage.addEventListener("click", function() { imageInput.click(); });
+  imageInput.addEventListener("change", async function() {
+    var file = imageInput.files[0];
+    if (!file) return;
+    setImageStatus("Loading image…");
+    try {
+      var path = await writeImageToFS(file);
+      if (!Module.ccall("load_image_from_browser", "number", ["string"], [path])) {
+        throw new Error("Puzzle could not load selected image");
+      }
+      setImageStatus(file.name);
+    } catch (error) {
+      console.error("Could not load selected image", error);
+      setImageStatus("Could not load image");
+    } finally {
+      imageInput.value = "";
+    }
+  });
+
+  var url = new URLSearchParams(window.location.search).get("url");
+  Module.preRun = Module.preRun || [];
+  Module.preRun.push(function() {
+    if (!url) return;
+    var dependency = "puzzle-image-url";
+    addRunDependency(dependency);
+    setImageStatus("Loading linked image…");
+    fetch(url).then(function(response) {
+      if (!response.ok) throw new Error("Image request failed: " + response.status);
+      return response.blob();
+    }).then(writeImageToFS).then(function() {
+      setImageStatus("Linked image loaded");
+    }).catch(function(error) {
+      console.error("Could not load linked image", error);
+      setImageStatus("Could not load linked image");
+    }).finally(function() { removeRunDependency(dependency); });
+  });
+
+  var previousOnRuntimeInitialized = Module.onRuntimeInitialized;
+  Module.onRuntimeInitialized = function() {
+    if (typeof previousOnRuntimeInitialized === "function") previousOnRuntimeInitialized();
+    chooseImage.disabled = false;
+  };
+})();
 // end include: web-fullscreen.js
-// include: /tmp/tmpt1x238uo.js
+// include: /tmp/tmppq5bi5bx.js
 
     if (!Module['preRun']) throw 'Module.preRun should exist because file support used it; did a pre-js delete it?';
     necessaryPreJSTasks.forEach((task) => {
       if (Module['preRun'].indexOf(task) < 0) throw 'All preRun tasks that exist before user pre-js code should remain after; did you replace Module or modify Module.preRun?';
     });
-  // end include: /tmp/tmpt1x238uo.js
+  // end include: /tmp/tmppq5bi5bx.js
 
 
 var arguments_ = [];
@@ -8286,6 +8379,87 @@ var stringToUTF8Array = (str, heap, outIdx, maxBytesToWrite) => {
 
   var requestFullscreen = Browser.requestFullscreen;
 
+  var getCFunc = (ident) => {
+      var func = Module['_' + ident]; // closure exported function
+      assert(func, 'Cannot call unknown function ' + ident + ', make sure it is exported');
+      return func;
+    };
+  
+  var writeArrayToMemory = (array, buffer) => {
+      assert(array.length >= 0, 'writeArrayToMemory array must have a length (should be an array or typed array)')
+      HEAP8.set(array, buffer);
+    };
+  
+  
+  
+  var stackAlloc = (sz) => __emscripten_stack_alloc(sz);
+  var stringToUTF8OnStack = (str) => {
+      var size = lengthBytesUTF8(str) + 1;
+      var ret = stackAlloc(size);
+      stringToUTF8(str, ret, size);
+      return ret;
+    };
+  
+  
+  
+  
+  
+    /**
+   * @param {string|null=} returnType
+   * @param {Array=} argTypes
+   * @param {Array=} args
+   * @param {Object=} opts
+   */
+  var ccall = (ident, returnType, argTypes, args, opts) => {
+      // For fast lookup of conversion functions
+      var toC = {
+        'string': (str) => {
+          var ret = 0;
+          if (str !== null && str !== undefined && str !== 0) { // null string
+            ret = stringToUTF8OnStack(str);
+          }
+          return ret;
+        },
+        'array': (arr) => {
+          var ret = stackAlloc(arr.length);
+          writeArrayToMemory(arr, ret);
+          return ret;
+        }
+      };
+  
+      function convertReturnValue(ret) {
+        if (returnType === 'string') {
+          return UTF8ToString(ret);
+        }
+        if (returnType === 'boolean') return Boolean(ret);
+        return ret;
+      }
+  
+      var func = getCFunc(ident);
+      var cArgs = [];
+      var stack = 0;
+      assert(returnType !== 'array', 'Return type should not be "array".');
+      if (args) {
+        for (var i = 0; i < args.length; i++) {
+          var converter = toC[argTypes[i]];
+          if (converter) {
+            if (stack === 0) stack = stackSave();
+            cArgs[i] = converter(args[i]);
+          } else {
+            cArgs[i] = args[i];
+          }
+        }
+      }
+      var ret = func(...cArgs);
+      function onDone(ret) {
+        if (stack !== 0) stackRestore(stack);
+        return convertReturnValue(ret);
+      }
+  
+      ret = onDone(ret);
+      return ret;
+    };
+
   var FS_createPath = (...args) => FS.createPath(...args);
 
 
@@ -8360,6 +8534,7 @@ if (Module['wasmBinary']) wasmBinary = Module['wasmBinary'];
 // Begin runtime exports
   Module['addRunDependency'] = addRunDependency;
   Module['removeRunDependency'] = removeRunDependency;
+  Module['ccall'] = ccall;
   Module['requestFullscreen'] = requestFullscreen;
   Module['FS_preloadFile'] = FS_preloadFile;
   Module['FS_unlink'] = FS_unlink;
@@ -8375,7 +8550,6 @@ if (Module['wasmBinary']) wasmBinary = Module['wasmBinary'];
   'convertI32PairToI53',
   'convertI32PairToI53Checked',
   'convertU32PairToI53',
-  'stackAlloc',
   'getTempRet0',
   'setTempRet0',
   'createNamedFunction',
@@ -8403,7 +8577,6 @@ if (Module['wasmBinary']) wasmBinary = Module['wasmBinary'];
   'STACK_ALIGN',
   'POINTER_SIZE',
   'ASSERTIONS',
-  'ccall',
   'cwrap',
   'convertJsFunctionToWasm',
   'getEmptyTableSlot',
@@ -8420,8 +8593,6 @@ if (Module['wasmBinary']) wasmBinary = Module['wasmBinary'];
   'UTF32ToString',
   'stringToUTF32',
   'lengthBytesUTF32',
-  'stringToUTF8OnStack',
-  'writeArrayToMemory',
   'registerKeyEventCallback',
   'registerWheelEventCallback',
   'fillDeviceOrientationEventData',
@@ -8518,6 +8689,7 @@ missingLibrarySymbols.forEach(missingLibrarySymbol)
   'bigintToI53Checked',
   'stackSave',
   'stackRestore',
+  'stackAlloc',
   'ptrToString',
   'exitJS',
   'getHeapMax',
@@ -8563,6 +8735,8 @@ missingLibrarySymbols.forEach(missingLibrarySymbol)
   'intArrayFromString',
   'UTF16Decoder',
   'stringToNewUTF8',
+  'stringToUTF8OnStack',
+  'writeArrayToMemory',
   'JSEvents',
   'specialHTMLTargets',
   'maybeCStringToJsString',
@@ -8779,49 +8953,49 @@ function checkIncomingModuleAPI() {
   ignoredModuleProp('loadSplitModule');
 }
 var ASM_CONSTS = {
-  95294: () => { if (document.fullscreenElement) return 1; },  
- 95340: () => { return Module.canvas.width; },  
- 95372: () => { return parseInt(Module.canvas.style.width); },  
- 95420: () => { document.exitFullscreen(); },  
- 95447: () => { setTimeout(function(){ Module.requestFullscreen(false, false); }, 100); },  
- 95519: () => { if (document.fullscreenElement) return 1; },  
- 95565: () => { return Module.canvas.width; },  
- 95597: () => { return screen.width; },  
- 95622: () => { document.exitFullscreen(); },  
- 95649: ($0) => { const canvasId = UTF8ToString($0); setTimeout(function() { Module.requestFullscreen(false, true); setTimeout(function() { document.querySelector(canvasId).style.width="unset"; }, 100); }, 100); },  
- 95843: () => { return window.innerWidth; },  
- 95869: () => { return window.innerHeight; },  
- 95896: () => { if (document.fullscreenElement) return 1; },  
- 95942: () => { return Module.canvas.width; },  
- 95974: () => { return parseInt(Module.canvas.style.width); },  
- 96022: () => { if (document.fullscreenElement) return 1; },  
- 96068: () => { return Module.canvas.width; },  
- 96100: () => { return screen.width; },  
- 96125: () => { return window.innerWidth; },  
- 96151: () => { return window.innerHeight; },  
- 96178: () => { if (document.fullscreenElement) return 1; },  
- 96224: () => { return Module.canvas.width; },  
- 96256: () => { return screen.width; },  
- 96281: () => { document.exitFullscreen(); },  
- 96308: () => { if (document.fullscreenElement) return 1; },  
- 96354: () => { return Module.canvas.width; },  
- 96386: () => { return parseInt(Module.canvas.style.width); },  
- 96434: () => { document.exitFullscreen(); },  
- 96461: ($0) => { Module.canvas.style.opacity = $0; },  
- 96499: () => { return screen.width; },  
- 96524: () => { return screen.height; },  
- 96550: () => { return window.screenX; },  
- 96577: () => { return window.screenY; },  
- 96604: () => { return window.devicePixelRatio; },  
- 96640: ($0) => { navigator.clipboard.writeText(UTF8ToString($0)); },  
- 96693: ($0) => { Module.canvas.style.cursor = UTF8ToString($0); },  
- 96744: () => { Module.canvas.style.cursor = 'none'; },  
- 96781: ($0, $1, $2, $3) => { try { navigator.getGamepads()[$0].vibrationActuator.playEffect('dual-rumble', { startDelay: 0, duration: $3, weakMagnitude: $1, strongMagnitude: $2 }); } catch (e) { try { navigator.getGamepads()[$0].hapticActuators[0].pulse($2, $3); } catch (e) { } } },  
- 97037: ($0) => { Module.canvas.style.cursor = UTF8ToString($0); },  
- 97088: () => { if (document.pointerLockElement) return 1; },  
- 97135: () => { if (document.fullscreenElement) return 1; },  
- 97181: () => { return window.innerWidth; },  
- 97207: () => { return window.innerHeight; }
+  95390: () => { if (document.fullscreenElement) return 1; },  
+ 95436: () => { return Module.canvas.width; },  
+ 95468: () => { return parseInt(Module.canvas.style.width); },  
+ 95516: () => { document.exitFullscreen(); },  
+ 95543: () => { setTimeout(function(){ Module.requestFullscreen(false, false); }, 100); },  
+ 95615: () => { if (document.fullscreenElement) return 1; },  
+ 95661: () => { return Module.canvas.width; },  
+ 95693: () => { return screen.width; },  
+ 95718: () => { document.exitFullscreen(); },  
+ 95745: ($0) => { const canvasId = UTF8ToString($0); setTimeout(function() { Module.requestFullscreen(false, true); setTimeout(function() { document.querySelector(canvasId).style.width="unset"; }, 100); }, 100); },  
+ 95939: () => { return window.innerWidth; },  
+ 95965: () => { return window.innerHeight; },  
+ 95992: () => { if (document.fullscreenElement) return 1; },  
+ 96038: () => { return Module.canvas.width; },  
+ 96070: () => { return parseInt(Module.canvas.style.width); },  
+ 96118: () => { if (document.fullscreenElement) return 1; },  
+ 96164: () => { return Module.canvas.width; },  
+ 96196: () => { return screen.width; },  
+ 96221: () => { return window.innerWidth; },  
+ 96247: () => { return window.innerHeight; },  
+ 96274: () => { if (document.fullscreenElement) return 1; },  
+ 96320: () => { return Module.canvas.width; },  
+ 96352: () => { return screen.width; },  
+ 96377: () => { document.exitFullscreen(); },  
+ 96404: () => { if (document.fullscreenElement) return 1; },  
+ 96450: () => { return Module.canvas.width; },  
+ 96482: () => { return parseInt(Module.canvas.style.width); },  
+ 96530: () => { document.exitFullscreen(); },  
+ 96557: ($0) => { Module.canvas.style.opacity = $0; },  
+ 96595: () => { return screen.width; },  
+ 96620: () => { return screen.height; },  
+ 96646: () => { return window.screenX; },  
+ 96673: () => { return window.screenY; },  
+ 96700: () => { return window.devicePixelRatio; },  
+ 96736: ($0) => { navigator.clipboard.writeText(UTF8ToString($0)); },  
+ 96789: ($0) => { Module.canvas.style.cursor = UTF8ToString($0); },  
+ 96840: () => { Module.canvas.style.cursor = 'none'; },  
+ 96877: ($0, $1, $2, $3) => { try { navigator.getGamepads()[$0].vibrationActuator.playEffect('dual-rumble', { startDelay: 0, duration: $3, weakMagnitude: $1, strongMagnitude: $2 }); } catch (e) { try { navigator.getGamepads()[$0].hapticActuators[0].pulse($2, $3); } catch (e) { } } },  
+ 97133: ($0) => { Module.canvas.style.cursor = UTF8ToString($0); },  
+ 97184: () => { if (document.pointerLockElement) return 1; },  
+ 97231: () => { if (document.fullscreenElement) return 1; },  
+ 97277: () => { return window.innerWidth; },  
+ 97303: () => { return window.innerHeight; }
 };
 function SetCanvasIdJs(out,outSize) { var canvasId = "#" + Module.canvas.id; stringToUTF8(canvasId, out, outSize); }
 function __asyncjs__RequestClipboardData() { return Asyncify.handleAsync(async () => { if (navigator.clipboard && window.isSecureContext) { let items = await navigator.clipboard.read(); for (const item of items) { if (item.types.includes("text/plain")) { const blob = await item.getType("text/plain"); const text = await blob.text(); window._lastClipboardString = text; } else if (item.types.find(t => t.startsWith("image/"))) { const blob = await item.getType(item.types.find(t => t.startsWith("image/"))); const bitmap = await createImageBitmap(blob); const canvas = document.createElement('canvas'); canvas.width = bitmap.width; canvas.height = bitmap.height; const ctx = canvas.getContext('2d'); ctx.drawImage(bitmap, 0, 0); const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height).data; window._lastImgWidth = canvas.width; window._lastImgHeight = canvas.height; window._lastImgData = imgData; } } } else console.warn("Clipboard read() requires HTTPS/Localhost"); }); }
@@ -8829,6 +9003,7 @@ function GetLastPastedText() { var str = window._lastClipboardString || ""; var 
 function GetLastPastedImage(width,height) { if (window._lastImgData) { const data = window._lastImgData; if (data.length > 0) { const ptr = _malloc(data.length); HEAPU8.set(data, ptr); if (width) setValue(width, window._lastImgWidth, 'i32'); if (height) setValue(height, window._lastImgHeight, 'i32'); window._lastImgData = null; return ptr; } } return 0; }
 
 // Imports from the Wasm binary.
+var _load_image_from_browser = Module['_load_image_from_browser'] = makeInvalidEarlyAccess('_load_image_from_browser');
 var _main = Module['_main'] = makeInvalidEarlyAccess('_main');
 var _fflush = makeInvalidEarlyAccess('_fflush');
 var _free = makeInvalidEarlyAccess('_free');
@@ -8847,6 +9022,7 @@ var wasmMemory = makeInvalidEarlyAccess('wasmMemory');
 var wasmTable = makeInvalidEarlyAccess('wasmTable');
 
 function assignWasmExports(wasmExports) {
+  assert(typeof wasmExports['load_image_from_browser'] != 'undefined', 'missing Wasm export: load_image_from_browser');
   assert(typeof wasmExports['main'] != 'undefined', 'missing Wasm export: main');
   assert(typeof wasmExports['fflush'] != 'undefined', 'missing Wasm export: fflush');
   assert(typeof wasmExports['free'] != 'undefined', 'missing Wasm export: free');
@@ -8861,6 +9037,7 @@ function assignWasmExports(wasmExports) {
   assert(typeof wasmExports['emscripten_stack_get_current'] != 'undefined', 'missing Wasm export: emscripten_stack_get_current');
   assert(typeof wasmExports['memory'] != 'undefined', 'missing Wasm export: memory');
   assert(typeof wasmExports['__indirect_function_table'] != 'undefined', 'missing Wasm export: __indirect_function_table');
+  _load_image_from_browser = Module['_load_image_from_browser'] = createExportWrapper('load_image_from_browser', 1);
   _main = Module['_main'] = createExportWrapper('main', 2);
   _fflush = createExportWrapper('fflush', 1);
   _free = createExportWrapper('free', 1);
